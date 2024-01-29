@@ -1,0 +1,92 @@
+
+#####################
+##### Variables #####
+#####################
+EXE           ?= system
+COMP_MODE     ?= NOC_MODE_BASE
+DISABLE_TRACE ?=
+KEY_FILE      ?= ../key.bin
+IV_FILE       ?= ../iv.bin
+IN_FILE       ?= ../in.bin
+OUT_FILE      ?= ../out.bin
+TRACE_FILE    ?= log
+SIM_STEP_TIME ?= 10
+SIM_STEP_UNIT ?= n
+
+#########################
+##### Configuration #####
+#########################
+
+# programs
+CXX              ?=g++
+TARGET_ARCH      ?= linux64
+ifneq (,$(strip $(TARGET_ARCH)))
+ARCH_SUFFIX      ?= -$(TARGET_ARCH)
+endif
+
+# basic SystemC directories
+SYSTEMC_HOME     ?= $(SYSTEMC)
+SYSTEMC_INC_DIR  ?= $(SYSTEMC_HOME)/include
+SYSTEMC_LIB_DIR  ?= $(SYSTEMC_HOME)/lib$(ARCH_SUFFIX)
+
+# basic check for SystemC directory
+ifeq (,$(wildcard $(SYSTEMC_HOME)/.))
+	$(error SYSTEMC_HOME [$(SYSTEMC_HOME)] is not present. \
+				Please update the variable SYSTEMC_HOME)
+endif
+ifeq (,$(wildcard $(SYSTEMC_INC_DIR)/systemc.h))
+	$(error systemc.h [$(SYSTEMC_INC_DIR)] not found. \
+				Please update the variable SYSTEMC_HOME)
+endif
+ifeq (,$(wildcard $(SYSTEMC_LIB_DIR)/libsystemc*))
+	$(error SystemC library [$(SYSTEMC_LIB_DIR)] not found. \
+				Please update the variable TARGET_ARCH)
+endif
+
+# compiler flags
+CFLAGS ?= -g3
+IFLAGS ?= -I../include -isystem $(SYSTEMC_INC_DIR)
+LFLAGS ?= -lsystemc -lm -L$(SYSTEMC_LIB_DIR)
+
+# file lists
+DEPS   = $(wildcard *.h) $(wildcard ../include/*.h) $(wildcard *.hpp) $(wildcard ../include/*.hpp)
+SRCS   = $(wildcard *.cpp) $(wildcard ../src/*.cpp)
+
+ifneq (,$(EXTRA_SRC_FILES))
+	SRCS += $(EXTRA_SRC_FILES)
+endif
+
+OBJS   = $(SRCS:.cpp=.o)
+
+DEFINE_FLAGS =
+ifneq (,$(COMP_MODE))
+  DEFINE_FLAGS = -D NOC_MODE=$(COMP_MODE)
+endif
+
+##########################################
+##### Process command line arguments #####
+##########################################
+
+ifneq (,$(DISABLE_TRACE))
+  TRACE_ARG =
+else
+  TRACE_ARG = -t$(TRACE_FILE)
+endif
+
+###################
+##### Targets #####
+###################
+
+%.o: %.cpp $(DEPS)
+	$(CXX) -c -o $@ $< $(CFLAGS) $(IFLAGS) $(DEFINE_FLAGS)
+
+$(EXE): $(OBJS)
+	$(CXX) -o $@ $^ $(CFLAGS) $(LFLAGS)
+
+run: $(EXE)
+	./$(EXE) $(KEY_FILE) $(IV_FILE) $(IN_FILE) $(OUT_FILE) $(TRACE_ARG) -s$(SIM_STEP_TIME) $(SIM_STEP_UNIT)
+
+.PHONY: clean
+
+clean:
+	rm -f $(wildcard *.o) $(wildcard ../src/*.o) $(EXE)
