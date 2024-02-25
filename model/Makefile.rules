@@ -3,12 +3,8 @@
 ##### Variables #####
 #####################
 EXE           ?= system
-COMP_MODE     ?= NOC_MODE_BASE
 DISABLE_TRACE ?=
-KEY_FILE      ?= ../key.bin
-IV_FILE       ?= ../iv.bin
-IN_FILE       ?= ../in.bin
-OUT_FILE      ?= ../out.bin
+ASM_FILE      ?= ../in.asm
 TRACE_FILE    ?= log
 SIM_STEP_TIME ?= 10
 SIM_STEP_UNIT ?= n
@@ -50,7 +46,8 @@ LFLAGS ?= -lsystemc -lm -L$(SYSTEMC_LIB_DIR)
 
 # file lists
 DEPS   = $(wildcard *.h) $(wildcard ../include/*.h) $(wildcard *.hpp) $(wildcard ../include/*.hpp)
-SRCS   = $(wildcard *.cpp) $(wildcard ../src/*.cpp)
+#SRCS   = $(wildcard *.cpp) $(wildcard ../src/*.cpp)
+SRCS   = $(wildcard *.cpp)
 
 ifneq (,$(EXTRA_SRC_FILES))
 	SRCS += $(EXTRA_SRC_FILES)
@@ -59,9 +56,6 @@ endif
 OBJS   = $(SRCS:.cpp=.o)
 
 DEFINE_FLAGS =
-ifneq (,$(COMP_MODE))
-  DEFINE_FLAGS = -D NOC_MODE=$(COMP_MODE)
-endif
 
 ##########################################
 ##### Process command line arguments #####
@@ -84,7 +78,7 @@ $(EXE): $(OBJS)
 	$(CXX) -o $@ $^ $(CFLAGS) $(LFLAGS)
 
 run: $(EXE)
-	./$(EXE) $(KEY_FILE) $(IV_FILE) $(IN_FILE) $(OUT_FILE) $(TRACE_ARG) -s$(SIM_STEP_TIME) $(SIM_STEP_UNIT)
+	./$(EXE) $(ASM_FILE) $(TRACE_ARG) -s$(SIM_STEP_TIME) $(SIM_STEP_UNIT)
 
 .PHONY: clean
 
