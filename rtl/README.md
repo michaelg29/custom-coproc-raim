@@ -7,6 +7,8 @@ The folder `hdl` contains all the VHDL and SV design files. Each subfolder repre
 
 The folder `sim` contains the scripts needed to compile and simulate the testbenches and their DUT modules. To create a new testbench to be able to compile designs, copy the `tb_template` directory and rename it to the new testbench (i.e. `cp tb_template tb_<MY_TESTBENCH>`). Before running, update the file `dependencies.txt`, which provides paths to the directories containing the relevant design files. These paths must be relative to the directory in `sim`. The order matters, much like with `filelist.txt`. The files `run.do` and `wave.do` are modifiable, and can be customized to suit the specific simulation and waveform needs.
 
+The directories `tb_template` and `tb_common` are symbolic links in the local development directory, and point to the directores in the repository *[mat_mult_fpga](https://github.com/michaelg29/mat_mult_fpga)* in its own `rtl/sim` directory.
+
 ## Running instructions
 
 Each directory within `sim` contains Linux bash scripts for compilation and simulation.
