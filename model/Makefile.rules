@@ -4,7 +4,7 @@
 #####################
 EXE           ?= system
 DISABLE_TRACE ?=
-ASM_FILE      ?= ../in.asm
+ASM_FILE      ?= ../../alg/asm/raim.bin
 TRACE_FILE    ?= log
 SIM_STEP_TIME ?= 10
 SIM_STEP_UNIT ?= n

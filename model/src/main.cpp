@@ -15,6 +15,10 @@ int sc_main(int argc, char* argv[]) {
     if (!parse_cmd_line(argc, argv)) {
         return 1;
     }
+    
+    mem_cursor_t cursors[64];
+    uint32_t mem[64];
+    printf("%d\n", read_input_files(cursors, 64, mem, 64));
 
     // initial state
     std::cout << "Initial state:" << std::endl;
