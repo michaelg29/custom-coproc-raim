@@ -1,6 +1,5 @@
 
 #include "systemc.h"
-
 #include <string>
 #include <stdarg.h>
 #include <stdint.h>
@@ -35,13 +34,7 @@
 // ===== HELPER FUNCTIONS =====
 // ============================
 
-typedef struct {
-    uint32_t addr;
-    uint32_t size;
-    uint32_t mem_cursor;
-} mem_cursor_t;
-
 bool parse_cmd_line(int argc, char **argv);
-uint32_t read_input_files(mem_cursor_t *cursors, uint32_t max_n_cursor, uint32_t *out, uint32_t max_mem_size);
+char *get_asm_file_name();
 
 #endif // SYSTEM_H

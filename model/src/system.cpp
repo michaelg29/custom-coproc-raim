@@ -75,30 +75,6 @@ bool parse_cmd_line(int argc, char **argv) {
     return true;
 }
 
-uint32_t read_input_files(mem_cursor_t *cursors, uint32_t max_n_cursor, uint32_t *out, uint32_t max_mem_size) {
-    // open ASM file
-    FILE *fp = fopen(asm_file_name, "rb");
-    if (!fp) return 0;
-    
-    uint32_t out_cursor = 0;
-    
-    for (int i = 0; i < max_n_cursor; i++) {
-        // read eight bytes for address and size
-        if (!fread((void*)(cursors + i), sizeof(uint32_t), 2, fp)) break;
-        cursors[i].mem_cursor = out_cursor;
-        uint32_t size = cursors[i].size;
-        if (!fread((void*)(out + out_cursor), sizeof(uint32_t), size, fp)) break;
-        
-        printf("Read %d words for addr %08x:", size, cursors[i].addr);
-        for (int i = 0; i < size; ++i) {
-            printf(" %08x", out[out_cursor + i]);
-        }
-        printf("\n");
-        
-        out_cursor += size;
-    }
-    
-    fclose(fp);
-
-    return out_cursor;
+char *get_asm_file_name() {
+    return asm_file_name;
 }

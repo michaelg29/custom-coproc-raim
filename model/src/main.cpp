@@ -7,6 +7,9 @@
 #include <iostream>
 #include <string>
 
+// simulation components
+#include "memory.h"
+
 // Statistics collecting classes
 sc_fault_injector sc_fault_injector::injector;
 sc_tracer sc_tracer::tracer;
@@ -15,10 +18,6 @@ int sc_main(int argc, char* argv[]) {
     if (!parse_cmd_line(argc, argv)) {
         return 1;
     }
-    
-    mem_cursor_t cursors[64];
-    uint32_t mem[64];
-    printf("%d\n", read_input_files(cursors, 64, mem, 64));
 
     // initial state
     std::cout << "Initial state:" << std::endl;
@@ -26,6 +25,9 @@ int sc_main(int argc, char* argv[]) {
     // ======================================
     // ===== CREATE AND CONNECT MODULES =====
     // ======================================
+
+    // memory has max 64 cursors and 1<<13 words = 1<<15 bytes
+    memory *mem = new memory("mem", 64, 1<<13);
 
     // ==============================
     // ===== RUN THE SIMULATION =====
@@ -37,6 +39,8 @@ int sc_main(int argc, char* argv[]) {
     // ===================
     // ===== CLEANUP =====
     // ===================
+
+    delete mem;
 
     std::cout << "Simulated for " << duration << std::endl;
 

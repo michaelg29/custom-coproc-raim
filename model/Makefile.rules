@@ -3,7 +3,7 @@
 ##### Variables #####
 #####################
 EXE           ?= system
-DISABLE_TRACE ?=
+ENABLE_TRACE  ?=
 ASM_FILE      ?= ../../alg/asm/raim.bin
 TRACE_FILE    ?= log
 SIM_STEP_TIME ?= 10
@@ -61,7 +61,7 @@ DEFINE_FLAGS =
 ##### Process command line arguments #####
 ##########################################
 
-ifneq (,$(DISABLE_TRACE))
+ifeq (,$(ENABLE_TRACE))
   TRACE_ARG =
 else
   TRACE_ARG = -t$(TRACE_FILE)
@@ -83,4 +83,4 @@ run: $(EXE)
 .PHONY: clean
 
 clean:
-	rm -f $(wildcard *.o) $(wildcard ../src/*.o) $(EXE)
+	rm -f *.o $(EXE) *.vcd
