@@ -8,6 +8,7 @@
 #include <string>
 
 // simulation components
+#include "cpu.h"
 #include "memory.h"
 
 // Statistics collecting classes
@@ -28,6 +29,9 @@ int sc_main(int argc, char* argv[]) {
 
     // memory has max 64 cursors and 1<<13 words = 1<<15 bytes
     memory *mem = new memory("mem", 64, 1<<13);
+    
+    cpu *c = new cpu("cpu", 0x00400000, 0x00400018, 4);
+    c->mem(*mem);
 
     // ==============================
     // ===== RUN THE SIMULATION =====

@@ -26,7 +26,7 @@ class memory_if : virtual public sc_interface {
 };
 
 /** Concrete memory module. */
-class memory : public sc_module, memory_if {
+class memory : public sc_module, public memory_if {
 
     public:
 
