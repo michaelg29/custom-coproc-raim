@@ -14,7 +14,8 @@ main:
   li $a1, 3
   add $a2 $a0 $a1
   la $a3, str1
-  sb $a2, 0($a3)
+  sw $a2, 0($a3)
+  lwc1 $a2, 0($a3)
 
 end:
   addi $v0, $zero, 10

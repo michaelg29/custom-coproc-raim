@@ -14,6 +14,13 @@ int32_t sign_extend_immd(uint32_t ir, uint32_t shift) {
     return ret;
 }
 
+int32_t zero_extend_immd(uint32_t ir, uint32_t shift) {
+    // get immediate and sign extend
+    int32_t ret = GET_INSTR_BITS(ir, 0, 0xffff);
+    ret <<= shift;
+    return ret;
+}
+
 cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t max_instr_cnt) : sc_module(name), _start_addr(start_addr), _exit_addr(exit_addr), _max_instr_cnt(max_instr_cnt) {
     SC_THREAD(main);
 
@@ -152,9 +159,120 @@ void cpu::main() {
                 res = _regs.a[rs] | _regs.a[rt];
                 break;
             }
-            default: {
-                LOGF("Unsupported SPECIAL opcode: %02x", GET_INSTR_SPECIAL_OP(_regs.s.ir));
+            case SPECIAL_SLL: {
+                // get immediate
+                immd = GET_INSTR_BITS(_regs.s.ir, 6, 0b11111);
+                res = _regs.ua[rt] << immd;
+                break;
+            }
+            case SPECIAL_SLLV: {
+                res = _regs.ua[rt] << _regs.a[rs];
+                break;
+            }
+            case SPECIAL_SLT: {
+                res = _regs.a[rs] < _regs.a[rt] ? 1 : 0;
+                break;
+            }
+            case SPECIAL_SLTU: {
+                res = _regs.ua[rs] < _regs.ua[rt] ? 1 : 0;
+                break;
+            }
+            case SPECIAL_SRA: {
+                // get immediate
+                immd = GET_INSTR_BITS(_regs.s.ir, 6, 0b11111);
+                res = _regs.a[rt] >> immd;
+                break;
+            }
+            case SPECIAL_SRAV: {
+                res = _regs.a[rt] >> _regs.a[rs];
+                break;
+            }
+            case SPECIAL_SRL: {
+                // get immediate
+                immd = GET_INSTR_BITS(_regs.s.ir, 6, 0b11111);
+                res = _regs.ua[rt] >> immd;
+                break;
+            }
+            case SPECIAL_SRLV: {
+                res = _regs.ua[rt] >> _regs.a[rs];
+                break;
+            }
+            case SPECIAL_SUB:
+            case SPECIAL_SUBU: {
+                res = _regs.a[rs] - _regs.a[rt];
+                break;
+            }
+            case SPECIAL_SYSCALL: {
+                // todo syscall
+                break;
+            }
+            case SPECIAL_TEQ: {
+                if (_regs.a[rs] == _regs.a[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_TGE: {
+                if (_regs.a[rs] >= _regs.a[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_TGEU: {
+                if (_regs.ua[rs] >= _regs.ua[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_TLT: {
+                if (_regs.a[rs] < _regs.a[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_TLTU: {
+                if (_regs.ua[rs] < _regs.ua[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_TNE: {
+                if (_regs.ua[rs] != _regs.ua[rt]) {
+                    signal_ex(EX_TRAP);
+                }
+                break;
+            }
+            case SPECIAL_XOR: {
+                res = _regs.ua[rs] ^ _regs.ua[rt];
+                break;
+            }
+            case SPECIAL_DADD:
+            case SPECIAL_DADDU:
+            case SPECIAL_DDIV:
+            case SPECIAL_DDIVU:
+            case SPECIAL_DMULT:
+            case SPECIAL_DMULTU:
+            case SPECIAL_DSLL:
+            case SPECIAL_DSLL32:
+            case SPECIAL_DSLLV:
+            case SPECIAL_DSRA:
+            case SPECIAL_DSRA32:
+            case SPECIAL_DSRAV:
+            case SPECIAL_DSRL:
+            case SPECIAL_DSRL32:
+            case SPECIAL_DSRLV:
+            case SPECIAL_DSUB:
+            case SPECIAL_DSUBU:
+            case SPECIAL_SYNC: {
+                LOGF("Unimplemented SPECIAL opcode: %02x", GET_INSTR_SPECIAL_OP(_regs.s.ir));
                 dst_reg_idx = -1;
+                signal_ex(EX_NOIMP);
+                break;
+            }
+            default: {
+                LOGF("Invalid SPECIAL opcode: %02x", GET_INSTR_SPECIAL_OP(_regs.s.ir));
+                dst_reg_idx = -1;
+                signal_ex(EX_INVALID);
                 break;
             }
             }
@@ -175,7 +293,7 @@ void cpu::main() {
             dst_reg_idx = rt;
 
             // get immediate and zero extend
-            immd = GET_INSTR_BITS(_regs.s.ir, 0, 0xffff);
+            immd = zero_extend_immd(_regs.s.ir, 0);
 
             // perform immediate logical AND
             res = _regs.a[rs] & immd;
@@ -231,9 +349,64 @@ void cpu::main() {
                 }
                 break;
             }
-            default: {
-                LOGF("Unsupported REGIMM opcode: %02x", rt);
+            case REGIMM_TEQI: {
+                // get immediate and sign extend
+                immd = sign_extend_immd(_regs.s.ir, 0);
+                if (_regs.a[rs] == immd) {
+                    signal_ex(EX_TRAP);
+                }
                 dst_reg_idx = -1;
+                break;
+            }
+            case REGIMM_TGEI: {
+                // get immediate and sign extend
+                immd = sign_extend_immd(_regs.s.ir, 0);
+                if (_regs.a[rs] >= immd) {
+                    signal_ex(EX_TRAP);
+                }
+                dst_reg_idx = -1;
+                break;
+            }
+            case REGIMM_TGEIU: {
+                // get immediate
+                immd = zero_extend_immd(_regs.s.ir, 0);
+                if (_regs.a[rs] >= immd) {
+                    signal_ex(EX_TRAP);
+                }
+                dst_reg_idx = -1;
+                break;
+            }
+            case REGIMM_TLTI: {
+                // get immediate and sign extend
+                immd = sign_extend_immd(_regs.s.ir, 0);
+                if (_regs.a[rs] < immd) {
+                    signal_ex(EX_TRAP);
+                }
+                dst_reg_idx = -1;
+                break;
+            }
+            case REGIMM_TLTIU: {
+                // get immediate
+                immd = zero_extend_immd(_regs.s.ir, 0);
+                if (_regs.ua[rs] < immd) {
+                    signal_ex(EX_TRAP);
+                }
+                dst_reg_idx = -1;
+                break;
+            }
+            case REGIMM_TNEI: {
+                // get immediate and sign extend
+                immd = sign_extend_immd(_regs.s.ir, 0);
+                if (_regs.a[rs] != immd) {
+                    signal_ex(EX_TRAP);
+                }
+                dst_reg_idx = -1;
+                break;
+            }
+            default: {
+                LOGF("Invalid REGIMM opcode: %02x", rt);
+                dst_reg_idx = -1;
+                signal_ex(EX_INVALID);
                 break;
             }
             }
@@ -264,7 +437,7 @@ void cpu::main() {
         case OPCODE_BNE:
         case OPCODE_BNEL: {
             // get immediate and left shift
-            immd = GET_INSTR_BITS(_regs.s.ir, 0, 0xffff) << 2;
+            immd = zero_extend_immd(_regs.s.ir, 2);
 
             // conditional PC-relative branch
             if (_regs.a[rs] != _regs.a[rt]) {
@@ -361,7 +534,7 @@ void cpu::main() {
         }
         case OPCODE_LUI: {
             // get immedate
-            immd = GET_INSTR_BITS(_regs.s.ir, 0, 0xffff);
+            immd = zero_extend_immd(_regs.s.ir, 0);
             res = (immd << 16) & 0xffff0000;
             dst_reg_idx = rt;
             break;
@@ -392,7 +565,7 @@ void cpu::main() {
 
             // construct address
             immd = immd + _regs.a[rs];
-            if (immd & 0b1) {
+            if (immd & 0b11) {
                 signal_ex(EX_ADDRESS);
             }
             else {
@@ -401,14 +574,14 @@ void cpu::main() {
                 res = (int32_t)ures;
                 dst_reg_idx = rt;
 
-                // todo write to coprocessor z
+                // todo write to coprocessor z register
                 immd = opcode & 0b11;
             }
             break;
         }
         case OPCODE_ORI: {
             // get immedate
-            immd = GET_INSTR_BITS(_regs.s.ir, 0, 0xffff);
+            immd = zero_extend_immd(_regs.s.ir, 0);
             res = immd | _regs.a[rs];
             dst_reg_idx = rt;
             break;
@@ -422,8 +595,107 @@ void cpu::main() {
             mem->write(immd, (uint32_t)_regs.a[rt], 1);
             break;
         }
+        case OPCODE_SH: {
+            // get immediate and sign extend
+            immd = sign_extend_immd(_regs.s.ir, 0);
+
+            // construct address and write byte to memory
+            immd = immd + _regs.a[rs];
+
+            if (immd & 0b1) {
+                signal_ex(EX_ADDRESS);
+            }
+            else {
+                // write halfword to memory
+                mem->write(immd, (uint32_t)_regs.a[rt], 2);
+            }
+            break;
+        }
+        case OPCODE_SLTI: {
+            // get immediate and sign extend
+            immd = sign_extend_immd(_regs.s.ir, 0);
+            res = _regs.a[rs] < immd ? 1 : 0;
+            dst_reg_idx = rt;
+            break;
+        }
+        case OPCODE_SLTIU: {
+            // get immediate and sign extend
+            immd = sign_extend_immd(_regs.s.ir, 0);
+            res = (uint32_t)_regs.a[rs] < (uint32_t)immd ? 1 : 0;
+            dst_reg_idx = rt;
+            break;
+        }
+        case OPCODE_SW: {
+            // get immediate and sign extend
+            immd = sign_extend_immd(_regs.s.ir, 0);
+
+            // construct address and write byte to memory
+            immd = immd + _regs.a[rs];
+
+            if (immd & 0b11) {
+                signal_ex(EX_ADDRESS);
+            }
+            else {
+                // write word to memory
+                mem->write(immd, (uint32_t)_regs.a[rt], 4);
+            }
+            break;
+        }
+        case OPCODE_SWC1:
+        case OPCODE_SWC2:
+        case OPCODE_SWC3: {
+            // get immediate and sign extend
+            immd = sign_extend_immd(_regs.s.ir, 0);
+
+            // construct address
+            immd = immd + _regs.a[rs];
+            if (immd & 0b11) {
+                signal_ex(EX_ADDRESS);
+            }
+            else {
+                // todo read from coprocessor z register
+                // ures = ...;
+
+                // write to memory
+                mem->write(immd, ures, 4);
+            }
+            break;
+        }
+        case OPCODE_XORI: {
+            // get immedate
+            immd = zero_extend_immd(_regs.s.ir, 0);
+            res = immd ^ _regs.a[rs];
+            dst_reg_idx = rt;
+            break;
+        }
+        case OPCODE_DADDI:
+        case OPCODE_DADDIU:
+        case OPCODE_LD:
+        case OPCODE_LDC1:
+        case OPCODE_LDC2:
+        case OPCODE_LDL:
+        case OPCODE_LDR:
+        case OPCODE_LL:
+        case OPCODE_LLD:
+        case OPCODE_LWL:
+        case OPCODE_LWR:
+        case OPCODE_PREF:
+        case OPCODE_SC:
+        case OPCODE_SCD:
+        case OPCODE_SD:
+        case OPCODE_SDC1:
+        case OPCODE_SDC2:
+        case OPCODE_SDL:
+        case OPCODE_SDR:
+        case OPCODE_SWL:
+        case OPCODE_SWR: {
+            LOGF("Unimplemented instr opcode: %02x", GET_INSTR_OPCODE(_regs.s.ir));
+            signal_ex(EX_NOIMP);
+            break;
+        }
         default: {
-            LOGF("Unsupported instr opcode: %02x", GET_INSTR_OPCODE(_regs.s.ir));
+            LOGF("Invalid instr opcode: %02x", GET_INSTR_OPCODE(_regs.s.ir));
+            signal_ex(EX_INVALID);
             break;
         }
         }
