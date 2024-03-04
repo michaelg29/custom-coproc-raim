@@ -10,11 +10,11 @@ newline: .asciiz "\n"  #This will cause the screen cursor to move to a newline
 
 main:
 
-  la $a0, str1
-  li $v0, 4
-  syscall
-
-  addi $s0, $zero, 10     # X = 10; $s0 = X,  Value in $s0: 10
+  li $a0, 15
+  li $a1, 3
+  add $a2 $a0 $a1
+  la $a3, str1
+  sb $a2, 0($a3)
 
 end:
   addi $v0, $zero, 10

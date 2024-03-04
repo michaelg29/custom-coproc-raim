@@ -93,7 +93,7 @@ bool memory::read(uint32_t addr, uint32_t& data) {
     return true;
 }
 
-bool memory::write(uint32_t addr, uint32_t data) {
+bool memory::write(uint32_t addr, uint32_t data, uint8_t size) {
     // find memory entry containing the address
     int i;
     for (i = 0; i < _n_cursors; ++i) {
@@ -125,7 +125,7 @@ bool memory::write(uint32_t addr, uint32_t data) {
             _cursors[i].mem_cursor = _mem_words;
 
             // insert into memory
-            _mem[_mem_words] = data;
+            write_int(_mem_words, data, addr & 0b11, size);
             _mem_words++;
 
             return true;
@@ -136,8 +136,40 @@ bool memory::write(uint32_t addr, uint32_t data) {
     }
 
     // calculate the address in the memory array
-    addr = _cursors[i].mem_cursor + ((addr - _cursors[i].addr) >> 2);
-    _mem[addr] = data;
+    write_int(_cursors[i].mem_cursor + ((addr - _cursors[i].addr) >> 2), data, addr & 0b11, size);
 
     return true;
+}
+
+void memory::write_int(uint32_t addr_int, uint32_t data, uint32_t offset, uint32_t size) {
+    switch (size) {
+    case 4:
+        _mem[addr_int] = data;
+        break;
+    case 2:
+        *((uint16_t*)(_mem + addr_int) + (offset >> 1)) = (uint16_t)data;
+        break;
+    case 1:
+        *((uint8_t*)(_mem + addr_int) + offset) = (uint8_t)data;
+        break;
+    };
+}
+
+void memory::print() {
+    int i, j;
+    uint32_t addr_print, addr_int;
+    mem_cursor_t *c = _cursors;
+
+    for (i = 0; i < _n_cursors; ++i, ++c) {
+        printf("\n=====\n0x%08x -> 0x%08x\n=====", c->addr, c->addr + (c->size << 2));
+        addr_print = c->addr;
+        addr_int = c->mem_cursor;
+        for (j = 0; j < c->size; ++j, addr_print += 4, ++addr_int) {
+            if ((j & 0b11) == 0) {
+                printf("\n0x%08x: ", addr_print);
+            }
+            printf("%08x ", _mem[addr_int]);
+        }
+        printf("\n");
+    }
 }

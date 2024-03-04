@@ -29,8 +29,8 @@ int sc_main(int argc, char* argv[]) {
 
     // memory has max 64 cursors and 1<<13 words = 1<<15 bytes
     memory *mem = new memory("mem", 64, 1<<13);
-    
-    cpu *c = new cpu("cpu", 0x00400000, 0x00400018, 4);
+
+    cpu *c = new cpu("cpu", 0x00400000, 0x00400018, 5);
     c->mem(*mem);
 
     // ==============================
@@ -39,6 +39,10 @@ int sc_main(int argc, char* argv[]) {
 
     std::cout << "Starting simulation..." << std::endl;
     sc_time duration = sc_fault_injector::simulate();
+
+    // final state
+    std::cout << "Final state:" << std::endl;
+    mem->print();
 
     // ===================
     // ===== CLEANUP =====

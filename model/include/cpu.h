@@ -4,6 +4,7 @@
 #include "systemc.h"
 
 #include "memory.h"
+#include "isa.h"
 
 #ifndef CPU_H
 #define CPU_H
@@ -43,8 +44,9 @@ typedef struct {
     int32_t sp;
     int32_t s8;
     int32_t ra;
-    uint32_t pc;
-    uint32_t ir;
+    uint32_t pc; // program counter
+    uint32_t ir; // instruction register
+    uint32_t ex; // exception register
     int32_t lo;
     int32_t hi;
 } regs_t;
@@ -82,6 +84,8 @@ class cpu : public sc_module {
 
         /** Main function. */
         void main();
+        
+        void signal_ex(exception_e ex);
 
 };
 
