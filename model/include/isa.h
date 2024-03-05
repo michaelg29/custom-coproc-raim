@@ -24,6 +24,9 @@
 // get the format of a floating point instruction
 #define GET_INSTR_FPU_FMT(instr) GET_INSTR_BITS(instr, 21, 0b11111)
 
+// get the flags for a floating point branch instruction
+#define GET_INSTR_FPU_FLAGS(instr) GET_INSTR_BITS(instr, 16, 0b11);
+
 // =============================
 // ===== INSTRUCTION ENUMS =====
 // =============================
@@ -99,7 +102,11 @@ enum opcode_e {
     OPCODE_SWL      = 0b101010, // not supported
     OPCODE_SWR      = 0b101110, // not supported
     OPCODE_XORI     = 0b001110,
-    //OPCODE_FPU      = 0b010001,
+    //OPCODE_FPU      = 0b010001, // same opcode as OPCODE_COP1,
+    //OPCODE_LDC1     = 0b110101, // repeated, not supported
+    //OPCODE_LDXC1    = 0b010011, // repeated (LWC3)
+    //OPCODE_LWC1     = 0b110001, // repeated (LWC1)
+    OPCODE_COP1X    = 0b010011, // repeated (LWC3)
 };
 
 // Operations of the SPECIAL opcode.
@@ -158,6 +165,7 @@ enum special_op_e {
     SPECIAL_TLTU    = 0b110011,
     SPECIAL_TNE     = 0b110110,
     SPECIAL_XOR     = 0b100110,
+    SPECIAL_MOVF    = 0b000001,
 };
 
 // Operations of the REGIMM opcode.
@@ -181,14 +189,75 @@ enum regimm_op_e {
 // Operations of the FPU opcode (opcode COP1).
 enum fpu_op_e {
     FPU_ABS         = 0b000101,
+    FPU_ADD         = 0b000000,
+    FPU_CEILL       = 0b001010, // not supported
+    FPU_CEILW       = 0b001110, // not supported
+    FPU_CVTD        = 0b100001, // not supported
+    FPU_CVTL        = 0b100101, // not supported
+    FPU_CVTS        = 0b100000, // not supported
+    FPU_CVTW        = 0b100100, // not supported
+    FPU_DIV         = 0b000011,
+    FPU_FLOORL      = 0b001011, // not supported
+    FPU_FLOORW      = 0b001001, // not supported
+    FPU_MADD_S      = 0b100000,
+    FPU_MADD_D      = 0b100001, // not supported
+    FPU_MOV         = 0b000110,
+    FPU_MOVCF       = 0b010001,
+    FPU_MOVN        = 0b010011,
+    FPU_MOVZ        = 0b010010,
+    FPU_MSUB_S      = 0b101000,
+    FPU_MSUB_D      = 0b101001, // not supported
+    FPU_MUL         = 0b000010,
+    FPU_NEG         = 0b000111,
+    FPU_NMADD_S     = 0b110000,
+    FPU_NMADD_D     = 0b110001, // not supported
+    FPU_NMSUB_S     = 0b111000,
+    FPU_NMSUB_D     = 0b111001, // not supported
+    FPU_RECIP       = 0b010101,
+    FPU_ROUNDL      = 0b001000, // not supported
+    FPU_ROUNDW      = 0b001100, // not supported
+    FPU_RSQRT       = 0b010110,
+    FPU_SQRT        = 0b000100,
+    FPU_SUB         = 0b000001,
+    FPU_LWXC1       = 0b000000,
+    FPU_SWXC1       = 0b001000,
+    FPU_TRUNCL      = 0b001001, // not supported
+    FPU_TRUNCW      = 0b001101, // not supported
+};
+
+// Floating point conditions to test for.
+enum fpu_cond_e {
+    FPU_F           = 0b0000,
+    FPU_UN          = 0b0001,
+    FPU_EQ          = 0b0010,
+    FPU_UEQ         = 0b0011,
+    FPU_OLT         = 0b0100,
+    FPU_ULT         = 0b0101,
+    FPU_OLE         = 0b0110,
+    FPU_ULE         = 0b0111,
+    FPU_SF          = 0b1000,
+    FPU_NGLE        = 0b1001,
+    FPU_SEQ         = 0b1010,
+    FPU_NGL         = 0b1011,
+    FPU_LT          = 0b1100,
+    FPU_NGE         = 0b1101,
+    FPU_LE          = 0b1110,
+    FPU_NGT         = 0b1111,
 };
 
 // Possible formats for floating point instructions.
 enum fpu_fmt_e {
-    FPU_FMT_S       = 16,
-    FPU_FMT_D       = 17,
-    FPU_FMT_W       = 20,
-    FPU_FMT_L       = 21
+    FPU_FMT_S       = 0b10000,
+    FPU_FMT_D       = 0b10001,
+    FPU_FMT_W       = 0b10100,
+    FPU_FMT_L       = 0b10101,
+    FPU_FMT_BC      = 0b01000,
+    FPU_FMT_CF      = 0b00010,
+    FPU_FMT_CT      = 0b00110,
+    FPU_FMT_DMF     = 0b00001, // not supported
+    FPU_FMT_DMT     = 0b00101,
+    FPU_FMT_MFC     = 0b00000,
+    FPU_FMT_MT      = 0b00100,
 };
 
 #endif // ISA_H

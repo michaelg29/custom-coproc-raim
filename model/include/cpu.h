@@ -53,8 +53,8 @@ typedef struct {
 
 typedef union {
     regs_t s;
-    int32_t a[N_REGS];
-    uint32_t ua[N_REGS];
+    int32_t w[N_REGS];
+    uint32_t uw[N_REGS];
     int64_t l[N_REGS >> 1];
     uint64_t ul[N_REGS >> 1];
 } regs_u;
@@ -90,6 +90,7 @@ class cpu : public sc_module {
         /** Registers. */
         regs_u _regs;
         fp_regs_u _fp_regs;
+        uint8_t _fp_cc;
 
         /** Main function. */
         void main();
