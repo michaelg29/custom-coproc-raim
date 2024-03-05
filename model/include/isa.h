@@ -2,14 +2,31 @@
 #ifndef ISA_H
 #define ISA_H
 
+// =====================================
+// ===== INSTRUCTION DECODE MACROS =====
+// =====================================
+
 // get bits of the instruction [a:n_bits(mask)]
 #define GET_INSTR_BITS(instr, a, mask) ((instr >> a) & mask)
+
 // get opcode of the instruction (bits [26:31])
 #define GET_INSTR_OPCODE(instr) GET_INSTR_BITS(instr, 26, 0b111111)
+
 // get five-bit identifier for a register starting from bit a (bits [a:a+4])
 #define GET_INSTR_REG(instr, a) GET_INSTR_BITS(instr, a, 0b11111)
+
 // get the operation of a special instruction
 #define GET_INSTR_SPECIAL_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
+
+// get the operation of a floating point instruction
+#define GET_INSTR_FPU_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
+
+// get the format of a floating point instruction
+#define GET_INSTR_FPU_FMT(instr) GET_INSTR_BITS(instr, 21, 0b11111)
+
+// =============================
+// ===== INSTRUCTION ENUMS =====
+// =============================
 
 // Possible exceptions.
 enum exception_e {
@@ -63,7 +80,7 @@ enum opcode_e {
     OPCODE_LWR      = 0b100110, // not supported
     OPCODE_LWU      = 0b100111,
     OPCODE_ORI      = 0b001101,
-    OPCODE_PREF     = 0b110011, // not supported
+    //OPCODE_PREF     = 0b110011, // same opcode as OPCODE_LWC3, not supported
     OPCODE_SB       = 0b101000,
     OPCODE_SC       = 0b111000, // not supported
     OPCODE_SCD      = 0b111100, // not supported
@@ -82,6 +99,7 @@ enum opcode_e {
     OPCODE_SWL      = 0b101010, // not supported
     OPCODE_SWR      = 0b101110, // not supported
     OPCODE_XORI     = 0b001110,
+    //OPCODE_FPU      = 0b010001,
 };
 
 // Operations of the SPECIAL opcode.
@@ -158,6 +176,19 @@ enum regimm_op_e {
     REGIMM_TLTI     = 0b01010,
     REGIMM_TLTIU    = 0b01011,
     REGIMM_TNEI     = 0b01110,
+};
+
+// Operations of the FPU opcode (opcode COP1).
+enum fpu_op_e {
+    FPU_ABS         = 0b000101,
+};
+
+// Possible formats for floating point instructions.
+enum fpu_fmt_e {
+    FPU_FMT_S       = 16,
+    FPU_FMT_D       = 17,
+    FPU_FMT_W       = 20,
+    FPU_FMT_L       = 21
 };
 
 #endif // ISA_H

@@ -55,7 +55,15 @@ typedef union {
     regs_t s;
     int32_t a[N_REGS];
     uint32_t ua[N_REGS];
+    int64_t l[N_REGS >> 1];
+    uint64_t ul[N_REGS >> 1];
 } regs_u;
+
+#define N_FP_REGS 32
+typedef union {
+    float s[N_FP_REGS];
+    double d[N_FP_REGS >> 1];
+} fp_regs_u;
 
 /** Concrete CPU module. */
 class cpu : public sc_module {
@@ -81,6 +89,7 @@ class cpu : public sc_module {
 
         /** Registers. */
         regs_u _regs;
+        fp_regs_u _fp_regs;
 
         /** Main function. */
         void main();

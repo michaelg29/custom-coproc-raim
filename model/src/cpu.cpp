@@ -36,6 +36,7 @@ void cpu::main() {
     // decoded instruction values
     int32_t opcode;
     int32_t rs, rt, rd;
+    int32_t fs, ft, fd;
     int32_t immd;
 
     // computation result
@@ -403,6 +404,12 @@ void cpu::main() {
                 dst_reg_idx = -1;
                 break;
             }
+            /*case : {
+                LOGF("Unimplemented REGIMM opcode: %02x", rt);
+                dst_reg_idx = -1;
+                signal_ex(EX_NOIMP);
+                break;
+            }*/
             default: {
                 LOGF("Invalid REGIMM opcode: %02x", rt);
                 dst_reg_idx = -1;
@@ -446,7 +453,7 @@ void cpu::main() {
             break;
         }
         case OPCODE_COP0:
-        case OPCODE_COP1:
+        //case OPCODE_COP1: // defined below as floating point instructions
         case OPCODE_COP2:
         case OPCODE_COP3: {
             break;
@@ -668,6 +675,31 @@ void cpu::main() {
             dst_reg_idx = rt;
             break;
         }
+        case OPCODE_COP1: {
+            dst_reg_idx = -1;
+            fs = GET_INSTR_REG(_regs.s.ir, 11);
+            ft = GET_INSTR_REG(_regs.s.ir, 16);
+            fd = GET_INSTR_REG(_regs.s.ir, 6);
+            switch (GET_INSTR_FPU_OP(_regs.s.ir)) {
+            case FPU_ABS: {
+                _fp_regs.s[fd] = fabs(_fp_regs.s[fs]);
+                break;
+            }
+            /*case : {
+                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
+                dst_reg_idx = -1;
+                signal_ex(EX_NOIMP);
+                break;
+            }*/
+            default: {
+                LOGF("Invalid FPU opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
+                dst_reg_idx = -1;
+                signal_ex(EX_INVALID);
+                break;
+            }
+            }
+            break;
+        }
         case OPCODE_DADDI:
         case OPCODE_DADDIU:
         case OPCODE_LD:
@@ -679,7 +711,7 @@ void cpu::main() {
         case OPCODE_LLD:
         case OPCODE_LWL:
         case OPCODE_LWR:
-        case OPCODE_PREF:
+        //case OPCODE_PREF:
         case OPCODE_SC:
         case OPCODE_SCD:
         case OPCODE_SD:
