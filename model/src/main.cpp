@@ -9,6 +9,7 @@
 
 // simulation components
 #include "cpu.h"
+#include "fp_cop.h"
 #include "memory.h"
 
 // Statistics collecting classes
@@ -30,8 +31,14 @@ int sc_main(int argc, char* argv[]) {
     // memory has max 64 cursors and 1<<13 words = 1<<15 bytes
     memory *mem = new memory("mem", 64, 1<<13);
 
-    cpu *c = new cpu("cpu", 0x00400000, 0x00400018, 5);
+    // cpu and coprocessors
+    coprocessor_if *empty_cop = new stubbed_cop();
+    coprocessor_if *cop1 = new fp_cop("fp_cop");
+    cpu *c = new cpu("cpu", 0x00400000, 0x00400018, 6);
     c->mem(*mem);
+    c->cop1(*empty_cop);
+    c->cop2(*cop1);
+    c->cop3(*empty_cop);
 
     // ==============================
     // ===== RUN THE SIMULATION =====

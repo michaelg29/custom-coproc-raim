@@ -21,6 +21,18 @@ int32_t zero_extend_immd(uint32_t ir, uint32_t shift) {
     return ret;
 }
 
+bool stubbed_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
+    return false;
+}
+
+bool stubbed_cop::get_regs(uint32_t rt, int32_t &res) {
+    return false;
+}
+
+exception_e stubbed_cop::get_exception() {
+    return EX_NONE;
+}
+
 cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t max_instr_cnt) : sc_module(name), _start_addr(start_addr), _exit_addr(exit_addr), _max_instr_cnt(max_instr_cnt) {
     SC_THREAD(main);
 

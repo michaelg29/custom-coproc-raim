@@ -59,11 +59,47 @@ typedef union {
     uint64_t ul[N_REGS >> 1];
 } regs_u;
 
+/** Register collection. */
 #define N_FP_REGS 32
 typedef union {
     float s[N_FP_REGS];
     double d[N_FP_REGS >> 1];
 } fp_regs_u;
+
+/** Coprocessor to use inside the CPU. */
+class coprocessor_if : virtual public sc_interface {
+
+    public:
+
+        /**
+         * Execute an instruction on the coprocessor.
+         *
+         * @param ir  The 32-bit instruction.
+         * @param rt  The received 32-bit general purpose register value.
+         * @param res The output 32-bit value.
+         * @returns Whether the coprocessor wrote a value to the result.
+         */
+        virtual bool execute(uint32_t ir, int32_t rt, int32_t &res) = 0;
+
+        /** Get the value in a coprocessor register. */
+        virtual bool get_regs(uint32_t rt, int32_t &res) = 0;
+
+        /** Determine if the coprocessor signaled an exception in the previous instruction. */
+        virtual exception_e get_exception() = 0;
+
+};
+
+/** Stubbed coprocessor with no internal functionality. */
+class stubbed_cop : public coprocessor_if {
+
+    public:
+
+        /** coprocessor_if overrides. */
+        bool execute(uint32_t ir, int32_t rt, int32_t &res);
+        bool get_regs(uint32_t rt, int32_t &res);
+        exception_e get_exception();
+
+};
 
 /** Concrete CPU module. */
 class cpu : public sc_module {
@@ -72,6 +108,9 @@ class cpu : public sc_module {
 
         /** Interfaces. */
         sc_port<memory_if> mem;
+        sc_port<coprocessor_if> cop1;
+        sc_port<coprocessor_if> cop2;
+        sc_port<coprocessor_if> cop3;
 
         /** Constructor. */
         SC_HAS_PROCESS(cpu);
@@ -94,7 +133,7 @@ class cpu : public sc_module {
 
         /** Main function. */
         void main();
-        
+
         void signal_ex(exception_e ex);
 
 };
