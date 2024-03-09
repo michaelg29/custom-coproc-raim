@@ -9,6 +9,17 @@
 #ifndef CPU_H
 #define CPU_H
 
+// ============================
+// ===== HELPER FUNCTIONS =====
+// ============================
+
+int32_t sign_extend_immd(uint32_t ir, uint32_t shift);
+int32_t zero_extend_immd(uint32_t ir, uint32_t shift);
+
+// ===============================
+// ===== REGISTER COLLECTION =====
+// ===============================
+
 /** Register collection. */
 #define N_REGS 32
 typedef struct {
@@ -66,6 +77,10 @@ typedef union {
     double d[N_FP_REGS >> 1];
 } fp_regs_u;
 
+// =============================
+// ===== SYSTEM COMPONENTS =====
+// =============================
+
 /** Coprocessor to use inside the CPU. */
 class coprocessor_if : virtual public sc_interface {
 
@@ -84,6 +99,12 @@ class coprocessor_if : virtual public sc_interface {
         /** Get the value in a coprocessor register. */
         virtual bool get_regs(uint32_t rt, int32_t &res) = 0;
 
+        /** Set the value in a coprocessor register. */
+        virtual void set_regs(uint32_t rt, int32_t res) = 0;
+
+        /** Get the offset for the next program counter if the coprocessor has updated it. */
+        virtual bool get_next_pc_offset(int32_t &next_pc_offset) = 0;
+
         /** Determine if the coprocessor signaled an exception in the previous instruction. */
         virtual exception_e get_exception() = 0;
 
@@ -97,6 +118,8 @@ class stubbed_cop : public coprocessor_if {
         /** coprocessor_if overrides. */
         bool execute(uint32_t ir, int32_t rt, int32_t &res);
         bool get_regs(uint32_t rt, int32_t &res);
+        void set_regs(uint32_t rt, int32_t res);
+        bool get_next_pc_offset(int32_t &next_pc_offset);
         exception_e get_exception();
 
 };

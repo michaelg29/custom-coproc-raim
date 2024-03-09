@@ -29,6 +29,12 @@ bool stubbed_cop::get_regs(uint32_t rt, int32_t &res) {
     return false;
 }
 
+void stubbed_cop::set_regs(uint32_t rt, int32_t res) {}
+
+bool stubbed_cop::get_next_pc_offset(int32_t &next_pc_offset) {
+    return false;
+}
+
 exception_e stubbed_cop::get_exception() {
     return EX_NONE;
 }
@@ -701,202 +707,13 @@ void cpu::main() {
             break;
         }
         case OPCODE_COP1: {
-            dst_reg_idx = -1;
-            fs = GET_INSTR_REG(_regs.s.ir, 11);
-            ft = GET_INSTR_REG(_regs.s.ir, 16);
-            fd = GET_INSTR_REG(_regs.s.ir, 6);
-            fr = GET_INSTR_REG(_regs.s.ir, 21);
-
-            fpu_fmt = GET_INSTR_FPU_FMT(_regs.s.ir);
-            fp_branch_flags = GET_INSTR_FPU_FLAGS(_regs.s.ir);
-
-            // decode format
-            if (fpu_fmt == FPU_FMT_BC) {
-                // branch instruction
-                switch (fp_branch_flags) {
-                case 0b00:
-                case 0b10: {
-                    // get immediate and left shift
-                    immd = sign_extend_immd(_regs.s.ir, 2);
-
-                    // conditional PC-relative branch
-                    if (_fp_cc == 0b000) {
-                        next_pc = _regs.s.pc + immd;
-                    }
-                    break;
-                }
-                case 0b01:
-                case 0b11: {
-                    // get immediate and left shift
-                    immd = sign_extend_immd(_regs.s.ir, 2);
-
-                    // conditional PC-relative branch
-                    if (_fp_cc == 0b001) {
-                        next_pc = _regs.s.pc + immd;
-                    }
-                    break;
-                }
-                }
-                break;
-            }
-            else if (GET_INSTR_BITS(_regs.s.ir, 4, 0b11) == 0b11) {
-                // set the condition flag
-                switch (GET_INSTR_BITS(_regs.s.ir, 0, 0xf)) {
-                case FPU_F:    _fp_cc = 0; break;
-                case FPU_UN:   _fp_cc = 0; break;
-                case FPU_EQ:   _fp_cc = _fp_regs.s[fs] == _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_UEQ:  _fp_cc = _fp_regs.s[fs] == _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_OLT:  _fp_cc = _fp_regs.s[fs] < _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_ULT:  _fp_cc = _fp_regs.s[fs] < _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_OLE:  _fp_cc = _fp_regs.s[fs] <= _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_ULE:  _fp_cc = _fp_regs.s[fs] <= _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_SF:   _fp_cc = 0; break;
-                case FPU_NGLE: _fp_cc = 0; break;
-                case FPU_SEQ:  _fp_cc = _fp_regs.s[fs] == _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_NGL:  _fp_cc = _fp_regs.s[fs] == _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_LT:   _fp_cc = _fp_regs.s[fs] < _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_NGE:  _fp_cc = _fp_regs.s[fs] < _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_LE:   _fp_cc = _fp_regs.s[fs] <= _fp_regs.s[ft] ? 1 : 0; break;
-                case FPU_NGT:  _fp_cc = _fp_regs.s[fs] <= _fp_regs.s[ft] ? 1 : 0; break;
-                }
-                break;
-            }
-            else if (fpu_fmt == FPU_FMT_CF) {
-                res = *(int32_t*)&_fp_regs.s[fs];
-                dst_reg_idx = rt;
-                break;
-            }
-            else if (fpu_fmt == FPU_FMT_CT) {
-                _fp_regs.s[fs] = *(float*)&_regs.w[rt];
-                break;
-            }
-            else if (fpu_fmt == FPU_FMT_MFC) {
-                res = *(int32_t*)&_fp_regs.s[fs];
-                dst_reg_idx = rt;
-                break;
-            }
-            else if (fpu_fmt == FPU_FMT_MT) {
-                _fp_regs.s[fs] = *(float*)&_regs.w[rt];
-                break;
-            }
-            /*else if (fpu_fmt != FPU_FMT_S) {
-                LOGF("Unimplemented FPU format: %02x", fpu_fmt);
-                dst_reg_idx = -1;
-                signal_ex(EX_NOIMP);
-                break;
-            }*/
-
-            // decode operation
-            switch (GET_INSTR_FPU_OP(_regs.s.ir)) {
-            case FPU_ABS: {
-                _fp_regs.s[fd] = fabs(_fp_regs.s[fs]);
-                break;
-            }
-            case FPU_ADD: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] + _fp_regs.s[ft];
-                break;
-            }
-            case FPU_DIV: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] / _fp_regs.s[ft];
-                break;
-            }
-            case FPU_MADD_S: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] * _fp_regs.s[ft] + _fp_regs.s[fr];
-                break;
-            }
-            case FPU_MOV: {
-                _fp_regs.s[fd] = _fp_regs.s[fs];
-                break;
-            }
-            case FPU_MOVCF: {
-                // branch flags must be equal to the condition code
-                if (!(fp_branch_flags ^ _fp_cc)) {
-                    _fp_regs.s[fd] = _fp_regs.s[fs];
-                }
-                break;
-            }
-            case FPU_MOVN: {
-                if (_regs.w[rt] != 0) {
-                    _fp_regs.s[fd] = _fp_regs.s[fs];
-                }
-                break;
-            }
-            case FPU_MOVZ: {
-                if (_regs.w[rt] == 0) {
-                    _fp_regs.s[fd] = _fp_regs.s[fs];
-                }
-                break;
-            }
-            case FPU_MSUB_S: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] * _fp_regs.s[ft] - _fp_regs.s[fr];
-                break;
-            }
-            case FPU_MUL: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] * _fp_regs.s[ft];
-                break;
-            }
-            case FPU_NEG: {
-                _fp_regs.s[fd] = -_fp_regs.s[fs];
-                break;
-            }
-            case FPU_NMADD_S: {
-                _fp_regs.s[fd] = -(_fp_regs.s[fs] * _fp_regs.s[ft] + _fp_regs.s[fr]);
-                break;
-            }
-            case FPU_NMSUB_S: {
-                _fp_regs.s[fd] = -(_fp_regs.s[fs] * _fp_regs.s[ft] - _fp_regs.s[fr]);
-                break;
-            }
-            case FPU_RECIP: {
-                _fp_regs.s[fd] = 1.0f / _fp_regs.s[fs];
-                break;
-            }
-            case FPU_RSQRT: {
-                _fp_regs.s[fd] = 1.0f / sqrt(_fp_regs.s[fs]);
-                break;
-            }
-            case FPU_SQRT: {
-                _fp_regs.s[fd] = sqrt(_fp_regs.s[fs]);
-                break;
-            }
-            case FPU_SUB: {
-                _fp_regs.s[fd] = _fp_regs.s[fs] - _fp_regs.s[ft];
-                break;
-            }
-            case FPU_CEILL:
-            case FPU_CEILW:
-            //case FPU_CVTD: // repeated 6LSbs as FPU_MADD_D
-            case FPU_CVTL:
-            //case FPU_CVTS: // repeated 6LSbs as FPU_MADD_S
-            case FPU_CVTW:
-            case FPU_FLOORL:
-            case FPU_FLOORW:
-            case FPU_MADD_D:
-            case FPU_MSUB_D:
-            case FPU_NMADD_D:
-            case FPU_ROUNDL:
-            case FPU_ROUNDW:
-            case FPU_TRUNCW: {
-                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
-                dst_reg_idx = -1;
-                signal_ex(EX_NOIMP);
-                break;
-            }
-            default: {
-                LOGF("Invalid FPU opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
-                dst_reg_idx = -1;
-                signal_ex(EX_INVALID);
-                break;
-            }
-            }
+            dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
             break;
         }
         case OPCODE_COP1X: {
             // decode operation
             switch (GET_INSTR_FPU_OP(_regs.s.ir)) {
             case FPU_LWXC1: {
-                fd = GET_INSTR_REG(_regs.s.ir, 6);
-
                 // construct address
                 immd = _regs.w[rs] + _regs.w[rt];
                 if (immd & 0b11) {
@@ -904,14 +721,12 @@ void cpu::main() {
                 }
                 else {
                     // load 4B word from memory
-                    mem->read(immd & 0xfffffffc, ures);
-                    _fp_regs.s[fd] = *(float*)&ures;
+                    mem->read(immd, ures);
+                    cop1->set_regs(GET_INSTR_REG(_regs.s.ir, 6), (int32_t)ures);
                 }
                 break;
             }
             case FPU_SWXC1: {
-                fs = GET_INSTR_REG(_regs.s.ir, 11);
-
                 // construct address
                 immd = _regs.w[rs] + _regs.w[rt];
                 if (immd & 0b11) {
@@ -919,7 +734,8 @@ void cpu::main() {
                 }
                 else {
                     // write word to memory
-                    mem->write(immd, *(uint32_t*)&_fp_regs.s[fs], 4);
+                    cop1->get_regs(GET_INSTR_REG(_regs.s.ir, 11), res);
+                    mem->write(immd, (uint32_t)res, 4);
                 }
                 break;
             }
@@ -941,7 +757,6 @@ void cpu::main() {
         case OPCODE_LWC1: {
             // get immediate and sign extend
             immd = sign_extend_immd(_regs.s.ir, 0);
-            ft = GET_INSTR_REG(_regs.s.ir, 16);
 
             // construct address
             immd = immd + _regs.w[rs];
@@ -950,15 +765,14 @@ void cpu::main() {
             }
             else {
                 // load 4B word from memory
-                mem->read(immd & 0xfffffffc, ures);
-                _fp_regs.s[ft] = *(float*)&ures;
+                mem->read(immd, ures);
+                cop1->set_regs(rt, (int32_t)ures);
             }
             break;
         }
         case OPCODE_SWC1: {
             // get immediate and sign extend
             immd = sign_extend_immd(_regs.s.ir, 0);
-            ft = GET_INSTR_REG(_regs.s.ir, 16);
 
             // construct address
             immd = immd + _regs.w[rs];
@@ -967,7 +781,8 @@ void cpu::main() {
             }
             else {
                 // write word to memory
-                mem->write(immd, *(uint32_t*)&_fp_regs.s[ft], 4);
+                cop1->get_regs(rt, res);
+                mem->write(immd, (uint32_t)res, 4);
             }
             break;
         }
@@ -1013,14 +828,34 @@ void cpu::main() {
             LOGF("Writing result %08x to register %d (rd = %d, rs = %d, rt = %d)", res, dst_reg_idx, rd, rs, rt);
         }
 
+        // capture exceptions
         if (_regs.s.ex != EX_NONE) {
             LOGF("Error code: %08x", _regs.s.ex);
         }
+        if ((ures = cop1->get_exception()) != EX_NONE) {
+            LOGF("COP1 error code: %08x", ures);
+        }
+        if ((ures = cop2->get_exception()) != EX_NONE) {
+            LOGF("COP2 error code: %08x", ures);
+        }
+        if ((ures = cop3->get_exception()) != EX_NONE) {
+            LOGF("COP3 error code: %08x", ures);
+        }
 
+        // update PC
         if (_regs.s.pc == _exit_addr) {
             break;
         }
         _regs.s.pc = next_pc;
+        if (cop1->get_next_pc_offset(res)) {
+            _regs.s.pc = _regs.s.pc + res;
+        }
+        if (cop2->get_next_pc_offset(res)) {
+            _regs.s.pc = _regs.s.pc + res;
+        }
+        if (cop3->get_next_pc_offset(res)) {
+            _regs.s.pc = _regs.s.pc + res;
+        }
 
         instr_cnt++;
         POSEDGE_CPU();
