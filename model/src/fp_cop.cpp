@@ -7,7 +7,7 @@
 #include "systemc.h"
 
 fp_cop::fp_cop(sc_module_name name)
-    : sc_module(name), _prev_ex(EX_NONE) {
+    : sc_module(name) {
 
 }
 
@@ -220,8 +220,4 @@ bool fp_cop::get_next_pc_offset(int32_t &next_pc_offset) {
 
 exception_e fp_cop::get_exception() {
     return _prev_ex;
-}
-
-void fp_cop::signal_ex(exception_e ex) {
-    _prev_ex = ex;
 }

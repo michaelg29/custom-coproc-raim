@@ -36,8 +36,9 @@ enum exception_e {
     EX_NONE         = 0x00000000,
     EX_INVALID      = 0x00000001,
     EX_NOIMP        = 0x00000002,
-    EX_TRAP         = 0x00000004,
-    EX_ADDRESS      = 0x00000008,
+    EX_COP_UNUSABLE = 0x00000004,
+    EX_TRAP         = 0x00000008,
+    EX_ADDRESS      = 0x00000010,
 };
 
 // Instruction opcodes.

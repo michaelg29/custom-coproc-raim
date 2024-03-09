@@ -40,9 +40,6 @@ class fp_cop : public sc_module, public coprocessor_if {
         fp_regs_u _regs;
         uint8_t _condition_code;
         int32_t _next_pc_offset;
-        exception_e _prev_ex;
-
-        void signal_ex(exception_e ex);
 
 };
 

@@ -108,6 +108,12 @@ class coprocessor_if : virtual public sc_interface {
         /** Determine if the coprocessor signaled an exception in the previous instruction. */
         virtual exception_e get_exception() = 0;
 
+    protected:
+
+        /** Raise an internal exception. */
+        exception_e _prev_ex;
+        void signal_ex(exception_e ex);
+
 };
 
 /** Stubbed coprocessor with no internal functionality. */
