@@ -10,6 +10,12 @@
 #ifndef FP_COP_H
 #define FP_COP_H
 
+// get the format of a floating point instruction
+#define GET_INSTR_FPU_FMT(instr) GET_INSTR_BITS(instr, 21, 0b11111)
+
+// get the flags for a floating point branch instruction
+#define GET_INSTR_FPU_FLAGS(instr) GET_INSTR_BITS(instr, 16, 0b11);
+
 /** Concrete floating point coprocessor. */
 class fp_cop : public sc_module, public coprocessor_if {
 
@@ -26,7 +32,6 @@ class fp_cop : public sc_module, public coprocessor_if {
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
         bool get_next_pc_offset(int32_t &next_pc_offset);
-        exception_e get_exception();
 
     private:
 

@@ -61,6 +61,9 @@ bool parsehex32(uint32_t *out, bool doRead0) {
         else if (c >= 'a' && c <= 'f') {
             val |= (c - 'a' + 10) & 0xf;
         }
+        else if (c >= 'A' && c <= 'F') {
+            val |= (c - 'A' + 10) & 0xf;
+        }
         else {
             return false;
         }

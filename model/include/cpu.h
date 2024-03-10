@@ -86,6 +86,9 @@ class coprocessor_if : virtual public sc_interface {
 
     public:
 
+        /** Constructor. */
+        coprocessor_if();
+
         /**
          * Execute an instruction on the coprocessor.
          *
@@ -106,7 +109,7 @@ class coprocessor_if : virtual public sc_interface {
         virtual bool get_next_pc_offset(int32_t &next_pc_offset) = 0;
 
         /** Determine if the coprocessor signaled an exception in the previous instruction. */
-        virtual exception_e get_exception() = 0;
+        exception_e get_exception();
 
     protected:
 
@@ -126,7 +129,6 @@ class stubbed_cop : public coprocessor_if {
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
         bool get_next_pc_offset(int32_t &next_pc_offset);
-        exception_e get_exception();
 
 };
 

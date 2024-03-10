@@ -21,8 +21,17 @@ int32_t zero_extend_immd(uint32_t ir, uint32_t shift) {
     return ret;
 }
 
+coprocessor_if::coprocessor_if()
+    : _prev_ex(EX_NONE) {}
+
 void coprocessor_if::signal_ex(exception_e ex) {
     _prev_ex = ex;
+}
+
+exception_e coprocessor_if::get_exception() {
+    exception_e ret = _prev_ex;
+    _prev_ex = EX_NONE;
+    return ret;
 }
 
 bool stubbed_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
@@ -38,12 +47,6 @@ void stubbed_cop::set_regs(uint32_t rt, int32_t res) {}
 
 bool stubbed_cop::get_next_pc_offset(int32_t &next_pc_offset) {
     return false;
-}
-
-exception_e stubbed_cop::get_exception() {
-    exception_e ret = _prev_ex;
-    _prev_ex = EX_NONE;
-    return ret;
 }
 
 cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t max_instr_cnt) : sc_module(name), _start_addr(start_addr), _exit_addr(exit_addr), _max_instr_cnt(max_instr_cnt) {
@@ -719,7 +722,7 @@ void cpu::main() {
         }
         case OPCODE_COP1X: {
             // decode operation
-            switch (GET_INSTR_FPU_OP(_regs.s.ir)) {
+            switch (GET_INSTR_COP_OP(_regs.s.ir)) {
             case FPU_LWXC1: {
                 // construct address
                 immd = _regs.w[rs] + _regs.w[rt];
@@ -747,15 +750,13 @@ void cpu::main() {
                 break;
             }
             /*case : {
-                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
+                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_COP_OP(_regs.s.ir));
                 dst_reg_idx = -1;
                 signal_ex(EX_NOIMP);
                 break;
             }*/
             default: {
-                LOGF("Invalid COP1X opcode: %02x", GET_INSTR_FPU_OP(_regs.s.ir));
-                dst_reg_idx = -1;
-                signal_ex(EX_INVALID);
+                dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
                 break;
             }
             }

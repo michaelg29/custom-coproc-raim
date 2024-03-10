@@ -30,77 +30,79 @@ bool fp_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     _branch_flags = GET_INSTR_FPU_FLAGS(ir);
 
     // decode format
-    if (_fpu_fmt == FPU_FMT_BC) {
-        // branch instruction
-        switch (_branch_flags) {
-        case 0b00:
-        case 0b10: {
-            // get immediate and left shift
-            _next_pc_offset = sign_extend_immd(ir, 2);
+    if (GET_INSTR_OPCODE(ir) == OPCODE_COP1) {
+        if (_fpu_fmt == FPU_FMT_BC) {
+            // branch instruction
+            switch (_branch_flags) {
+            case 0b00:
+            case 0b10: {
+                // get immediate and left shift
+                _next_pc_offset = sign_extend_immd(ir, 2);
 
-            // conditional PC-relative branch
-            _has_next_pc_offset = _condition_code == 0b000;
-            break;
-        }
-        case 0b01:
-        case 0b11: {
-            // get immediate and left shift
-            _next_pc_offset = sign_extend_immd(ir, 2);
+                // conditional PC-relative branch
+                _has_next_pc_offset = _condition_code == 0b000;
+                break;
+            }
+            case 0b01:
+            case 0b11: {
+                // get immediate and left shift
+                _next_pc_offset = sign_extend_immd(ir, 2);
 
-            // conditional PC-relative branch
-            _has_next_pc_offset = _condition_code == 0b001;
+                // conditional PC-relative branch
+                _has_next_pc_offset = _condition_code == 0b001;
+                break;
+            }
+            }
+            return false;
+        }
+        else if (GET_INSTR_BITS(ir, 4, 0b11) == 0b11) {
+            // set the condition flag
+            switch (GET_INSTR_BITS(ir, 0, 0xf)) {
+            case FPU_F:    _condition_code = 0; break;
+            case FPU_UN:   _condition_code = 0; break;
+            case FPU_EQ:   _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
+            case FPU_UEQ:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
+            case FPU_OLT:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
+            case FPU_ULT:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
+            case FPU_OLE:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
+            case FPU_ULE:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
+            case FPU_SF:   _condition_code = 0; break;
+            case FPU_NGLE: _condition_code = 0; break;
+            case FPU_SEQ:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
+            case FPU_NGL:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
+            case FPU_LT:   _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
+            case FPU_NGE:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
+            case FPU_LE:   _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
+            case FPU_NGT:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
+            }
+            return false;
+        }
+        else if (_fpu_fmt == FPU_FMT_CF) {
+            res = *(int32_t*)&_regs.s[_fs];
+            return true;
+        }
+        else if (_fpu_fmt == FPU_FMT_CT) {
+            _regs.s[_fs] = *(float*)&rt;
+            return false;
+        }
+        else if (_fpu_fmt == FPU_FMT_MFC) {
+            res = *(int32_t*)&_regs.s[_fs];
+            return true;
+        }
+        else if (_fpu_fmt == FPU_FMT_MT) {
+            _regs.s[_fs] = *(float*)&rt;
+            return false;
+        }
+        /*else if (_fpu_fmt != FPU_FMT_S) {
+            LOGF("Unimplemented FPU format: %02x", _fpu_fmt);
+            dst_reg_idx = -1;
+            signal_ex(EX_NOIMP);
             break;
-        }
-        }
-        return false;
+        }*/
     }
-    else if (GET_INSTR_BITS(ir, 4, 0b11) == 0b11) {
-        // set the condition flag
-        switch (GET_INSTR_BITS(ir, 0, 0xf)) {
-        case FPU_F:    _condition_code = 0; break;
-        case FPU_UN:   _condition_code = 0; break;
-        case FPU_EQ:   _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
-        case FPU_UEQ:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
-        case FPU_OLT:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
-        case FPU_ULT:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
-        case FPU_OLE:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
-        case FPU_ULE:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
-        case FPU_SF:   _condition_code = 0; break;
-        case FPU_NGLE: _condition_code = 0; break;
-        case FPU_SEQ:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
-        case FPU_NGL:  _condition_code = _regs.s[_fs] == _regs.s[_ft] ? 1 : 0; break;
-        case FPU_LT:   _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
-        case FPU_NGE:  _condition_code = _regs.s[_fs] < _regs.s[_ft] ? 1 : 0; break;
-        case FPU_LE:   _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
-        case FPU_NGT:  _condition_code = _regs.s[_fs] <= _regs.s[_ft] ? 1 : 0; break;
-        }
-        return false;
-    }
-    else if (_fpu_fmt == FPU_FMT_CF) {
-        res = *(int32_t*)&_regs.s[_fs];
-        return true;
-    }
-    else if (_fpu_fmt == FPU_FMT_CT) {
-        _regs.s[_fs] = *(float*)&rt;
-        return false;
-    }
-    else if (_fpu_fmt == FPU_FMT_MFC) {
-        res = *(int32_t*)&_regs.s[_fs];
-        return true;
-    }
-    else if (_fpu_fmt == FPU_FMT_MT) {
-        _regs.s[_fs] = *(float*)&rt;
-        return false;
-    }
-    /*else if (_fpu_fmt != FPU_FMT_S) {
-        LOGF("Unimplemented FPU format: %02x", _fpu_fmt);
-        dst_reg_idx = -1;
-        signal_ex(EX_NOIMP);
-        break;
-    }*/
 
     // decode operation
-    switch (GET_INSTR_FPU_OP(ir)) {
+    switch (GET_INSTR_COP_OP(ir)) {
     case FPU_ABS: {
         _regs.s[_fd] = fabs(_regs.s[_fs]);
         break;
@@ -190,12 +192,12 @@ bool fp_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     case FPU_ROUNDL:
     case FPU_ROUNDW:
     case FPU_TRUNCW: {
-        LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_FPU_OP(ir));
+        LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_COP_OP(ir));
         signal_ex(EX_NOIMP);
         break;
     }
     default: {
-        LOGF("Invalid FPU opcode: %02x", GET_INSTR_FPU_OP(ir));
+        LOGF("Invalid FPU opcode: %02x", GET_INSTR_COP_OP(ir));
         signal_ex(EX_INVALID);
         break;
     }
@@ -216,8 +218,4 @@ void fp_cop::set_regs(uint32_t ft, int32_t res) {
 bool fp_cop::get_next_pc_offset(int32_t &next_pc_offset) {
     next_pc_offset = _next_pc_offset;
     return _has_next_pc_offset;
-}
-
-exception_e fp_cop::get_exception() {
-    return _prev_ex;
 }

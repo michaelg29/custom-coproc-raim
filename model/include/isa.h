@@ -19,13 +19,7 @@
 #define GET_INSTR_SPECIAL_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
 
 // get the operation of a floating point instruction
-#define GET_INSTR_FPU_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
-
-// get the format of a floating point instruction
-#define GET_INSTR_FPU_FMT(instr) GET_INSTR_BITS(instr, 21, 0b11111)
-
-// get the flags for a floating point branch instruction
-#define GET_INSTR_FPU_FLAGS(instr) GET_INSTR_BITS(instr, 16, 0b11);
+#define GET_INSTR_COP_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
 
 // =============================
 // ===== INSTRUCTION ENUMS =====
@@ -105,7 +99,6 @@ enum opcode_e {
     OPCODE_XORI     = 0b001110,
     //OPCODE_FPU      = 0b010001, // same opcode as OPCODE_COP1,
     //OPCODE_LDC1     = 0b110101, // repeated, not supported
-    //OPCODE_LDXC1    = 0b010011, // repeated (LWC3)
     //OPCODE_LWC1     = 0b110001, // repeated (LWC1)
     OPCODE_COP1X    = 0b010011, // repeated (LWC3)
 };

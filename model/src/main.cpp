@@ -34,7 +34,7 @@ int sc_main(int argc, char* argv[]) {
     // cpu and coprocessors
     coprocessor_if *empty_cop = new stubbed_cop();
     coprocessor_if *cop1 = new fp_cop("fp_cop");
-    cpu *c = new cpu("cpu", 0x00400000, 0x0, 8);
+    cpu *c = new cpu("cpu", 0x00400000, 0x00400020, 0);
     c->mem(*mem);
     c->cop1(*cop1);
     c->cop2(*empty_cop);
