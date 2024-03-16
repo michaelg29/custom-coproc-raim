@@ -3,9 +3,8 @@
 ##### Variables #####
 #####################
 EXE           ?= system
-ENABLE_TRACE  ?=
 ASM_FILE      ?= ../../alg/asm/raim.bin
-TRACE_FILE    ?= log
+TRACE_FILE    ?=
 SIM_STEP_TIME ?= 10
 SIM_STEP_UNIT ?= n
 
@@ -61,7 +60,7 @@ DEFINE_FLAGS =
 ##### Process command line arguments #####
 ##########################################
 
-ifeq (,$(ENABLE_TRACE))
+ifeq (,$(TRACE_FILE))
   TRACE_ARG =
 else
   TRACE_ARG = -t$(TRACE_FILE)

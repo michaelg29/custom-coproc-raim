@@ -70,13 +70,6 @@ typedef union {
     uint64_t ul[N_REGS >> 1];
 } regs_u;
 
-/** Register collection. */
-#define N_FP_REGS 32
-typedef union {
-    float s[N_FP_REGS];
-    double d[N_FP_REGS >> 1];
-} fp_regs_u;
-
 // =============================
 // ===== SYSTEM COMPONENTS =====
 // =============================
@@ -87,7 +80,7 @@ class coprocessor_if : virtual public sc_interface {
     public:
 
         /** Constructor. */
-        coprocessor_if();
+        coprocessor_if(uint32_t cop_opcode);
 
         /**
          * Execute an instruction on the coprocessor.
@@ -105,13 +98,19 @@ class coprocessor_if : virtual public sc_interface {
         /** Set the value in a coprocessor register. */
         virtual void set_regs(uint32_t rt, int32_t res) = 0;
 
-        /** Get the offset for the next program counter if the coprocessor has updated it. */
-        virtual bool get_next_pc_offset(int32_t &next_pc_offset) = 0;
+        /** Get the condition code. */
+        bool get_condition_code(uint8_t &cc);
 
         /** Determine if the coprocessor signaled an exception in the previous instruction. */
         exception_e get_exception();
 
+        /** Get the offset for the next program counter if the coprocessor has updated it. */
+        bool get_next_pc_offset(int32_t &next_pc_offset);
+
     protected:
+
+        /** Protected variables. */
+        uint32_t _cop_opcode;
 
         /** Raise an internal exception. */
         exception_e _prev_ex;
@@ -124,11 +123,13 @@ class stubbed_cop : public coprocessor_if {
 
     public:
 
+        /** Constructor. */
+        stubbed_cop();
+
         /** coprocessor_if overrides. */
         bool execute(uint32_t ir, int32_t rt, int32_t &res);
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
-        bool get_next_pc_offset(int32_t &next_pc_offset);
 
 };
 
@@ -159,8 +160,6 @@ class cpu : public sc_module {
 
         /** Registers. */
         regs_u _regs;
-        fp_regs_u _fp_regs;
-        uint8_t _fp_cc;
 
         /** Main function. */
         void main();

@@ -18,7 +18,7 @@
 // get the operation of a special instruction
 #define GET_INSTR_SPECIAL_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
 
-// get the operation of a floating point instruction
+// get the operation of a co-processor instruction
 #define GET_INSTR_COP_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
 
 // =============================
@@ -78,7 +78,7 @@ enum opcode_e {
     OPCODE_LWR      = 0b100110, // not supported
     OPCODE_LWU      = 0b100111,
     OPCODE_ORI      = 0b001101,
-    //OPCODE_PREF     = 0b110011, // same opcode as OPCODE_LWC3, not supported
+    OPCODE_PREF     = 0b110011, // same opcode as OPCODE_LWC3, not supported
     OPCODE_SB       = 0b101000,
     OPCODE_SC       = 0b111000, // not supported
     OPCODE_SCD      = 0b111100, // not supported
@@ -100,7 +100,11 @@ enum opcode_e {
     //OPCODE_FPU      = 0b010001, // same opcode as OPCODE_COP1,
     //OPCODE_LDC1     = 0b110101, // repeated, not supported
     //OPCODE_LWC1     = 0b110001, // repeated (LWC1)
-    OPCODE_COP1X    = 0b010011, // repeated (LWC3)
+    OPCODE_COP1X    = 0b010011, // repeated (COP3),
+    OPCODE_COP2X    = 0b010101,
+    OPCODE_COP3X    = 0b010111,
+    OPCODE_LWXCZ    = 0b000000,
+    OPCODE_SWXCZ    = 0b001000,
 };
 
 // Operations of the SPECIAL opcode.
@@ -213,8 +217,6 @@ enum fpu_op_e {
     FPU_RSQRT       = 0b010110,
     FPU_SQRT        = 0b000100,
     FPU_SUB         = 0b000001,
-    FPU_LWXC1       = 0b000000,
-    FPU_SWXC1       = 0b001000,
     FPU_TRUNCL      = 0b001001, // not supported
     FPU_TRUNCW      = 0b001101, // not supported
 };
@@ -252,6 +254,11 @@ enum fpu_fmt_e {
     FPU_FMT_DMT     = 0b00101,
     FPU_FMT_MFC     = 0b00000,
     FPU_FMT_MT      = 0b00100,
+};
+
+// System call codes.
+enum syscall_e {
+    SYSCALL_EXIT    = 10,
 };
 
 #endif // ISA_H

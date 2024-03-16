@@ -21,11 +21,15 @@ int32_t zero_extend_immd(uint32_t ir, uint32_t shift) {
     return ret;
 }
 
-coprocessor_if::coprocessor_if()
-    : _prev_ex(EX_NONE) {}
+coprocessor_if::coprocessor_if(uint32_t cop_opcode)
+    : _prev_ex(EX_NONE), _cop_opcode(cop_opcode) {}
 
 void coprocessor_if::signal_ex(exception_e ex) {
     _prev_ex = ex;
+}
+
+bool coprocessor_if::get_condition_code(uint8_t &cc) {
+    return false;
 }
 
 exception_e coprocessor_if::get_exception() {
@@ -34,7 +38,15 @@ exception_e coprocessor_if::get_exception() {
     return ret;
 }
 
+bool coprocessor_if::get_next_pc_offset(int32_t &next_pc_offset) {
+    return false;
+}
+
+stubbed_cop::stubbed_cop()
+    : coprocessor_if(0) {}
+
 bool stubbed_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
+    _prev_ex = EX_COP_UNUSABLE;
     return false;
 }
 
@@ -44,10 +56,6 @@ bool stubbed_cop::get_regs(uint32_t rt, int32_t &res) {
 }
 
 void stubbed_cop::set_regs(uint32_t rt, int32_t res) {}
-
-bool stubbed_cop::get_next_pc_offset(int32_t &next_pc_offset) {
-    return false;
-}
 
 cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t max_instr_cnt) : sc_module(name), _start_addr(start_addr), _exit_addr(exit_addr), _max_instr_cnt(max_instr_cnt) {
     SC_THREAD(main);
@@ -66,10 +74,14 @@ void cpu::main() {
     int32_t rs, rt, rd;
     int32_t immd;
 
-    // floating point instruction values
-    int32_t fs, ft, fd, fr;
-    int32_t fpu_fmt;
-    int32_t fp_branch_flags;
+    // intermediate co-processor values
+    uint8_t condition_code;
+    int32_t cop_idx;
+    sc_port<coprocessor_if> *target_cops[4];
+    target_cops[0] = NULL;
+    target_cops[1] = &cop1;
+    target_cops[2] = &cop2;
+    target_cops[3] = &cop3;
 
     // computation result
     int32_t next_pc;
@@ -98,6 +110,7 @@ void cpu::main() {
         rt = GET_INSTR_REG(_regs.s.ir, 16);
         rd = GET_INSTR_REG(_regs.s.ir, 11);
         opcode = GET_INSTR_OPCODE(_regs.s.ir);
+        cop_idx = opcode & 0b11;
 
         switch (opcode) {
         case OPCODE_SPECIAL: {
@@ -236,7 +249,15 @@ void cpu::main() {
                 break;
             }
             case SPECIAL_SYSCALL: {
-                // todo syscall
+                LOGF("[%s] Syscall code %d", this->name(), _regs.s.v0);
+                switch (_regs.s.v0) {
+                case SYSCALL_EXIT: {
+                    // exit program
+                    _max_instr_cnt = 1;
+                    dst_reg_idx = -1;
+                    break;
+                }
+                }
                 break;
             }
             case SPECIAL_TEQ: {
@@ -280,7 +301,7 @@ void cpu::main() {
                 break;
             }
             case SPECIAL_MOVF: {
-                if (_fp_cc == 0) {
+                if (cop1->get_condition_code(condition_code) && condition_code == 0) {
                     res = _regs.w[rs];
                 }
                 else {
@@ -460,8 +481,8 @@ void cpu::main() {
             }
             break;
         }
-        case OPCODE_BGTZ:
-        case OPCODE_BGTZL: {
+        case OPCODE_BGTZ: {
+        //case OPCODE_BGTZL: {
             // get immediate and left shift
             immd = sign_extend_immd(_regs.s.ir, 2);
 
@@ -482,8 +503,8 @@ void cpu::main() {
             }
             break;
         }
-        case OPCODE_BNE:
-        case OPCODE_BNEL: {
+        case OPCODE_BNE: {
+        //case OPCODE_BNEL: {
             // get immediate and left shift
             immd = zero_extend_immd(_regs.s.ir, 2);
 
@@ -493,10 +514,58 @@ void cpu::main() {
             }
             break;
         }
-        case OPCODE_COP0:
-        //case OPCODE_COP1: // defined below as floating point instructions
+        case OPCODE_COP1:
         case OPCODE_COP2: {
-        //case OPCODE_COP3: { // defined below as floating point instruction
+            // execute on target co-processor
+            immd = opcode & 0b11;
+            dst_reg_idx = (*target_cops[immd])->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
+            break;
+        }
+        case OPCODE_COP1X:
+        case OPCODE_COP2X:
+        case OPCODE_COP3X: {
+            // calculate new co-processor index
+            cop_idx = (opcode >> 1) & 0b11;
+
+            // decode operation
+            switch (GET_INSTR_COP_OP(_regs.s.ir)) {
+            case OPCODE_LWXCZ: {
+                // construct address
+                immd = _regs.w[rs] + _regs.w[rt];
+                if (immd & 0b11) {
+                    signal_ex(EX_ADDRESS);
+                }
+                else {
+                    // load 4B word from memory
+                    mem->read(immd, ures);
+                    (*target_cops[cop_idx])->set_regs(GET_INSTR_REG(_regs.s.ir, 6), (int32_t)ures);
+                }
+                break;
+            }
+            case OPCODE_SWXCZ: {
+                // construct address
+                immd = _regs.w[rs] + _regs.w[rt];
+                if (immd & 0b11) {
+                    signal_ex(EX_ADDRESS);
+                }
+                else {
+                    // write word to memory
+                    (*target_cops[cop_idx])->get_regs(GET_INSTR_REG(_regs.s.ir, 11), res);
+                    mem->write(immd, (uint32_t)res, 4);
+                }
+                break;
+            }
+            /*case : {
+                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_COP_OP(_regs.s.ir));
+                dst_reg_idx = -1;
+                signal_ex(EX_NOIMP);
+                break;
+            }*/
+            default: {
+                dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
+                break;
+            }
+            }
             break;
         }
         case OPCODE_J: {
@@ -605,7 +674,7 @@ void cpu::main() {
             }
             break;
         }
-        //case OPCODE_LWC1: // defined below as floating point instruction
+        case OPCODE_LWC1:
         case OPCODE_LWC2:
         case OPCODE_LWC3: {
             // get immediate and sign extend
@@ -618,12 +687,8 @@ void cpu::main() {
             }
             else {
                 // load 4B word from memory
-                mem->read(immd & 0xfffffffc, ures);
-                res = (int32_t)ures;
-                dst_reg_idx = rt;
-
-                // todo write to coprocessor z register
-                immd = opcode & 0b11;
+                mem->read(immd, ures);
+                (*target_cops[cop_idx])->set_regs(rt, (int32_t)ures);
             }
             break;
         }
@@ -689,7 +754,7 @@ void cpu::main() {
             }
             break;
         }
-        //case OPCODE_SWC1: // defined below as floating point instruction
+        case OPCODE_SWC1:
         case OPCODE_SWC2:
         case OPCODE_SWC3: {
             // get immediate and sign extend
@@ -701,11 +766,9 @@ void cpu::main() {
                 signal_ex(EX_ADDRESS);
             }
             else {
-                // todo read from coprocessor z register
-                // ures = ...;
-
-                // write to memory
-                mem->write(immd, ures, 4);
+                // write word to memory
+                (*target_cops[cop_idx])->get_regs(rt, res);
+                mem->write(immd, (uint32_t)res, 4);
             }
             break;
         }
@@ -714,84 +777,6 @@ void cpu::main() {
             immd = zero_extend_immd(_regs.s.ir, 0);
             res = immd ^ _regs.w[rs];
             dst_reg_idx = rt;
-            break;
-        }
-        case OPCODE_COP1: {
-            dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
-            break;
-        }
-        case OPCODE_COP1X: {
-            // decode operation
-            switch (GET_INSTR_COP_OP(_regs.s.ir)) {
-            case FPU_LWXC1: {
-                // construct address
-                immd = _regs.w[rs] + _regs.w[rt];
-                if (immd & 0b11) {
-                    signal_ex(EX_ADDRESS);
-                }
-                else {
-                    // load 4B word from memory
-                    mem->read(immd, ures);
-                    cop1->set_regs(GET_INSTR_REG(_regs.s.ir, 6), (int32_t)ures);
-                }
-                break;
-            }
-            case FPU_SWXC1: {
-                // construct address
-                immd = _regs.w[rs] + _regs.w[rt];
-                if (immd & 0b11) {
-                    signal_ex(EX_ADDRESS);
-                }
-                else {
-                    // write word to memory
-                    cop1->get_regs(GET_INSTR_REG(_regs.s.ir, 11), res);
-                    mem->write(immd, (uint32_t)res, 4);
-                }
-                break;
-            }
-            /*case : {
-                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_COP_OP(_regs.s.ir));
-                dst_reg_idx = -1;
-                signal_ex(EX_NOIMP);
-                break;
-            }*/
-            default: {
-                dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
-                break;
-            }
-            }
-            break;
-        }
-        case OPCODE_LWC1: {
-            // get immediate and sign extend
-            immd = sign_extend_immd(_regs.s.ir, 0);
-
-            // construct address
-            immd = immd + _regs.w[rs];
-            if (immd & 0b11) {
-                signal_ex(EX_ADDRESS);
-            }
-            else {
-                // load 4B word from memory
-                mem->read(immd, ures);
-                cop1->set_regs(rt, (int32_t)ures);
-            }
-            break;
-        }
-        case OPCODE_SWC1: {
-            // get immediate and sign extend
-            immd = sign_extend_immd(_regs.s.ir, 0);
-
-            // construct address
-            immd = immd + _regs.w[rs];
-            if (immd & 0b11) {
-                signal_ex(EX_ADDRESS);
-            }
-            else {
-                // write word to memory
-                cop1->get_regs(rt, res);
-                mem->write(immd, (uint32_t)res, 4);
-            }
             break;
         }
         case OPCODE_DADDI:

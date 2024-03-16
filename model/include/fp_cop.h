@@ -16,13 +16,20 @@
 // get the flags for a floating point branch instruction
 #define GET_INSTR_FPU_FLAGS(instr) GET_INSTR_BITS(instr, 16, 0b11);
 
+/** Register collection. */
+#define N_FP_REGS 32
+typedef union {
+    float s[N_FP_REGS];
+    double d[N_FP_REGS >> 1];
+} fp_regs_u;
+
 /** Concrete floating point coprocessor. */
 class fp_cop : public sc_module, public coprocessor_if {
 
     public:
 
         /** Constructor. */
-        fp_cop(sc_module_name name);
+        fp_cop(sc_module_name name, uint32_t cop_opcode);
 
         /** Destructor. */
         ~fp_cop();
@@ -31,6 +38,7 @@ class fp_cop : public sc_module, public coprocessor_if {
         bool execute(uint32_t ir, int32_t rt, int32_t &res);
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
+        bool get_condition_code(uint8_t &cc);
         bool get_next_pc_offset(int32_t &next_pc_offset);
 
     private:

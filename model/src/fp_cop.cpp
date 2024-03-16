@@ -6,8 +6,8 @@
 
 #include "systemc.h"
 
-fp_cop::fp_cop(sc_module_name name)
-    : sc_module(name) {
+fp_cop::fp_cop(sc_module_name name, uint32_t cop_opcode)
+    : sc_module(name), coprocessor_if(cop_opcode) {
 
 }
 
@@ -30,7 +30,7 @@ bool fp_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     _branch_flags = GET_INSTR_FPU_FLAGS(ir);
 
     // decode format
-    if (GET_INSTR_OPCODE(ir) == OPCODE_COP1) {
+    if (GET_INSTR_OPCODE(ir) == _cop_opcode) {
         if (_fpu_fmt == FPU_FMT_BC) {
             // branch instruction
             switch (_branch_flags) {
@@ -213,6 +213,11 @@ bool fp_cop::get_regs(uint32_t ft, int32_t &res) {
 
 void fp_cop::set_regs(uint32_t ft, int32_t res) {
     _regs.s[ft] = *(float*)&res;
+}
+
+bool fp_cop::get_condition_code(uint8_t &cc) {
+    cc = _condition_code;
+    return true;
 }
 
 bool fp_cop::get_next_pc_offset(int32_t &next_pc_offset) {
