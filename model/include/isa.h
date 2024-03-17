@@ -97,9 +97,6 @@ enum opcode_e {
     OPCODE_SWL      = 0b101010, // not supported
     OPCODE_SWR      = 0b101110, // not supported
     OPCODE_XORI     = 0b001110,
-    //OPCODE_FPU      = 0b010001, // same opcode as OPCODE_COP1,
-    //OPCODE_LDC1     = 0b110101, // repeated, not supported
-    //OPCODE_LWC1     = 0b110001, // repeated (LWC1)
     OPCODE_COP1X    = 0b010011, // repeated (COP3),
     OPCODE_COP2X    = 0b010101,
     OPCODE_COP3X    = 0b010111,

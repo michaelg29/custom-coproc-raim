@@ -118,7 +118,7 @@ class coprocessor_if : virtual public sc_interface {
 
 };
 
-/** Stubbed coprocessor with no internal functionality. */
+/** Stubbed co-processor with no internal functionality. */
 class stubbed_cop : public coprocessor_if {
 
     public:

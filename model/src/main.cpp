@@ -11,6 +11,7 @@
 #include "cpu.h"
 #include "isa.h"
 #include "fp_cop.h"
+#include "raim_cop.h"
 #include "memory.h"
 
 // Statistics collecting classes
@@ -35,10 +36,11 @@ int sc_main(int argc, char* argv[]) {
     // cpu and coprocessors
     coprocessor_if *empty_cop = new stubbed_cop();
     coprocessor_if *cop1 = new fp_cop("fp_cop", OPCODE_COP1);
+    coprocessor_if *cop2 = new raim_cop("raim_cop", OPCODE_COP2);
     cpu *c = new cpu("cpu", 0x00400000, 0, 0);
     c->mem(*mem);
     c->cop1(*cop1);
-    c->cop2(*empty_cop);
+    c->cop2(*cop2);
     c->cop3(*empty_cop);
 
     // ==============================
