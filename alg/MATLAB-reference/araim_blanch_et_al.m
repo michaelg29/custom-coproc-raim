@@ -107,6 +107,8 @@ function [] = appendix_j()
     C_acc = diag(C_acc);
     W = inv(C_int);
 
+    
+
     % N_sat,max=2
     % N_const,max=1
     % => subset fault modes include n-1 and n-2 subsets, and two
