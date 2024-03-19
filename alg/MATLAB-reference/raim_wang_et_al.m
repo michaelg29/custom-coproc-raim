@@ -47,7 +47,7 @@ function [xhat, rad, delta] = raim_wang_et_al(n)
 
         % determine angle of elevation = atan2(z, sqrt(x^2 + y^2))
         ang = rad2deg(abs(atan2(G(j,3), sqrt(power(G(j,1),2)+power(G(j,2),2)))));
-       
+
         % determine tropospheric delay
         tropo_delay_val = tropo_delay(ang);
 
@@ -60,7 +60,7 @@ function [xhat, rad, delta] = raim_wang_et_al(n)
 
     % weight matrix
     W = diag(1./C_int);
-    
+
     % least-squares matrix
     G_t = transpose(G);
     LS = inv(G_t * W * G) * G_t * W;
@@ -74,10 +74,6 @@ function [xhat, rad, delta] = raim_wang_et_al(n)
             del_prs(j) = PRs(j) - norm(SVs(j,1:3) - transpose(xhat(1:3)));
         end
 
-        % weight matrix
-        W = diag(1./C_int);
-        
-        G_t = transpose(G);
         xhat_new = LS * del_prs;
 
         delta(i,1:4) = transpose(xhat_new - xhat);
@@ -105,7 +101,7 @@ function [delay] = user_delay_galileo(th)
     delays = [0.4529, 0.3553, 0.3063, 0.2638, 0.2593, 0.2555, 0.2504, 0.2438, 0.2396, 0.2359, 0.2339, 0.2302, 0.2295, 0.2278, 0.2297, 0.2310, 0.2274, 0.2277];
     th1 = floor(th / 5);
     th2 = th1 + 1;
-    
+
     % return linear interpolation between tabular values
     delay = delays(th1) + (delays(th2) - delays(th1)) * ((th / 5) - th1) / (th2 - th1);
 end

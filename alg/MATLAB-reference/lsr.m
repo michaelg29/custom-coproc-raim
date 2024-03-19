@@ -27,5 +27,5 @@ function [x, y, e] = lsr(in_vec, out_vec, p)
     e = y - out_vec_t;
 
     scatter(transpose(in_vec), out_vec_t)
-    
+
 end

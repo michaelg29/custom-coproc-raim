@@ -19,7 +19,7 @@ function [delay] = user_delay_galileo(th)
     delays = [0.4529, 0.3553, 0.3063, 0.2638, 0.2593, 0.2555, 0.2504, 0.2438, 0.2396, 0.2359, 0.2339, 0.2302, 0.2295, 0.2278, 0.2297, 0.2310, 0.2274, 0.2277];
     th1 = floor(th / 5);
     th2 = th1 + 1;
-    
+
     % return linear interpolation between tabular values
     delay = delays(th1) + (delays(th2) - delays(th1)) * ((th / 5) - th1) / (th2 - th1);
 end
@@ -107,7 +107,7 @@ function [] = appendix_j()
     C_acc = diag(C_acc);
     W = inv(C_int);
 
-    
+
 
     % N_sat,max=2
     % N_const,max=1
