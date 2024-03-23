@@ -22,59 +22,43 @@ $\Delta PR \in \R^{N_{sat}}$ | FP $N_{sat}^{(k)}$-dimensional vector of the diff
 ## Equations
 
 Initial matrices the RPU must calculate:
-$$
-\begin{align}
-C_{int}(i,i) &\equiv \sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2
-\newline
-C_{acc}(i,i) &\equiv \sigma_{URE,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2
-\newline
-W &\equiv C_{int}^{-1}
-\Rightarrow W(i,i)=\frac{1}{\sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2}
-\end{align}
-$$
+
+$C_{int}(i,i) \equiv \sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2$
+
+$C_{acc}(i,i) \equiv \sigma_{URE,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2$
+
+$W \equiv C_{int}^{-1} \Rightarrow W(i,i)=\frac{1}{\sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2}$
 
 All-in-view iterative solution:
-$$
-\begin{align}
-\Delta \hat{x}_j&=(G^T W G)^{-1} G^T W \Delta PR_j
-\newline
-\Delta PR_j(i)&=PR_i-|\vec{x}_{SV_{i}}-\hat{x}_j|
-\newline
-\hat{x}_{j+1} &= \hat{x}_j + \Delta \hat{x}_j
-\newline
-\vec{y} &\equiv \Delta PR_J
-\end{align}
-$$
+
+$\Delta \hat{x}_j=(G^T W G)^{-1} G^T W \Delta PR_j$
+
+$\Delta PR_j(i)=PR_i-|\vec{x}_{SV_{i}}-\hat{x}_j|$
+
+$\hat{x}_{j+1} = \hat{x}_j + \Delta \hat{x}_j$
+
+$\vec{y} \equiv \Delta PR_J$
 
 Least-squares matrix for each subset:
-$$
-\begin{align}
-S^{(k)} &= (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}
-\newline
-W^{(k)} &\in \R^{N_{sat} \times N_{sat}}
-\newline
-G &\in \R^{N_{sat} \times (3+N_{const})}
-\Rightarrow G^T \in \R^{(3+N_{const}) \times N_{sat}}
-\newline
-\Rightarrow G^T W^{(k)} &\in \R^{(3+N_{const}) \times N_{sat}}
-\newline
-\Rightarrow G^T W^{(k)} G, (G^T W^{(k)} G)^{-1} &\in \R^{(3+N_{const}) \times (3+N_{const})}
-\newline
-\Rightarrow S^{(k)} =(G^T W^{(k)} G)^{-1} G^T W^{(k)} &\in \R^{(3+N_{const}) \times N_{sat}}
-\newline
 
-\end{align}
-$$
+$S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
+
+$W^{(k)} \in \R^{N_{sat} \times N_{sat}}$
+
+$G \in \R^{N_{sat} \times (3+N_{const})} \Rightarrow G^T \in \R^{(3+N_{const}) \times N_{sat}}$
+
+$\Rightarrow G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
+
+$\Rightarrow G^T W^{(k)} G, (G^T W^{(k)} G)^{-1} \in \R^{(3+N_{const}) \times (3+N_{const})}$
+
+$\Rightarrow S^{(k)} =(G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
 
 The following equations are applicable for all subsets ($\forall \ k \in [1,N_{ss}]$) and the three ENU components ($\forall \ q \in \{1,2,3\}$). Subset solution separations, along with variances and biases:
-$$
-\begin{align}
-\Delta \hat{x}^{(k)} &= \hat{x}^{(k)} - \hat{x}^{(0)} = (S^{(k)} - S^{(0)})\vec{y} \in \R^{(3+N_{const})}
-\newline
-\sigma_q^{(k)2} &= [(G^T W^{(k)} G)^{-1}](q,q)
-\newline
-b_q^{(k)} &= \sum_{i=1}^{N_{sat}}|S_{q,i}^{(k)}|*b_{nom,i}
-\newline
-\sigma_{ss,q}^{(k)2} &= [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)
-\end{align}
-$$
+
+$\Delta \hat{x}^{(k)} = \hat{x}^{(k)} - \hat{x}^{(0)} = (S^{(k)} - S^{(0)})\vec{y} \in \R^{(3+N_{const})}$
+
+$\sigma_q^{(k)2} = [(G^T W^{(k)} G)^{-1}](q,q)$
+
+$b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S_{q,i}^{(k)}|*b_{nom,i}$
+
+$\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$

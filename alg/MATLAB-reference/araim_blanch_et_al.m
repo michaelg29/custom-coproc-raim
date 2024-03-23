@@ -1,3 +1,6 @@
+
+% "Advanced RAIM User Algorithm Description: Integrity Support Message Processing, Fault Detection, Exclusion, and Protection Level Calculation"
+% Blanch et al., 2012
 function [] = araim_blanch_et_al()
     appendix_j();
 end
