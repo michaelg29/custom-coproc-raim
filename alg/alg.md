@@ -2,24 +2,26 @@
 
 ## Definitions
 
-Name | Description | Source
--- | -- | --
-$k$ | Subset index. The initial value, $k=0$ denotes the all-in-view subset assuming no faults. | -
-$N_{sat}$ | Integer number of satellites. | RPU
-$N_{const}$ | Integer number of constellations. | RPU
-$N_{ss}$ | Integer subsets for which to calculate solutions. | GPP
-$\sigma_{URA,i}$ | FP standard deviation of the clock and ephemeris error of $SV_i$ used for integrity. | GPP
-$\sigma_{URE,i}$ | FP standard deviation of the clock and ephemeris error of $SV_i$ used for accuracy and continuity. | GPP
-$\sigma_{tropo,i}^2$ | FP variance for the tropospheric delay for $SV_i$. | GPP
-$\sigma_{user,i}^2$ | FP variance for the user delay based on line-of-sight geometry for $SV_i$. | GPP
-$C_{int} \in \R^{N_{sat} \times N_{sat}}$ | FP $N_{sat} \times N_{sat}$ covariance matrix for integrity. | RPU
-$C_{acc} \in \R^{N_{sat} \times N_{sat}}$ | FP $N_{sat} \times N_{sat}$ covariance matrix for accuracy and continuity. | RPU
-$W^{(k)} \in \R^{N_{sat} \times N_{sat}}$ | FP $N_{sat} \times N_{sat}$ weighting matrix for subset $k$. If $SV_i$ is in subset $k$, $W^{(k)}(i,i)=W(i,i)$. Otherwise, the subset solution excludes that SV, so $W^{(k)}(i,i)=0$. | RPU
-$G \in \R^{N_{sat} \times (3+N_{const})}$ | FP $N_{sat} \times (3+N_{const})$ geometry matrix. The first three columns are the unit vector pointing from the linearized receiver position to the satellite position in ENU coordinates. The final $N_{const}$ columns are an activation string for the SV's constellation. | GPP
-$S^{(k)} \in \R^{N_{sat} \times (3+N_{const})}$ | FP $N_{sat} \times (3+N_{const})$ matrix for least squares derived from the geometry and weight matrices. | RPU
-$\Delta PR \in \R^{N_{sat}}$ | FP $N_{sat}^{(k)}$-dimensional vector of the difference between the pseudorange measurements and the expected ranges from the linearized point to each satellite. | RPU
+Name | Description
+-- | --
+$k$ | Subset index. The initial value, $k=0$ denotes the all-in-view subset assuming no faults.
+$N_{sat}$ | Integer number of satellites.
+$N_{const}$ | Integer number of constellations.
+$N_{ss}$ | Integer subsets for which to calculate solutions.
 
 ## Equations
+
+Notation | Relation | Dimensions | Description
+-- | -- | -- | --
+$x_{SV_i}$ | $SV_i$ | $3 \times 1$ | Unit vector pointing from the linearized receiver position to the satellite position in ENU coordinates
+$c_{SV_i}$ | $SV_i$ | $1 \times 1$ | Constellation number.
+$\sigma_{tropo,i}^2$ | $SV_i$ | $1 \times 1$ | Variance for the tropospheric delay.
+$\sigma_{user,i}^2$ | $SV_i$ | $1 \times 1$ | Variance for the user delay based on line-of-sight geometry.
+$\sigma_{URA,i}^2$ | $SV_i$ | $1 \times 1$ | Variance of the clock and ephemeris error used for integrity.
+$\sigma_{URE,i}^2$ | $SV_i$ | $1 \times 1$ | Variance of the clock and ephemeris error used for accuracy and continuity.
+$b_{nom,i}$ | $SV_i$ | $1 \times 1$ | Maximum nominal bias for integrity.
+$idx_{ss,k}$ | $SS_k$ | $1 \times 1$ | $N_{sat}$-bit activation string to indicate satellites included in a subset.
+$\vec{y}$ | $SS_k$ | $N_{sat} \times 1$ | Vector to multiply with the weighted least-squares matrix.
 
 Initial matrices the RPU must calculate:
 
@@ -59,6 +61,53 @@ $\Delta \hat{x}^{(k)} = \hat{x}^{(k)} - \hat{x}^{(0)} = (S^{(k)} - S^{(0)})\vec{
 
 $\sigma_q^{(k)2} = [(G^T W^{(k)} G)^{-1}](q,q)$
 
-$b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S_{q,i}^{(k)}|*b_{nom,i}$
+$b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom,i}$
 
 $\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$
+
+### FDE tests
+
+Notation | Relation | Dimensions | Description
+-- | -- | -- | --
+$K_{fa}$ | conf | $3 \times 1$ | Threshold factors derived from the q-function and false alarm probabilities. See (19) and (20) in [X] for more details.
+
+$|\Delta \hat{x}^{(k)}| = |\hat{x}^{(k)} - \hat{x}^{(0)}| \le K_{fa,q}*\sigma_{ss,q}^{(k)2}$
+
+### Least-squares adaptation
+
+$U \in \R^{M \times N} \Rightarrow U \in \R^{N \times M}$
+
+$U^{\dagger} = (U^T U)^{-1} U^T \in \R^{N \times M}$
+
+$U^{\dagger}_{k+1}=(2I_N - U^{\dagger}_k U) U^{\dagger}_k$
+
+$U^{\dagger}_0 = \alpha U^T, \alpha \in [0,2/\max(\text{eigenvals}(U^T U))]$
+
+$S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
+
+$U = W^{1/2}G \in \R^{(3+N_{const}) \times N_{sat}}$
+
+$U^{\dagger} = ((W^{1/2}G)^T W^{1/2}G)^{-1} (W^{1/2}G)^T$
+
+$(AB)^T = B^T A^T$
+
+$U^{\dagger} = (G^T (W^{1/2})^T W^{1/2}G)^{-1} G^T (W^{1/2})^T$
+
+$W^{1/2} = (W^{1/2})^T$
+
+$U^{\dagger} = (G^T W G)^{-1} G^T W^{1/2}$
+
+$S^{(k)} = U^{\dagger} W^{1/2} = (G^T W G)^{-1} G^T W$
+
+## Notes
+
+### Weight matrix multiplication
+```
+ones(6,4)*diag([0.1, 0.2 0.3 0.4]) =
+    0.1000    0.2000    0.3000    0.4000
+    0.1000    0.2000    0.3000    0.4000
+    0.1000    0.2000    0.3000    0.4000
+    0.1000    0.2000    0.3000    0.4000
+    0.1000    0.2000    0.3000    0.4000
+    0.1000    0.2000    0.3000    0.4000
+```

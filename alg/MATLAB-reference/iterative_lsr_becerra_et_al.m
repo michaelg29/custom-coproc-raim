@@ -20,9 +20,9 @@ function [] = iterative_lsr_becerra_et_al()
          -0.1024  0.2300 -0.9678 0 1;
           0.2744  0.8529 -0.4441 0 1;
           0.8220 -0.5516 -0.1417 0 1];
-    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(30, U);
+    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_weighted_pseudoinverse(30, U);
     fprintf("Converged in %d iterations, with alpha of %f (actual is %f), and a max deviation of %f (%f percentage)\n", n, alpha, alpha_act, max_dev, max_dev_perc);
-    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(30, U, 0.05);
+    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_weighted_pseudoinverse(30, U, 0.05);
     fprintf("Converged in %d iterations, with alpha of %f (actual is %f), and a max deviation of %f (%f percentage)\n", n, alpha, alpha_act, max_dev, max_dev_perc);
     
 
@@ -36,16 +36,16 @@ function [] = iterative_lsr_becerra_et_al()
           0.0938 -0.7004 -0.7075 0.0 1.0 ;
           0.5571  0.3088 -0.7709 0.0 1.0 ;
           0.6622  0.6958 -0.2780 0.0 1.0 ];
-    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(30, U);
+    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_weighted_pseudoinverse(30, U);
     fprintf("Converged in %d iterations, with alpha of %f (actual is %f), and a max deviation of %f (%f percentage)\n", n, alpha, alpha_act, max_dev, max_dev_perc);
-    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(30, U, 0.05);
+    [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_weighted_pseudoinverse(30, U, 0.05);
     fprintf("Converged in %d iterations, with alpha of %f (actual is %f), and a max deviation of %f (%f percentage)\n", n, alpha, alpha_act, max_dev, max_dev_perc);
 
 end
 
 function [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(n, U, alpha, delta)
     arguments
-        n; U; alpha = 0.13; delta = 1e-4
+        n; U; alpha = 0.13; delta = 1e-6
     end
 
     C = length(U(1,:));
@@ -65,6 +65,41 @@ function [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_pseudoinverse(
         end
         guess = new_guess;
     end
+
+    max_dev = max(max(abs(exp - guess)));
+    max_dev_perc = max_dev / min(min(abs(exp))) * 100.0;
+    n = i;
+end
+
+function [n, alpha, alpha_act, max_dev, max_dev_perc] = iterative_weighted_pseudoinverse(n, U, alpha, delta)
+    arguments
+        n; U; alpha = 0.13; delta = 1e-6
+    end
+
+    R = length(U(:,1));
+    C = length(U(1,:));
+    W = diag(rand(R,1))
+    sqrt(W)
+
+    % traditional Moore-Penrose Pseudoinverse
+    exp = (U' * W * U) \ U' * W;
+
+    U = sqrt(W) * U;
+
+    % iterative approach
+    two_I = 2 * diag(ones(C,1)); % 2*I
+    alpha_act = 2 / max(eig(U' * U));
+    guess = alpha * U';
+    for i = 1:n
+        new_guess = (two_I - guess * U) * guess;
+        if max(max(new_guess - guess)) < delta
+             guess = new_guess;
+             break;
+        end
+        guess = new_guess;
+    end
+
+    guess = guess * sqrt(W);
 
     max_dev = max(max(abs(exp - guess)));
     max_dev_perc = max_dev / min(min(abs(exp))) * 100.0;
