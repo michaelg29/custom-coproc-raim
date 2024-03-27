@@ -53,7 +53,7 @@ $\Rightarrow G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
 
 $\Rightarrow G^T W^{(k)} G, (G^T W^{(k)} G)^{-1} \in \R^{(3+N_{const}) \times (3+N_{const})}$
 
-$\Rightarrow S^{(k)} =(G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
+$\Rightarrow S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} = (W^{(k)1/2} G)^{\dagger} * W^{(k)1/2} \in \R^{(3+N_{const}) \times N_{sat}}$
 
 The following equations are applicable for all subsets ($\forall \ k \in [1,N_{ss}]$) and the three ENU components ($\forall \ q \in \{1,2,3\}$). Subset solution separations, along with variances and biases:
 
@@ -69,9 +69,33 @@ $\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$
 
 Notation | Relation | Dimensions | Description
 -- | -- | -- | --
-$K_{fa}$ | conf | $3 \times 1$ | Threshold factors derived from the q-function and false alarm probabilities. See (19) and (20) in [X] for more details.
+$K_{fa}$ | conf | $3 \times 1$ | Threshold factors derived from the continuity budgets allocated for the vertical and horizontal modes. See (19) and (20) in [X] for more details.
+$K_{fa,r}$ | conf | $1 \times 1$ | Threshold factors dervied from the continuity budgets allocated for the local test. See (22) and (23) in [X] for more details.
+$idx_{ss,k}$ | $SS_k$ | $1 \times 1$ | $N_{sat}$-bit activation string to indicate satellites included in a subset.
 
-$|\Delta \hat{x}^{(k)}| = |\hat{x}^{(k)} - \hat{x}^{(0)}| \le K_{fa,q}*\sigma_{ss,q}^{(k)2}$
+Requirements
+
+Solution: $N_{sat} \ge 3 + N_{const}; N_{const} \ge 1$
+
+Fault detection: $N_{sat} \ge 3 + N_{const} + 1; N_{const} \ge 1$
+
+Fault exclusion: $N_{sat} \ge 3 + N_{const} + 2; N_{const} \ge 1$
+
+Global test for each subset $k$:
+
+$|\Delta \hat{x}^{(k)}| = |\hat{x}^{(k)} - \hat{x}^{(0)}| \le \sigma_{ss,q}^{(k)2} * K_{fa,q}$
+
+$K_{fa,1} = K_{fa,2} = Q^{-1}(\frac{P_{FA\_HOR}}{4N_{fault modes}})$
+
+$K_{fa,3} = Q^{-1}(\frac{P_{FA\_VERT}}{2N_{fault modes}})$
+
+$Q^{-1}(p)$ is the $(1-p)$-quantile of a normal distribution.
+
+Local test for each satellite vehicle $i$:
+
+$|y_i| \le \sqrt{C_{int}(i,i)} * K_{fa,r}$
+
+$K_{fa,r} = Q^{-1}(\frac{P_{FA}}{2})$
 
 ### Least-squares adaptation
 
@@ -81,7 +105,7 @@ $U^{\dagger} = (U^T U)^{-1} U^T \in \R^{N \times M}$
 
 $U^{\dagger}_{k+1}=(2I_N - U^{\dagger}_k U) U^{\dagger}_k$
 
-$U^{\dagger}_0 = \alpha U^T, \alpha \in [0,2/\max(\text{eigenvals}(U^T U))]$
+$U^{\dagger}_0 = \alpha U^T, \alpha \in [0,\frac{2}{\max(\text{eigenvals}(U^T U))}]$
 
 $S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \R^{(3+N_{const}) \times N_{sat}}$
 

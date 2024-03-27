@@ -2,7 +2,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% calculate matrices for least-squares %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [inv_GTWG, S] = calc_ls_matrices( ...
+function [S] = calc_ls_matrices( ...
     N_sat, N_const, N_ss, ...
     W, G, ...
     ss_sat_mat, ss_const_mat)
@@ -47,12 +47,36 @@ for k = 1:N_ss
     this_G = G(not_zero_sat,not_zero_const);
     this_W = W(not_zero_sat,not_zero_sat);
 
-    % perform multiplications
-    this_inv_GTWG = inv(this_G' * this_W * this_G);
-
-    % output
-    inv_GTWG(not_zero_const,not_zero_const,k) = this_inv_GTWG;
-    S(not_zero_const,not_zero_sat,k) = this_inv_GTWG * this_G' * this_W;
+    % compute pseudoinverse
+    S(not_zero_const,not_zero_sat,k) = ...
+        iterative_weighted_pseudoinverse(10, this_G, this_W);
 end
 
+end
+
+% compute the weighted pseudoinverse with the iterative method
+function [U_pseudoinv] = iterative_weighted_pseudoinverse(n, U, W, alpha, delta)
+    arguments
+        n; U; W; alpha = 0.13; delta = 1e-6
+    end
+
+    C = length(U(1,:));
+
+    % modify matrix for input to iterative algorithm
+    U = sqrt(W) * U;
+
+    % iterative approach
+    two_I = 2 * diag(ones(C,1)); % 2*I
+    %alpha_act = 2 / max(eig(U' * U));
+    guess = alpha * U';
+    for i = 1:n
+        new_guess = (two_I - guess * U) * guess;
+        if max(max(new_guess - guess)) < delta
+             guess = new_guess;
+             break;
+        end
+        guess = new_guess;
+    end
+
+    U_pseudoinv = guess * sqrt(W);
 end
