@@ -21,6 +21,44 @@
 // get the operation of a co-processor instruction
 #define GET_INSTR_COP_OP(instr) GET_INSTR_BITS(instr, 0, 0b111111)
 
+// ================================
+// ===== REGISTER DEFINITIONS =====
+// ================================
+enum register_e {
+    REGS_r0 = 0,
+    REGS_at = 1,
+    REGS_v0 = 2,
+    REGS_v1 = 3,
+    REGS_a0 = 4,
+    REGS_a1 = 5,
+    REGS_a2 = 6,
+    REGS_a3 = 7,
+    REGS_t0 = 8,
+    REGS_t1 = 9,
+    REGS_t2 = 10,
+    REGS_t3 = 11,
+    REGS_t4 = 12,
+    REGS_t5 = 13,
+    REGS_t6 = 14,
+    REGS_t7 = 15,
+    REGS_s0 = 16,
+    REGS_s1 = 17,
+    REGS_s2 = 18,
+    REGS_s3 = 19,
+    REGS_s4 = 20,
+    REGS_s5 = 21,
+    REGS_s6 = 22,
+    REGS_s7 = 23,
+    REGS_t8 = 24,
+    REGS_t9 = 25,
+    REGS_k0 = 26,
+    REGS_k1 = 27,
+    REGS_gp = 28,
+    REGS_sp = 29,
+    REGS_s8 = 30,
+    REGS_ra = 31,
+};
+
 // =============================
 // ===== INSTRUCTION ENUMS =====
 // =============================
@@ -257,5 +295,14 @@ enum fpu_fmt_e {
 enum syscall_e {
     SYSCALL_EXIT    = 10,
 };
+
+/** Generate I-type (immediate) instruction. */
+int gen_immd_instr(int opcode, int rs, int rt, int offset);
+
+/** Generate J-type (jump) instruction. */
+int gen_jump_instr(int opcode, int instr_idx);
+
+/** Generate R-type (register) instruction. */
+int gen_reg_instr(int opcode, int rs, int rt, int rd, int sa, int function);
 
 #endif // ISA_H
