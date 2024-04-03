@@ -61,6 +61,7 @@ cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t 
     SC_THREAD(main);
 
     // initial register values
+    memset(&_regs, 0, sizeof(regs_t));
     _regs.s.pc = _start_addr;
 }
 
@@ -853,6 +854,8 @@ void cpu::main() {
         instr_cnt++;
         POSEDGE_CPU();
     }
+
+    sc_stop();
 }
 
 void cpu::signal_ex(exception_e ex) {

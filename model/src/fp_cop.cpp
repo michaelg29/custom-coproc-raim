@@ -8,7 +8,8 @@
 
 fp_cop::fp_cop(sc_module_name name, uint32_t cop_opcode)
     : sc_module(name), coprocessor_if(cop_opcode) {
-
+    // initial register values
+    memset(&_regs, 0, sizeof(fp_regs_u));
 }
 
 fp_cop::~fp_cop() {
