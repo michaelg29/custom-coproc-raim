@@ -24,6 +24,8 @@
 // ================================
 // ===== REGISTER DEFINITIONS =====
 // ================================
+
+// General purpose processor registers.
 enum register_e {
     REGS_r0 = 0,
     REGS_at = 1,
@@ -57,6 +59,23 @@ enum register_e {
     REGS_sp = 29,
     REGS_s8 = 30,
     REGS_ra = 31,
+};
+
+// RAIM co-processor register locations.
+enum rpu_regs_e {
+    RPU_VR_LX = 0,
+    RPU_VR_LY = 1,
+    RPU_VR_LZ = 2,
+    RPU_VR_C  = 3,
+    RPU_VR_ST = 4,
+    RPU_VR_SR = 5,
+    RPU_VR_SA = 6,
+    RPU_VR_SE = 7,
+    RPU_VR_BN = 8,
+    RPU_VR_KX = 9,
+    RPU_VR_KY = 10,
+    RPU_VR_KZ = 11,
+    RPU_VR_KR = 12,
 };
 
 // =============================
@@ -289,6 +308,12 @@ enum fpu_fmt_e {
     FPU_FMT_DMT     = 0b00101,
     FPU_FMT_MFC     = 0b00000,
     FPU_FMT_MT      = 0b00100,
+};
+
+// Operations of the RPU opcode (opcode COP2).
+enum rpu_op_e {
+    RPU_RST         = 0b000000,
+    RPU_NEWSV       = 0b000001,
 };
 
 // System call codes.

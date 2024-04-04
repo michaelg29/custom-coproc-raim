@@ -507,7 +507,7 @@ void cpu::main() {
         case OPCODE_BNE: {
         //case OPCODE_BNEL: {
             // get immediate and left shift
-            immd = zero_extend_immd(_regs.s.ir, 2);
+            immd = sign_extend_immd(_regs.s.ir, 2);
 
             // conditional PC-relative branch
             if (_regs.w[rs] != _regs.w[rt]) {
