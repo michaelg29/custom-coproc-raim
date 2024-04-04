@@ -37,11 +37,16 @@ int main(int argc, char **argv) {
     /** Placeholder instruction replacements. */
     uint32_t gen_instr_idx = 0;
     int gen_instr[] = {
-        gen_reg_instr(OPCODE_COP1X, REGS_a3, REGS_r0, 0, 0, OPCODE_LWXCZ),
-        gen_reg_instr(OPCODE_COP1X, REGS_a3, REGS_t4, 0, 1, OPCODE_LWXCZ),
-        gen_reg_instr(OPCODE_COP2, 0, 0, 0, 0, 0b011101),
-        gen_reg_instr(OPCODE_COP1X, 2, 1, 0, 2, FPU_MADD_S),
-        gen_reg_instr(OPCODE_COP1X, REGS_a3, REGS_t5, 2, 0, OPCODE_SWXCZ)
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SA, -8),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SE, -4),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LX, 0),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LY, 4),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LZ, 8),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_C,  12),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_ST, 16),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_SR, 20),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_BN, 0),
+        gen_reg_instr(OPCODE_COP2, 0, 0, 0, 0, RPU_NEWSV)
     };
     uint32_t n_gen_instr = sizeof(gen_instr) / sizeof(uint32_t);
     printf("Replacing %d instructions.\n", n_gen_instr);

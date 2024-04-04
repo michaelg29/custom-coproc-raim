@@ -2,7 +2,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Script to test the algorithm. %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [] = alg_test(test)
+function [] = alg_test(test, log_asm)
+
+arguments
+    test = ""
+    log_asm = false
+end
 
 % configuration data
 N_sat = 10;
@@ -43,6 +48,8 @@ ss_const_mat = [ 1 0;
                  0 1 ];
 
 % expected results from Blanch et al. Appendix H
+% sig_tropo2 = 1.2733 0.2055 0.0257 0.2697 0.1702 0.0161 0.0404 0.0287 0.0242 0.1820
+% sig_user2 = 2.0508 0.6698 0.2722 0.8061 0.5902 0.2648 0.2934 0.2757 0.2706 0.6171
 C_int_exp = diag([ 3.8865 1.4377 0.8604 1.6383 1.3229 0.8434 0.8963 0.8669 0.8573 1.3616 ]);
 C_acc_exp = diag([ 3.5740 1.1252 0.5479 1.3258 1.0104 0.5309 0.5838 0.5544 0.5448 1.0491 ]);
 sig_fault_const1_vert_exp = 2.5760;
@@ -75,6 +82,23 @@ for i = 1:N_sat
     sig_user2(i) = user_delay2_gps(ang);
 end
 
+% print out assembly code to store initial data
+if log_asm
+    fprintf("data_sig_ura2: .word 0x%s\n", fh(sig_URA_i2));
+    fprintf("data_sig_ure2: .word 0x%s\n", fh(sig_URE_i2));
+    fprintf("data_bias_nom: .word 0x%s\n", fh(bias_nom_i));
+
+    for i = 1:N_sat
+        fprintf("\ndata_sv%d:\n", i-1);
+        fprintf("  .word 0x%s # LOS_x = %f\n", fh(init_G(i,1)), init_G(i,1));
+        fprintf("  .word 0x%s # LOS_y = %f\n", fh(init_G(i,2)), init_G(i,2));
+        fprintf("  .word 0x%s # LOS_z = %f\n", fh(init_G(i,3)), init_G(i,3));
+        fprintf("  .word 0x%08x # constellation\n", consts(i,1));
+        fprintf("  .word 0x%s # sig_tropo2 = %f\n", fh(sig_tropo2(i)), sig_tropo2(i));
+        fprintf("  .word 0x%s # sig_user2 = %f\n", fh(sig_user2(i)), sig_user2(i));
+    end
+end
+
 if test == "init_matrices"
     % unit test - matrix initialization
     fprintf("Running unit test on init_matrices\n");
@@ -101,7 +125,7 @@ elseif test == "calc_ls_matrices"
     assert(abs(sqrt(inv_GTWG(3,3,1)) - sig_fault_const2_vert_exp) < 1e-4);
     % second subset assumes fault in constellation 1
     assert(abs(sqrt(inv_GTWG(3,3,2)) - sig_fault_const1_vert_exp) < 1e-4);
-else
+elseif test ~= "none"
     % integration test - call the whole algorithm
     fprintf("Running integration test on alg\n");
     [pos_vars, nominal_bias_impact, sol_sep_vars] = alg( ...
@@ -117,6 +141,11 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Helper functions %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+function [s] = fh(n)
+    s = num2hex(single(n));
+end
+
 function [delay2] = user_delay2_gps(th_i)
 % Description:
 %   Calculate the user delay for a GPS satellite.

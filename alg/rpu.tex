@@ -1,0 +1,68 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{array}
+
+\title{RAIM Co-processor Appendix}
+\author{Michael Grieco}
+\date{}
+
+\begin{document}
+
+\section{Registers}
+
+\begin{table}[htbp] \begin{center}
+  \caption{Registers}\label{tab:reg}
+  \begin{tabular}{|m{1.5cm}|m{1.5cm}|m{6cm}|m{1cm}|m{1cm}|}
+    \cline{4-5}
+    \multicolumn{3}{m{9cm}|}{} & \multicolumn{2}{m{2cm}|}{Access Permissions}\\ \hline
+    \textbf{Name} & \textbf{Size (bits)} & \textbf{Notation/Description} & \textbf{Ext.} & \textbf{Int.}\\ \hline
+
+    $LOS$ & $3 \times 32$ & The current SV's 3-dimensional LOS vector. & W & *\\ \hline
+
+    $C$ & $2$ & Constellation index for the current SV. The values start from $0$ and increment by $1$ for each additional constellation. & W & *\\ \hline
+
+    $G[i][j]$ & $N_{sv,max} \times 3 \times 32$ & The $j$-th 32-bit floating-point element of the $i$-th SV's LOS vector. & - & R\\ \hline
+
+    $C[i]$ & $N_{sv,max} \times 2$ & The saved constellation index (defined above) for the $i$-th SV. Translates to the index of the one hot column in the geometry matrix (i.e. $G[i][4+C[i]]=1$). & - & RW\\ \hline
+
+    $N_{sv}$ & $\text{ceil} ( \text{log}_2 ( \newline N_{sv,max} ) )$ & The current number of SVs in view. Increments with each new written SV. & - & RW\\ \hline
+
+    $N_{const}$ & $2$ & The current number of constellations with visible SVs. Taken as the maximum value of $C[i]$. & - & RW\\ \hline
+
+    $\sigma_{tropo}^2$ & $32$ & Variance for the tropospheric delay for the current SV. & W & R\\ \hline
+
+    $\sigma_{user}^2$ & $32$ & Variance for the user delay for the current SV. & W & R\\ \hline
+
+    $\sigma_{URA}^2$ & $32$ & Variance for the clock and ephemeris error used for integrity for the current SV. & W & R\\ \hline
+
+    $\sigma_{URE}^2$ & $32$ & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV. & W & R\\ \hline
+
+    $C_{int}[i][i]$ & $N_{sv,max} \times 32$ & The $i$-th element of the diagonal of the covariance matrix for integrity. & - & RW\\ \hline
+
+    $C_{acc}[i][i]$ & $N_{sv,max} \times 32$ & The $i$-th elemen tof the diagonal of the covariance matrix for accuracy and continuity. & - & RW\\ \hline
+
+    $W^{1/2}[i][i]$ & $N_{sv,max} \times 32$ & Square root of the $i$-th element of the diagonal of the weight matrix. & - & RW\\ \hline
+
+    $b_{nom}[i]$ & $N_{sv,max} \times 32$ & Maximum nominal bias for integrity for the $i$-th SV. & W & *\\ \hline
+
+    $idx_{ss}$ & $N_{sv,max}$ & Activation string to indicate the SVs that the current subset includes. & W & R\\ \hline
+
+    $y[i]$ & $N_{sv,max} \times 32$ & The $i$-th element of the vector to multiply with the least-squares matrix. & W & R\\ \hline
+
+    $S[k][j][i]$ & $N_{ss,max} \times 7 \times N_{sv,max} \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset. & - & RW\\ \hline
+
+    $pad[j][i]$ & $N_{ss,max} \times 7 \times N_{sv,max}$ & The $(j,i)$ element of the scratchpad matrix. & - & RW\\ \hline
+
+    $K_{fa}[j]$ & $3 \times 32$ & The threshold factor for the global test of the $j$-th element of the coordinate vector (ENU). & W & R\\ \hline
+
+    $K_{fa,r}$ & $32$ & The threshold factor for the local exclusion test. & W & R\\ \hline
+  \end{tabular}
+\end{center}
+\end{table}
+
+\textbf{* - Virtual register}
+
+\end{document}
+
