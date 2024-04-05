@@ -31,11 +31,11 @@ function [S] = calc_ls_matrices( ...
 %             matrix corresponds to the all-in-view set.
 
 % placeholders
-inv_GTWG = zeros(3+N_const,3+N_const,N_ss);
+%inv_GTWG = zeros(3+N_const,3+N_const,N_ss);
 S = zeros(3+N_const,N_sat,N_ss+1);
 
 % compute the all-in-view matrix
-S(:,:,N_ss+1) = inv(G' * W * G) * G' * W;
+S(:,:,N_ss+1) = iterative_weighted_pseudoinverse(10, G, W);
 
 % compute for each subset
 for k = 1:N_ss

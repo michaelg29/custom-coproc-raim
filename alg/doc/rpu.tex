@@ -13,10 +13,10 @@
 \section{Registers}
 
 \begin{table}[htbp] \begin{center}
-  \caption{Registers}\label{tab:reg}
+  \caption{Internal RPU registers. All sizes are in bits. The notation explains what each indexed element corresponds to. Each register has external and internal access permissions, with "R" meaning readable, "W" meaning writeable, "RW" meaning readable and writeable, "-" meaning inaccessible, and "*" indicating a virtual register.}
+  \label{tab:reg}
   \begin{tabular}{|m{1.5cm}|m{1.5cm}|m{6cm}|m{1cm}|m{1cm}|}
-    \cline{4-5}
-    \multicolumn{3}{m{9cm}|}{} & \multicolumn{2}{m{2cm}|}{Access Permissions}\\ \hline
+    \hline
     \textbf{Name} & \textbf{Size (bits)} & \textbf{Notation/Description} & \textbf{Ext.} & \textbf{Int.}\\ \hline
 
     $LOS$ & $3 \times 32$ & The current SV's 3-dimensional LOS vector. & W & *\\ \hline
@@ -30,6 +30,8 @@
     $N_{sv}$ & $\text{ceil} ( \text{log}_2 ( \newline N_{sv,max} ) )$ & The current number of SVs in view. Increments with each new written SV. & - & RW\\ \hline
 
     $N_{const}$ & $2$ & The current number of constellations with visible SVs. Taken as the maximum value of $C[i]$. & - & RW\\ \hline
+
+    $N_{ss}$ & $\text{ceil} ( \text{log}_2 ( \newline N_{ss,max} ) )$ & The current number of formed subsets. Increments with each new calculated least-squares matrix. & - & RW\\ \hline
 
     $\sigma_{tropo}^2$ & $32$ & Variance for the tropospheric delay for the current SV. & W & R\\ \hline
 
@@ -45,15 +47,19 @@
 
     $W^{1/2}[i][i]$ & $N_{sv,max} \times 32$ & Square root of the $i$-th element of the diagonal of the weight matrix. & - & RW\\ \hline
 
-    $b_{nom}[i]$ & $N_{sv,max} \times 32$ & Maximum nominal bias for integrity for the $i$-th SV. & W & *\\ \hline
+    $U[i][j]$ & $N_{sv,max} \times 7 \times 32$ & $i,j$-th element of the matrix resulting from $W^{1/2}G$. & - & RW\\ \hline
 
-    $idx_{ss}$ & $N_{sv,max}$ & Activation string to indicate the SVs that the current subset includes. & W & R\\ \hline
+    $b_{nom}[i]$ & $N_{sv,max} \times 32$ & Maximum nominal bias for integrity for the $i$-th SV. & W & RW\\ \hline
+
+    $idx_{ss}$ & $N_{ss,max}$ & Activation string to indicate the SVs that the current subset includes. & W & *\\ \hline
+
+    $idx_{ss}[k]$ & $N_{ss,max} \times N_{ss,max}$ & Activation string for the $k$-th subset. & - & R\\ hline
 
     $y[i]$ & $N_{sv,max} \times 32$ & The $i$-th element of the vector to multiply with the least-squares matrix. & W & R\\ \hline
 
     $S[k][j][i]$ & $N_{ss,max} \times 7 \times N_{sv,max} \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset. & - & RW\\ \hline
 
-    $pad[j][i]$ & $N_{ss,max} \times 7 \times N_{sv,max}$ & The $(j,i)$ element of the scratchpad matrix. & - & RW\\ \hline
+    $spr[j][i]$ & $7 \times N_{sv,max} \times 32$ & The $(j,i)$-th element of the scratchpad matrix. & - & RW\\ \hline
 
     $K_{fa}[j]$ & $3 \times 32$ & The threshold factor for the global test of the $j$-th element of the coordinate vector (ENU). & W & R\\ \hline
 
@@ -62,7 +68,26 @@
 \end{center}
 \end{table}
 
-\textbf{* - Virtual register}
+\section{RPU Exceptions}
+
+\begin{table}[htbp] \begin{center}
+  \caption{RPU Exceptions}\label{tab:exc}
+  \begin{tabular}{|m{1.5cm}|m{3.5cm}|m{7cm}|}
+    \hline
+    \textbf{Code} & \textbf{Exception Name} & \textbf{Exception Description}\\ \hline
+
+    $0$ & None & No exception, OKAY functionality.\\ \hline
+
+    $1$ & Invalid instruction & The instruction opcode is invalid.\\ \hline
+
+    $2$ & No implementation & The instruction is not implemented in the RPU.\\ \hline
+
+    $4$ & Co-processor unusable & The RPU is currently unusable.\\ \hline
+
+    $8$ & Trap & The executed instruction resulted in a trap.\\ \hline
+  \end{tabular}
+\end{center}
+\end{table}
 
 \end{document}
 

@@ -4,9 +4,10 @@
 .data
 
 # Constant values for all SVs
-data_sig_ura2: .word 0x3f100000
-data_sig_ure2: .word 0x3e800000
-data_bias_nom: .word 0x3f000000
+data_alpha:    .word 0x3e051eb8 # 0.13
+data_sig_ura2: .word 0x3f100000 # 0.75 * 0.75
+data_sig_ure2: .word 0x3e800000 # 0.50 * 0.50
+data_bias_nom: .word 0x3f000000 # 0.5
 
 data_sv0:
   .word 0x3cb851ec # LOS_x = 0.022500
@@ -88,6 +89,11 @@ data_sv9:
   .word 0x3e3a577c # sig_tropo2 = 0.181974
   .word 0x3f1dfb07 # sig_user2 = 0.617112
 
+data_subsets:
+  .word 1023 # all-in-view
+  .word 992  # 5 last satellites
+  .word 31   # 5 first satellites
+
 #######################
 ##### Main method #####
 #######################
@@ -102,13 +108,17 @@ main:
   ##### load in SV data #####
   ###########################
   la $t0, data_bias_nom
+  nop # LWC2 ALi, -12($t0)
   nop # LWC2 SA, -8($t0)
   nop # LWC2 SE, -4($t0)
 
+  # cursors
   la $t1, data_sv0 # initial cursor
   la $t2, data_sv9 # last SV cursor
-load_loop:
+
+  # loop
   nop # LWC2 LX, 0($t1)
+load_loop:
   nop # LWC2 LY, 4($t1)
   nop # LWC2 LZ, 8($t1)
   nop # LWC2 C, 12($t1)
@@ -119,6 +129,25 @@ load_loop:
   slt $t3, $t1, $t2 # t3 <- t1 < t2
   addi $t1, $t1, 24 # move cursor to next SV
   bnez $t3, load_loop
+
+  #################################
+  ##### calculate LS matrices #####
+  #################################
+  nop # CALCUC2
+
+  # cursors
+  la $t0, data_subsets # initial subset
+  addi $t1, $zero, 0   # subset cursor
+
+  # loop
+  nop # LWXC2 IDX, $t1($t0)
+subset_loop:
+  nop # INITPC2
+  nop # CALCPC2
+  nop # WLSC2
+  slti $t2, $t1, 8 # t2 <- t1 < 8
+  addi $t1, $t1, 4  # move cursor to next subset
+  bnez $t2, subset_loop
 
 end:
   addi $v0, $zero, 10
