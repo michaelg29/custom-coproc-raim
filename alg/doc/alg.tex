@@ -10,7 +10,49 @@
 
 \begin{document}
 
-\section{Main definitions}
+\section{Background knowledge}
+
+$\Delta \vec{x} = (G^T G)^{-1} G^T \vec{y}$
+
+$\Delta \vec{x} = (G^T W G)^{-1} G^T W \vec{y}$
+
+\section{Literature survey}
+
+$U \in \mathbb{R}^{M \times N} \Rightarrow U^T \in \mathbb{R}^{N \times M}$
+
+$U^{\dagger} = (U^T U)^{-1} U^T \in \mathbb{R}^{N \times M}$
+
+$U^{\dagger}_{k+1}=(2I_N - U^{\dagger}_k U) U^{\dagger}_k$
+
+$U^{\dagger}_0 = \alpha U^T, \alpha \in [0,\frac{2}{\max(\text{eigenvals}(U^T U))}]$
+
+$S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
+
+$U = W^{1/2}G \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
+
+$U^{\dagger} = (W^{1/2}G)^{\dagger} = ((W^{1/2}G)^T W^{1/2}G)^{-1} (W^{1/2}G)^T$
+
+$(AB)^T = B^T A^T$
+
+$U^{\dagger} = (G^T (W^{1/2})^T W^{1/2}G)^{-1} G^T (W^{1/2})^T$
+
+$W^{1/2} = (W^{1/2})^T$
+
+$U^{\dagger} = (G^T W G)^{-1} G^T W^{1/2}$
+
+$S^{(k)} = U^{\dagger} W^{1/2} = (G^T W G)^{-1} G^T W$
+
+$\alpha = 0.13$
+
+$N = 10$
+
+\section{Problem definition}
+
+FDE:
+
+$N_{sat} \ge 3 + N_{const} + k; N_{const} \ge 1$
+
+\section{Approach}
 
 \begin{table}[htbp] \centering
   \caption{Constant definitions}\label{tab:exp}
@@ -24,9 +66,7 @@
   \end{tabular}
 \end{table}
 
-\section{RAIM subset least-squares estimations}
-
-\subsection{Definitions}
+\subsection{RAIM subset least-squares estimations}
 
 \begin{table}[htbp] \centering
   \caption{Definitions}
@@ -44,8 +84,6 @@
     $\vec{y}$ & $SS_k$ & $N_{sat} \times 1$ & Vector to multiply with the weighted least-squares matrix.\\ \hline
   \end{tabular}
 \end{table}
-
-\subsection{Equations}
 
 Initial matrices the RPU must calculate:
 
@@ -89,9 +127,7 @@ $b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom,i}$
 
 $\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$
 
-\section{Fault detection and exclusion}
-
-\subsection{Definitions}
+\subsection{Fault detection and exclusion}
 
 \begin{table}[htbp] \centering
   \caption{Definitions}
@@ -103,8 +139,6 @@ $\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$
     $idx_{ss,k}$ & $SS_k$ & $1 \times 1$ & $N_{sat}$-bit activation string to indicate satellites included in a subset.\\ \hline
   \end{tabular}
 \end{table}
-
-\subsection{Calculations}
 
 Requirements
 

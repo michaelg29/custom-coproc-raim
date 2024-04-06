@@ -37,15 +37,15 @@ typedef struct {
     float sig_ura2;
     float sig_ure2;
     float b_nom[RAIM_N_SV_MAX];
-    float k_fa[3];
-    float k_fa_r;
-    uint32_t idx_ss[RAIM_N_SS_MAX];
     float w_sqrt[RAIM_N_SV_MAX];
     float c_acc[RAIM_N_SV_MAX];
     float u[RAIM_N_SV_MAX][7];
-    float y[RAIM_N_SV_MAX];
+    uint32_t idx_ss[RAIM_N_SS_MAX];
     float s[RAIM_N_SS_MAX][7][RAIM_N_SV_MAX];
     float spr[7][RAIM_N_SV_MAX];
+    float y[RAIM_N_SV_MAX];
+    float k_fa[3];
+    float k_fa_r;
 } rpu_regs_t;
 
 /** Concrete RAIM coprocessor. */

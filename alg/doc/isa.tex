@@ -10,12 +10,63 @@
 
 \begin{document}
 
+LWC2 rrt, offset(base) – load word to RPU
+
+\emph{rrt} $\leftarrow$ memory[\emph{base}+\emph{offset}]
+
+LWXC2 rrd, index(base) – load word indexed to RPU
+
+\emph{rrt} $\leftarrow$ memory[\emph{base}+\emph{index}]
+
+SWC2 rrt, offset(base) – store word from RPU
+
+memory[\emph{base}+\emph{offset}] $\leftarrow$ \emph{rrt}
+
+SWXC2 rrs, index(base) – store word indexed from RPU
+
+memory[\emph{base}+\emph{index}] $\leftarrow$ \emph{rrs}
+
+MFC2 rt, rrs – move RPU register to GPR
+
+\emph{rt} $\leftarrow$ \emph{rrs}
+
+MTC2 rt, rrs – move GPR to RPU register
+
+\emph{rrs} $\leftarrow$ \emph{rt}
+
+RSTC2 – reset RPU registers
+
+NEWSVC2 – move the satellite vehicle cursor down in the RPU
+
+$N_{sv} \leftarrow N_{sv} + 1$
+
+CALCU – calculate the intermediate matrix and the initial guess before calculating a pseudoinverse
+
+$U \leftarrow W^{1/2} G$
+
+INITP – initialize the pseudoinverse guess
+
+$S^{(k)} \leftarrow \alpha_0 U^{T}$
+
+CALCP – calculate the pseudoinverse of the intermediate matrix for the current
+
+$S^{(k)} \leftarrow U^{\dagger} \stackrel{\Delta_n}{=} (2I_{3+N_{const}} - U^{\dagger}_n U) U^{\dagger}_n
+$
+
+WLSC2 – calculate the subset weighted least-squares matrix with the activation string (rrt)
+
+$S^{(k)} \leftarrow SPR W^{1/2}$
+
+MULY d, k – multiply the k-th LS matrix with the vector in y and store in scratchpad column d
+
 $SPR_{*,d} \leftarrow S^{(k)} \vec{y}$
 
-$
-S^{(k)} \leftarrow (W^{(k)1/2}G)^{\dagger}
-\newline 
-\stackrel{\Delta_n}{=} (2I_{3+N_{const}} - U^{\dagger}_n U) U^{\dagger}_n
-$
+MOVD k – move the scratchpad matrix memory into the memory for LS matrix for subset k
+
+$S^{(k)} \leftarrow SPR$
+
+SSSSC2 k – calculate the solution separation matrix for subset k and store as the least-squares matrix
+
+$S{(k)} \leftarrow S{(k)} – S^{(0)}$
 
 \end{document}

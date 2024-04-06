@@ -63,21 +63,22 @@ enum register_e {
 
 // RAIM co-processor register locations.
 enum rpu_regs_e {
-    RPU_VR_AL0 = 0,
-    RPU_VR_LX  = 1,
-    RPU_VR_LY  = 2,
-    RPU_VR_LZ  = 3,
-    RPU_VR_C   = 4,
-    RPU_VR_ST  = 5,
-    RPU_VR_SR  = 6,
-    RPU_VR_SA  = 7,
-    RPU_VR_SE  = 8,
-    RPU_VR_BN  = 9,
-    RPU_VR_IDX = 10,
-    RPU_VR_KX  = 11,
-    RPU_VR_KY  = 12,
-    RPU_VR_KZ  = 13,
-    RPU_VR_KR  = 14,
+    RPU_VR_EXC = 0,
+    RPU_VR_AL0 = 1,
+    RPU_VR_LX  = 2,
+    RPU_VR_LY  = 3,
+    RPU_VR_LZ  = 4,
+    RPU_VR_C   = 5,
+    RPU_VR_ST2 = 6,
+    RPU_VR_SR2 = 7,
+    RPU_VR_SA2 = 8,
+    RPU_VR_SE2 = 9,
+    RPU_VR_BN  = 10,
+    RPU_VR_IDX = 11,
+    RPU_VR_KX  = 12,
+    RPU_VR_KY  = 13,
+    RPU_VR_KZ  = 14,
+    RPU_VR_KR  = 15,
 };
 
 // =============================

@@ -51,7 +51,13 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
 }
 
 bool raim_cop::get_regs(uint32_t rt, int32_t &res) {
-    return false;
+    // decode register address
+    switch (rt) {
+    case RPU_VR_EXC: res = _prev_ex; break;
+    default: return false;
+    }
+
+    return true;
 }
 
 void raim_cop::set_regs(uint32_t rt, int32_t res) {
@@ -77,10 +83,10 @@ void raim_cop::set_regs(uint32_t rt, int32_t res) {
         break;
     }
 
-    case RPU_VR_ST:  _regs.sig_tropo2 = fres; break;
-    case RPU_VR_SR:  _regs.sig_user2 = fres; break;
-    case RPU_VR_SA:  _regs.sig_ura2 = fres; break;
-    case RPU_VR_SE:  _regs.sig_ure2 = fres; break;
+    case RPU_VR_ST2: _regs.sig_tropo2 = fres; break;
+    case RPU_VR_SR2: _regs.sig_user2 = fres; break;
+    case RPU_VR_SA2: _regs.sig_ura2 = fres; break;
+    case RPU_VR_SE2: _regs.sig_ure2 = fres; break;
     case RPU_VR_BN:  _regs.b_nom[i] = fres; break;
 
     case RPU_VR_IDX: _regs.idx_ss[k] = (uint32_t)res; break;
@@ -219,7 +225,7 @@ void raim_cop::main() {
                 break;
             }
             case RPU_WLS: {
-                // S[k] <- SPR w_sqrt
+                // S[k] <- S[k] w_sqrt
                 // w_sqrt is diagonal => single multiplication for each element
                 mask = 1 << (_regs.N_sv - 1);
                 for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {

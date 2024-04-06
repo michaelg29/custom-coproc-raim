@@ -13,57 +13,94 @@
 \section{Registers}
 
 \begin{table}[htbp] \begin{center}
-  \caption{Internal RPU registers. All sizes are in bits. The notation explains what each indexed element corresponds to. Each register has external and internal access permissions, with "R" meaning readable, "W" meaning writeable, "RW" meaning readable and writeable, "-" meaning inaccessible, and "*" indicating a virtual register.}
-  \label{tab:reg}
-  \begin{tabular}{|m{1.5cm}|m{1.5cm}|m{6cm}|m{1cm}|m{1cm}|}
+  \caption{Virtual registers in the RPU. General purpose instructions such as \emph{LWC2} and \emph{MFC2} access these registers. They are virtual as they map to internal registers. Some have hardwired locations. Others have mapped locations that change based on the current satellite vehicle or subset, indicated by a * in the mapped register column.}
+  \label{tab:rpu_virtual_registers}
+  \begin{tabular}{|m{1.5cm}|m{2cm}|m{6cm}|m{1.5cm}|}
     \hline
-    \textbf{Name} & \textbf{Size (bits)} & \textbf{Notation/Description} & \textbf{Ext.} & \textbf{Int.}\\ \hline
+    \textbf{Name} & \textbf{Type} & \textbf{Notation/Description} & \textbf{Mapped register}\\ \hline
 
-    $LOS$ & $3 \times 32$ & The current SV's 3-dimensional LOS vector. & W & *\\ \hline
+    \emph{EXC} & \emph{uint32} & Previous trapped exception. & \emph{EXC}\\ \hline
 
-    $C$ & $2$ & Constellation index for the current SV. The values start from $0$ and increment by $1$ for each additional constellation. & W & *\\ \hline
+    \emph{AL0} & \emph{float} & The factor for the initial guess in the pseudorange calculation. & $\alpha_0$\\ \hline
 
-    $G[i][j]$ & $N_{sv,max} \times 3 \times 32$ & The $j$-th 32-bit floating-point element of the $i$-th SV's LOS vector. & - & R\\ \hline
+    \emph{LX} & \emph{float} & The x value of the current SV's LOS vector. & $G[*][0]$\\ \hline
+    \emph{LY} & \emph{float} & The y value of the current SV's LOS vector. & $G[*][1]$\\ \hline
+    \emph{LZ} & \emph{float} & The z value of the current SV's LOS vector. & $G[*][2]$\\ \hline
 
-    $C[i]$ & $N_{sv,max} \times 2$ & The saved constellation index (defined above) for the $i$-th SV. Translates to the index of the one hot column in the geometry matrix (i.e. $G[i][4+C[i]]=1$). & - & RW\\ \hline
+    \emph{C} & \emph{bit[1:0]} & Constellation index for the current SV. The values start from $0$ and increment by $1$ for each additional constellation. & $C[*]$\\ \hline
 
-    $N_{sv}$ & $\text{ceil} ( \text{log}_2 ( \newline N_{sv,max} ) )$ & The current number of SVs in view. Increments with each new written SV. & - & RW\\ \hline
+    \emph{ST2} & \emph{float} & Variance for the tropospheric delay for the current SV. & $\sigma_{tropo}^2$\\ \hline
 
-    $N_{const}$ & $2$ & The current number of constellations with visible SVs. Taken as the maximum value of $C[i]$. & - & RW\\ \hline
+    \emph{SR2} & \emph{float} & Variance for the user delay for the current SV. & $\sigma_{user}^2$\\ \hline
 
-    $N_{ss}$ & $\text{ceil} ( \text{log}_2 ( \newline N_{ss,max} ) )$ & The current number of formed subsets. Increments with each new calculated least-squares matrix. & - & RW\\ \hline
+    \emph{SA2} & \emph{float} & Variance for the clock and ephemeris error used for integrity for the current SV. & $\sigma_{URA}^2$\\ \hline
 
-    $\sigma_{tropo}^2$ & $32$ & Variance for the tropospheric delay for the current SV. & W & R\\ \hline
+    \emph{SE2} & \emph{float} & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV. & $\sigma_{URE}^2$\\ \hline
 
-    $\sigma_{user}^2$ & $32$ & Variance for the user delay for the current SV. & W & R\\ \hline
+    \emph{BN} & \emph{float} & Maximum nominal bias for integrity for the current SV. & $b_{nom}[*]$\\ \hline
 
-    $\sigma_{URA}^2$ & $32$ & Variance for the clock and ephemeris error used for integrity for the current SV. & W & R\\ \hline
+    \emph{IDX} & \emph{bit}[$N_{sv,max}-1:0$] & Activation string to indicate the SVs that the current subset includes. & $idx_{ss}[*]$\\ \hline
 
-    $\sigma_{URE}^2$ & $32$ & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV. & W & R\\ \hline
+    \emph{KX} & \emph{float} & The threshold factor for the global test of the x-coordinate. & $K_{fa}[0]$\\ \hline
 
-    $C_{int}[i][i]$ & $N_{sv,max} \times 32$ & The $i$-th element of the diagonal of the covariance matrix for integrity. & - & RW\\ \hline
+    \emph{KY} & \emph{float} & The threshold factor for the global test of the y-coordinate. & $K_{fa}[1]$\\ \hline
 
-    $C_{acc}[i][i]$ & $N_{sv,max} \times 32$ & The $i$-th elemen tof the diagonal of the covariance matrix for accuracy and continuity. & - & RW\\ \hline
+    \emph{KZ} & \emph{float} & The threshold factor for the global test of the z-coordinate. & $K_{fa}[2]$\\ \hline
 
-    $W^{1/2}[i][i]$ & $N_{sv,max} \times 32$ & Square root of the $i$-th element of the diagonal of the weight matrix. & - & RW\\ \hline
+    \emph{KR} & \emph{float} & The threshold factor for the local exclusion test. & $K_{fa,r}$\\ \hline
+  \end{tabular}
+\end{center}
+\end{table}
 
-    $U[i][j]$ & $N_{sv,max} \times 7 \times 32$ & $i,j$-th element of the matrix resulting from $W^{1/2}G$. & - & RW\\ \hline
+\begin{table}[htbp] \begin{center}
+  \caption{Internal registers in the RPU. These are the registers the RPU physically holds in its internal memory blocks. The size column shows the dimensions of the register in parentheses if the register is an array multiplied by the bit-size of a single element.}
+  \label{tab:rpu_internal_registers}
+  \begin{tabular}{|m{1.5cm}|m{2.5cm}|m{7cm}|}
+    \hline
 
-    $b_{nom}[i]$ & $N_{sv,max} \times 32$ & Maximum nominal bias for integrity for the $i$-th SV. & W & RW\\ \hline
+    \textbf{Name} & \textbf{Size (bits)} & \textbf{Notation/Description}\\ \hline
 
-    $idx_{ss}$ & $N_{ss,max}$ & Activation string to indicate the SVs that the current subset includes. & W & *\\ \hline
+    \emph{EXC} & $\lceil{\text{log}_2(N_{ex})}\rceil$ & Previous trapped exception.\\ \hline
 
-    $idx_{ss}[k]$ & $N_{ss,max} \times N_{ss,max}$ & Activation string for the $k$-th subset. & - & R\\ hline
+    $\alpha_0$ & $32$ & The factor for the initial guess in the pseudorange calculation.\\ \hline
 
-    $y[i]$ & $N_{sv,max} \times 32$ & The $i$-th element of the vector to multiply with the least-squares matrix. & W & R\\ \hline
+    $G[i][j]$ & $(N_{sv,max} \times 3) \times 32$ & The $j$-th 32-bit floating-point element of the $i$-th SV's LOS vector.\\ \hline
 
-    $S[k][j][i]$ & $N_{ss,max} \times 7 \times N_{sv,max} \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset. & - & RW\\ \hline
+    $C[i]$ & $(N_{sv,max}) \times 2$ & The saved constellation index (defined above) for the $i$-th SV. Translates to the index of the one hot column in the geometry matrix (i.e. $G[i][4+C[i]]=1$).\\ \hline
 
-    $spr[j][i]$ & $7 \times N_{sv,max} \times 32$ & The $(j,i)$-th element of the scratchpad matrix. & - & RW\\ \hline
+    $N_{sv}$ & $\lceil{\text{log}_2(N_{sv,max})}\rceil$ & The current number of SVs in view. Increments with each new written SV.\\ \hline
 
-    $K_{fa}[j]$ & $3 \times 32$ & The threshold factor for the global test of the $j$-th element of the coordinate vector (ENU). & W & R\\ \hline
+    $N_{const}$ & $2$ & The current number of constellations with visible SVs. Taken as the maximum value of $C[i]$.\\ \hline
 
-    $K_{fa,r}$ & $32$ & The threshold factor for the local exclusion test. & W & R\\ \hline
+    $N_{ss}$ & $\lceil{\text{log}_2(N_{sv,max})}\rceil$ & The current number of formed subsets. Increments with each new calculated least-squares matrix.\\ \hline
+
+    $\sigma_{tropo}^2$ & $32$ & Variance for the tropospheric delay for the current SV.\\ \hline
+
+    $\sigma_{user}^2$ & $32$ & Variance for the user delay for the current SV.\\ \hline
+
+    $\sigma_{URA}^2$ & $32$ & Variance for the clock and ephemeris error used for integrity for the current SV.\\ \hline
+
+    $\sigma_{URE}^2$ & $32$ & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV.\\ \hline
+
+    $b_{nom}[i]$ & $(N_{sv,max}) \times 32$ & Maximum nominal bias for integrity for the $i$-th SV.\\ \hline
+
+    $W^{1/2}[i][i]$ & $(N_{sv,max}) \times 32$ & Square root of the $i$-th element of the diagonal of the weight matrix.\\ \hline
+
+    $C_{acc}[i][i]$ & $(N_{sv,max}) \times 32$ & The $i$-th element of the diagonal of the covariance matrix for accuracy and continuity.\\ \hline
+
+    $U[i][j]$ & $(N_{sv,max} \times 7) \times 32$ & $i,j$-th element of the matrix resulting from $W^{1/2}G$.\\ \hline
+
+    $idx_{ss}[k]$ & $(N_{ss,max}) \times N_{sv,max}$ & Activation string for the $k$-th subset.\\ \hline
+
+    $S[k][j][i]$ & $(N_{ss,max} \times 7) \times N_{sv,max} \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset.\\ \hline
+
+    $spr[j][i]$ & $(7 \times N_{sv,max}) \times 32$ & The $(j,i)$-th element of the scratchpad matrix.\\ \hline
+
+    $y[i]$ & $(N_{sv,max}) \times 32$ & The $i$-th element of the vector to multiply with the least-squares matrix.\\ \hline
+
+    $K_{fa}[j]$ & $(3) \times 32$ & The threshold factor for the global test of the $j$-th element of the coordinate vector (ENU).\\ \hline
+
+    $K_{fa,r}$ & $32$ & The threshold factor for the local exclusion test.\\ \hline
   \end{tabular}
 \end{center}
 \end{table}
@@ -71,7 +108,7 @@
 \section{RPU Exceptions}
 
 \begin{table}[htbp] \begin{center}
-  \caption{RPU Exceptions}\label{tab:exc}
+  \caption{RPU exception codes. The RPU stores current raised exceptions in the register EXC.}\label{tab:rpu_exception_codes}
   \begin{tabular}{|m{1.5cm}|m{3.5cm}|m{7cm}|}
     \hline
     \textbf{Code} & \textbf{Exception Name} & \textbf{Exception Description}\\ \hline

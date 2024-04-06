@@ -38,14 +38,14 @@ int main(int argc, char **argv) {
     uint32_t gen_instr_idx = 0;
     int gen_instr[] = {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_AL0, -12), // LWC2 AL0 -12($t0)
-        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SA, -8),
-        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SE, -4),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SA2, -8),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SE2, -4),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LX, 0),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LY, 4),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LZ, 8),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_C,  12),
-        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_ST, 16),
-        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_SR, 20),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_ST2, 16),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_SR2, 20),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_BN, 0),
         gen_reg_instr (OPCODE_COP2, 0, 0, 0, 0, RPU_NEWSV),
         gen_reg_instr (OPCODE_COP2, 0, 0, 0, 0, RPU_CALCU),
