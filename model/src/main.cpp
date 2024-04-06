@@ -52,7 +52,7 @@ int sc_main(int argc, char* argv[]) {
 
     // final state
     std::cout << "Final state:" << std::endl;
-    mem->print();
+    //mem->print();
 
     // ===================
     // ===== CLEANUP =====

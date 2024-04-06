@@ -22,13 +22,16 @@
 // =================================
 #define RPU_INSTR_Q_SIZE 16
 #define RPU_INSTR_Q_MASK 0xf
+#define RPU_PSEUDO_MAX_IT 10
 
 /** Concrete register collection. */
 typedef struct {
+    float alpha0;
     float G[RAIM_N_SV_MAX][3];
     uint8_t C[RAIM_N_SV_MAX];
     uint8_t N_sv;
     uint8_t N_const;
+    uint8_t N_ss;
     float sig_tropo2;
     float sig_user2;
     float sig_ura2;
@@ -36,11 +39,13 @@ typedef struct {
     float b_nom[RAIM_N_SV_MAX];
     float k_fa[3];
     float k_fa_r;
-    uint32_t idx_ss;
+    uint32_t idx_ss[RAIM_N_SS_MAX];
     float w_sqrt[RAIM_N_SV_MAX];
     float c_acc[RAIM_N_SV_MAX];
+    float u[RAIM_N_SV_MAX][7];
     float y[RAIM_N_SV_MAX];
     float s[RAIM_N_SS_MAX][7][RAIM_N_SV_MAX];
+    float spr[7][RAIM_N_SV_MAX];
 } rpu_regs_t;
 
 /** Concrete RAIM coprocessor. */

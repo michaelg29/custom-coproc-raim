@@ -63,19 +63,21 @@ enum register_e {
 
 // RAIM co-processor register locations.
 enum rpu_regs_e {
-    RPU_VR_LX = 0,
-    RPU_VR_LY = 1,
-    RPU_VR_LZ = 2,
-    RPU_VR_C  = 3,
-    RPU_VR_ST = 4,
-    RPU_VR_SR = 5,
-    RPU_VR_SA = 6,
-    RPU_VR_SE = 7,
-    RPU_VR_BN = 8,
-    RPU_VR_KX = 9,
-    RPU_VR_KY = 10,
-    RPU_VR_KZ = 11,
-    RPU_VR_KR = 12,
+    RPU_VR_AL0 = 0,
+    RPU_VR_LX  = 1,
+    RPU_VR_LY  = 2,
+    RPU_VR_LZ  = 3,
+    RPU_VR_C   = 4,
+    RPU_VR_ST  = 5,
+    RPU_VR_SR  = 6,
+    RPU_VR_SA  = 7,
+    RPU_VR_SE  = 8,
+    RPU_VR_BN  = 9,
+    RPU_VR_IDX = 10,
+    RPU_VR_KX  = 11,
+    RPU_VR_KY  = 12,
+    RPU_VR_KZ  = 13,
+    RPU_VR_KR  = 14,
 };
 
 // =============================
@@ -313,7 +315,13 @@ enum fpu_fmt_e {
 // Operations of the RPU opcode (opcode COP2).
 enum rpu_op_e {
     RPU_RST         = 0b000000,
-    RPU_NEWSV       = 0b000001,
+    RPU_MF          = 0b000001,
+    RPU_MT          = 0b000010,
+    RPU_NEWSV       = 0b000011,
+    RPU_CALCU       = 0b000100,
+    RPU_INITP       = 0b000101,
+    RPU_CALCP       = 0b000110,
+    RPU_WLS         = 0b000111,
 };
 
 // System call codes.
