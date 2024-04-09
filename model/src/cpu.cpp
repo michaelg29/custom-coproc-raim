@@ -91,6 +91,7 @@ void cpu::main() {
     uint32_t ures;
     int64_t res64;
     uint64_t ures64;
+    char buf[5];
 
     while (!_max_instr_cnt || instr_cnt < _max_instr_cnt) {
         // default values
@@ -251,14 +252,46 @@ void cpu::main() {
             }
             case SPECIAL_SYSCALL: {
                 LOGF("[%s] Syscall code %d", this->name(), _regs.s.v0);
+                dst_reg_idx = -1;
                 switch (_regs.s.v0) {
+                case SYSCALL_PINT: {
+                    // print integer in $a0
+                    printf("%d", _regs.s.a0);
+                    break;
+                }
+                case SYSCALL_PSTR: {
+                    // print string with address in $a0
+                    res = _regs.s.a0;
+                    while (true) {
+                        // read memory
+                        mem->read(res, ures);
+
+                        // print as char*
+                        *((uint32_t*)buf) = ures;
+                        buf[4] = 0;
+                        printf("%s", buf);
+
+                        // check bytes for terminator
+                        if (!(buf[0] && buf[1] && buf[2] && buf[3])) {
+                            break;
+                        }
+
+                        // increment cursor
+                        res += 4;
+                    }
+                    break;
+                }
                 case SYSCALL_EXIT: {
                     // exit program
                     _max_instr_cnt = 1;
-                    dst_reg_idx = -1;
                     break;
                 }
+                case SYSCALL_PCHAR: {
+                    // print character in $a0
+                    printf("%c", _regs.s.a0);
+                    break;
                 }
+                };
                 break;
             }
             case SPECIAL_TEQ: {

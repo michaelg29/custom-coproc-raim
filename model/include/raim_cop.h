@@ -42,6 +42,7 @@ typedef struct {
     float w_acc_sqrt[RAIM_N_SV_MAX];
     float u[RAIM_N_SV_MAX][7];
     uint32_t idx_ss[RAIM_N_SS_MAX];
+    uint32_t idx_faulty_sv;
     float s[RAIM_N_SS_MAX][7][RAIM_N_SV_MAX];
     float spr[7][RAIM_N_SV_MAX];
     float y[RAIM_N_SV_MAX];
@@ -49,7 +50,6 @@ typedef struct {
     float k_fa_r;
     float sig_q2[RAIM_N_SS_MAX][3];
     float bias_q[RAIM_N_SS_MAX][3];
-    float ss_mag[RAIM_N_SS_MAX];
     float sig_ssq2[RAIM_N_SS_MAX][3];
 } rpu_regs_t;
 

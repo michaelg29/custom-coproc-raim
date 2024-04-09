@@ -51,6 +51,12 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
         memset(&_regs, 0, sizeof(rpu_regs_t));
         break;
     }
+    case RPU_FMT_CLRC: {
+        // clear CPSR
+        _rpu_cpsr = RPU_OKAY;
+        _regs.idx_faulty_sv = 0;
+        break;
+    }
     case RPU_FMT_MF: {
         // move RPU register rrs to res
         write_back = get_regs(rrs, res);
@@ -78,6 +84,7 @@ bool raim_cop::get_regs(uint32_t rt, int32_t &res) {
     // decode register address
     switch (rt) {
     case RPU_VR_EXC: res = _prev_ex; break;
+    case RPU_VR_IDX: res = _regs.idx_faulty_sv; break;
     default: return false;
     }
 
@@ -390,19 +397,28 @@ void raim_cop::main() {
                 }
                 break;
             }
-            case RPU_SS: {
-                // ss_mag[k] <- mag(SPR[*][d])
-                dotp = 0.0f;
-                for (q = 2; q >= 0; q--) {
-                    dotp += _regs.spr[q][d] * _regs.spr[q][d];
-                }
-                _regs.ss_mag[k] = sqrt(dotp);
-                break;
-            }
             case RPU_NEWSS: {
                 // increment cursor
                 if (_regs.N_ss < RAIM_N_SS_MAX) {
                     _regs.N_ss++;
+                }
+                break;
+            }
+            case RPU_TSTG: {
+                // global test: fails if any SPR[*][d] > sig_ssq2[k][*] * K_fa[*]
+                for (q = 2; q >= 0; q--) {
+                    if ((_regs.sig_ssq2[k][q] * _regs.k_fa[q] - fabs(_regs.spr[q][d])) < 0.0f) {
+                        _rpu_cpsr |= RPU_FD;
+                    }
+                }
+                break;
+            }
+            case RPU_TSTL: {
+                // local test for satellite d
+                // fails if y[i] > K_fa,r / W_sqrt[i]
+                if ((_regs.k_fa_r / _regs.w_sqrt[d] - _regs.y[d]) < 0.0f) {
+                    _rpu_cpsr |= RPU_FL;
+                    _regs.idx_faulty_sv |= (1 << d);
                 }
                 break;
             }

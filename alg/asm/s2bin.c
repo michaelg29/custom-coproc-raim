@@ -40,6 +40,10 @@ int main(int argc, char **argv) {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_AL0, -12), // LWC2 $AL0, -12($t0)
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SA2, -8),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SE2, -4),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KX, 4),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KY, 8),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KZ, 12),
+        gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KR, 16),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LX, 0),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LY, 4),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LZ, 8),

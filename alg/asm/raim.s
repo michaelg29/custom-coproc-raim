@@ -3,12 +3,29 @@
 ##################################
 .data
 
+# strings
+str_greeting:   .asciiz "Hello, world!\n"
+.space 1 # pad to 4-byte boundary
+str_fault_ndet: .asciiz "Fault not detected!\n"
+.space 3 # pad to 4-byte boundary
+str_fault_det:  .asciiz "Fault detected!\n"
+.space 3 # pad to 4-byte boundary
+str_fault_nloc: .asciiz "Fault not located!\n"
+# .space 0 # already padded to 4-byte boundary
+str_fault_loc:  .asciiz "Fault located!\n"
+# .space 0 # already padded to 4-byte boundary
+
 # Constant values for all SVs
 data_alpha:    .word 0x3e051eb8 # 0.13
 data_sig_ura2: .word 0x3f100000 # 0.75 * 0.75
 data_sig_ure2: .word 0x3e800000 # 0.50 * 0.50
 data_bias_nom: .word 0x3f000000 # 0.5
+data_k_fa_1:   .word 0x40c127bb # 6.0361 = invq((P_FA,H = 9e-8)/2/(N_fault_modes=57))
+data_k_fa_2:   .word 0x40c127bb # 6.0361 = invq((P_FA,H = 9e-8)/2/(N_fault_modes=57))
+data_k_fa_3:   .word 0x40aca64c # 5.3953 = invq((P_FA,V = 3.9e-6)/2/(N_fault_modes=57))
+data_k_fa_r:   .word 0x40939097 # 4.6114 = invq((P_FA = 4e-6)/2)
 
+# individual satellite vehicle data
 data_sv0:
   .word 0x3cb851ec # LOS_x = 0.022500
   .word 0x3f7ebee0 # LOS_y = 0.995100
@@ -103,13 +120,21 @@ data_subsets:
 __start:
 main:
 
+  la $a0, str_greeting
+  ori $v0, $zero, 4
+  syscall
+
   ###########################
   ##### load in SV data #####
   ###########################
   la $t0, data_bias_nom
-  nop # LWC2 $ALi, -12($t0)
-  nop # LWC2 $SA, -8($t0)
-  nop # LWC2 $SE, -4($t0)
+  nop # LWC2 $AL0, -12($t0)
+  nop # LWC2 $SA2, -8($t0)
+  nop # LWC2 $SE2, -4($t0)
+  nop # LWC2 $KX, 4($t0)
+  nop # LWC2 $KY, 8($t0)
+  nop # LWC2 $KZ, 12($t0)
+  nop # LWC2 $KR, 16($t0)
 
   # cursors
   la $t1, data_sv0 # initial cursor

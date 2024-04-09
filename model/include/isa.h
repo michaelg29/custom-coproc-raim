@@ -329,11 +329,15 @@ enum rpu_op_e {
     RPU_SS          = 0b001101,
     RPU_SSVAR       = 0b001110,
     RPU_NEWSS       = 0b001111,
+    RPU_TSTG        = 0b010000,
+    RPU_TSTL        = 0b010001,
 };
 
 // RAIM conditions to test for.
 enum rpu_cond_e {
     RPU_OKAY        = 0b00000,
+    RPU_FD          = 0b00001,
+    RPU_FL          = 0b00010,
 };
 
 // Possible formats for RAIM instructions.
@@ -343,11 +347,15 @@ enum rpu_fmt_e {
     RPU_FMT_MF      = 0b00010,
     RPU_FMT_MT      = 0b00100,
     RPU_FMT_BC      = 0b01000,
+    RPU_FMT_CLRC    = 0b10000,
 };
 
 // System call codes.
 enum syscall_e {
+    SYSCALL_PINT    = 1,
+    SYSCALL_PSTR    = 4,
     SYSCALL_EXIT    = 10,
+    SYSCALL_PCHAR   = 11,
 };
 
 /** Generate I-type (immediate) instruction. */
