@@ -8,6 +8,18 @@
 
 #include <math.h>
 
+void print_mat(char *mat_name, int id, float *mat, int R, int C, int rowpad) {
+    LOGF("%s (id %d): [", mat_name, id);
+    int i = 0;
+    for (int r = 0; r < R; r++, i += rowpad) {
+        for (int c = 0; c < C; c++, i++) {
+            printf("%f ",mat[i]);
+        }
+        printf("\n");
+    }
+    printf("]\n");
+}
+
 raim_cop::raim_cop(sc_module_name name, uint32_t cop_opcode)
     : sc_module(name), coprocessor_if(cop_opcode), _instr_q(_instrs, RPU_INSTR_Q_SIZE, RPU_INSTR_Q_MASK), _instr_q_overflow(false) {
     SC_THREAD(main);
@@ -95,11 +107,19 @@ void raim_cop::set_regs(uint32_t rt, int32_t res) {
     case RPU_VR_KY:  _regs.k_fa[1] = fres; break;
     case RPU_VR_KZ:  _regs.k_fa[2] = fres; break;
     case RPU_VR_KR:  _regs.k_fa_r = fres; break;
+
+    default: {
+        if (rt >= RPU_VR_Yi) {
+            i = rt - RPU_VR_Yi;
+            _regs.y[i] = fres;
+        }
+        break;
+    }
     };
 }
 
 bool raim_cop::get_condition_code(uint8_t &cc) {
-    cc = _condition_code;
+    cc = _rpu_cpsr;
     return true;
 }
 
@@ -110,8 +130,10 @@ bool raim_cop::get_next_pc_offset(int32_t &next_pc_offset) {
 
 void raim_cop::main() {
     uint32_t ir;
+    uint32_t opcode;
     bool ir_valid;
-    int i, k, N, n, r, c, q;
+    int i, k, N, n, r, c, q, d;
+    uint32_t init_mask;
     uint32_t mask;
     float dotp;
 
@@ -129,6 +151,7 @@ void raim_cop::main() {
         i = _regs.N_sv;
         k = _regs.N_ss;
         N = 3 + _regs.N_const;
+        init_mask = 1 << (_regs.N_sv - 1);
 
         // ==============================
         // ===== INSTRUCTION DECODE =====
@@ -136,16 +159,22 @@ void raim_cop::main() {
 
         // take new operation from the instruction queue
         if (_instr_q.dequeue(ir)) {
-            switch (GET_INSTR_COP_OP(ir)) {
+            // decode intermediate value
+            d = GET_INSTR_REG(ir, 6);
+
+            // decode operation
+            opcode = GET_INSTR_COP_OP(ir);
+            switch (opcode) {
             case RPU_NEWSV: {
                 // calculate weight
                 _regs.w_sqrt[i] = 1.0f / sqrt(_regs.sig_tropo2 + _regs.sig_user2 + _regs.sig_ura2);
-                _regs.c_acc[i] = _regs.sig_tropo2 + _regs.sig_user2 + _regs.sig_ure2;
+                _regs.w_acc_sqrt[i] = 1.0f / sqrt(_regs.sig_tropo2 + _regs.sig_user2 + _regs.sig_ure2);
+                _regs.sig_ura2_all[i] = _regs.sig_ura2;
 
                 LOGF("[%s] Completed SV %d", this->name(), i);
                 LOGF("LOS %f %f %f, constellation %d", _regs.G[i][0], _regs.G[i][1], _regs.G[i][2], _regs.C[i]);
                 LOGF("st2 %f, sr2 %f, sa2 %f, se2 %f, bn %f", _regs.sig_tropo2, _regs.sig_user2, _regs.sig_ura2, _regs.sig_ure2, _regs.b_nom[i]);
-                LOGF("=> W_sqrt %f, c_acc %f", _regs.w_sqrt[i], _regs.c_acc[i]);
+                LOGF("=> W_sqrt %f, W_acc_sqrt %f", _regs.w_sqrt[i], _regs.w_acc_sqrt[i]);
 
                 // increment cursor
                 if (_regs.N_sv < RAIM_N_SV_MAX) {
@@ -170,9 +199,12 @@ void raim_cop::main() {
                 break;
             }
             case RPU_INITP: {
-                mask = 1 << (_regs.N_sv - 1);
+                mask = init_mask;
                 for (r = _regs.N_sv - 1; r >= 0; r--, mask >>= 1) {
                     if (!(_regs.idx_ss[k] & mask)) {
+                        for (c = 3 + 4; c >= 0; c--) {
+                            _regs.s[k][c][r] = 0.0f;
+                        }
                         continue;
                     }
 
@@ -189,17 +221,19 @@ void raim_cop::main() {
             }
             case RPU_CALCP: {
                 // S[k] <- pseudoinv(U)
+                LOGF("[%s] Subset %d has indices %03x, mask %03x", this->name(), k, _regs.idx_ss[k], 1 << (_regs.N_sv - 1));
                 for (n = 0; n < RPU_PSEUDO_MAX_IT; n++) {
                     // SPR <- 2I_N - Ut_n U
-                    mask = 1 << (_regs.N_sv - 1);
-                    for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {
-                        if (!(_regs.idx_ss[k] & mask)) {
-                            continue;
-                        }
-
+                    // [7][RAIM_N_SV_MAX] x [RAIM_N_SV_MAX][7]
+                    for (c = N - 1; c >= 0; c--) {
                         for (r = N - 1; r >= 0; r--) {
                             dotp = r == c ? 2.0f : 0.0f;
-                            for (q = _regs.N_sv - 1; q >= 0; q--) {
+                            mask = init_mask;
+                            for (q = _regs.N_sv - 1; q >= 0; q--, mask >>= 1) {
+                                if (!(_regs.idx_ss[k] & mask)) {
+                                    continue;
+                                }
+
                                 dotp -= _regs.s[k][r][q] * _regs.u[q][c];
                             }
                             _regs.spr[r][c] = dotp;
@@ -207,9 +241,12 @@ void raim_cop::main() {
                     }
 
                     // S[k] <- SPR Ut_n
-                    mask = 1 << (_regs.N_sv - 1);
+                    mask = init_mask;
                     for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {
                         if (!(_regs.idx_ss[k] & mask)) {
+                            for (r = N - 1; r >= 0; r--) {
+                                _regs.s[k][r][c] = 0.0f;
+                            }
                             continue;
                         }
 
@@ -222,31 +259,136 @@ void raim_cop::main() {
                         }
                     }
                 }
+
                 break;
             }
             case RPU_WLS: {
                 // S[k] <- S[k] w_sqrt
                 // w_sqrt is diagonal => single multiplication for each element
-                mask = 1 << (_regs.N_sv - 1);
+                mask = init_mask;
+                for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {
+                    if (_regs.idx_ss[k] & mask) {
+                        for (r = N - 1; r >= 0; r--) {
+                            _regs.s[k][r][c] = _regs.s[k][r][c] * _regs.w_sqrt[c];
+                        }
+                    }
+                    else {
+                        for (r = N - 1; r >= 0; r--) {
+                            _regs.s[k][r][c] = 0.0f;
+                        }
+                    }
+                }
+
+                print_mat((char*)"WLS matrix", k, (float*)_regs.s[k], N, _regs.N_sv, RAIM_N_SV_MAX - _regs.N_sv);
+                break;
+            }
+            case RPU_MULY: {
+                // SPR[*][d] <- S[k] y
+                for (r = N - 1; r >= 0; r--) {
+                    dotp = 0.0f;
+                    mask = init_mask;
+                    for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {
+                        if (!(_regs.idx_ss[k] & mask)) {
+                            continue;
+                        }
+
+                        dotp += _regs.s[k][r][c] * _regs.y[c];
+                    }
+                    _regs.spr[r][d] = dotp;
+                }
+                break;
+            }
+            case RPU_MOVD: {
+                // S[k] <- SPR
+                mask = init_mask;
                 for (c = _regs.N_sv - 1; c >= 0; c--, mask >>= 1) {
                     if (!(_regs.idx_ss[k] & mask)) {
+                        for (r = N - 1; r >= 0; r--) {
+                            _regs.s[k][r][c] = 0.0f;
+                        }
                         continue;
                     }
+                    for (r = N - 1; r >= 0; r--) {
+                        _regs.s[k][r][c] = _regs.spr[r][c];
+                    }
+                }
+                break;
+            }
+            case RPU_POSVAR:
+            case RPU_SSVAR: {
+                // RPU_POSVAR: sig_q2[k][*] <- ((S[k] W_sqrt^{-1})(W_sqrt^{-1} S[k]^T)[*][*]
+                // RPU_SSVAR: sig_q_ss2[k][*] <- ((S[k] W_acc_sqrt^{-1})(W_acc_sqrt^{-1} S[k]^T)[*][*]
 
-                    for (r = 3 + _regs.N_const - 1; r >= 0; r--) {
-                        _regs.s[k][r][c] = _regs.w_sqrt[c] * _regs.s[k][r][c];
+                // get input and output pointers
+                float *w_sqrt_src = NULL;
+                float *dst = NULL;
+                if (opcode == RPU_POSVAR) {
+                    w_sqrt_src = _regs.w_sqrt;
+                    dst = _regs.sig_q2[k];
+                }
+                else if (opcode == RPU_SSVAR) {
+                    w_sqrt_src = _regs.w_acc_sqrt;
+                    dst = _regs.sig_ssq2[k];
+                }
+
+                // SPR <- S[k] w_sqrt_src^{-1}, right-weight
+                for (c = _regs.N_sv - 1; c >= 0; c--) {
+                    for (r = N - 1; r >= 0; r--) {
+                        _regs.spr[r][c] = _regs.s[k][r][c] / w_sqrt_src[c];
                     }
                 }
 
-                LOGF("[%s] LS matrix for subset %d (%08x): [", this->name(), k, _regs.idx_ss[k]);
-                for (r = 0; r < 3 + _regs.N_const; r++) {
-                    for (c = 0; c < _regs.N_sv; c++) {
-                        printf("%f ", _regs.s[k][r][c]);
+                // dst[q] <- (SPR SPR^T)[q][q], q = 1,2,3
+                for (q = 2; q >= 0; q--) {
+                    // dot product of q-th row of SPR with q-th column of SPR^T
+                    // dot product of q-th row of SPR with itself
+                    dotp = 0.0f;
+                    for (c = _regs.N_sv - 1; c >= 0; c--) {
+                        dotp += _regs.spr[q][c] * _regs.spr[q][c];
                     }
-                    printf("\n");
+                    dst[q] = dotp;
                 }
-                printf("]\n");
 
+                LOGF("[%s] stddev for subset %d is [%f %f %f]", this->name(), k, sqrt(dst[0]), sqrt(dst[1]), sqrt(dst[2]));
+
+                break;
+            }
+            case RPU_BIAS: {
+                // bias_q[k][*] <- sum(|S[k][*][i]| * b_nom[i])
+                for (q = 2; q >= 0; q--) {
+                    dotp = 0.0f;
+                    mask = init_mask;
+                    for (i = _regs.N_sv - 1; i >= 0; i--, mask >>= 1) {
+                        if (!(_regs.idx_ss[k] & mask)) {
+                            continue;
+                        }
+                        dotp += fabs(_regs.s[k][q][i]) * _regs.b_nom[i];
+                    }
+                    _regs.bias_q[k][q] = dotp;
+                }
+                LOGF("[%s] bias for subset %d is [%f %f %f]", this->name(), k, _regs.bias_q[k][0], _regs.bias_q[k][1], _regs.bias_q[k][2]);
+                break;
+            }
+            case RPU_CALCSS: {
+                // S[k] <- S[k] - S[ss_k_aiv]
+                LOGF("[%s] AIV is %d", this->name(), _regs.ss_k_aiv);
+                for (c = _regs.N_sv - 1; c >= 0; c--) {
+                    for (r = N-1; r >= 0; r--) {
+                        _regs.s[k][r][c] = _regs.s[k][r][c] - _regs.s[_regs.ss_k_aiv][r][c];
+                    }
+                }
+                break;
+            }
+            case RPU_SS: {
+                // ss_mag[k] <- mag(SPR[*][d])
+                dotp = 0.0f;
+                for (q = 2; q >= 0; q--) {
+                    dotp += _regs.spr[q][d] * _regs.spr[q][d];
+                }
+                _regs.ss_mag[k] = sqrt(dotp);
+                break;
+            }
+            case RPU_NEWSS: {
                 // increment cursor
                 if (_regs.N_ss < RAIM_N_SS_MAX) {
                     _regs.N_ss++;

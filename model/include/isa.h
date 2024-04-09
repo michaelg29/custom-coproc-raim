@@ -79,6 +79,7 @@ enum rpu_regs_e {
     RPU_VR_KY  = 13,
     RPU_VR_KZ  = 14,
     RPU_VR_KR  = 15,
+    RPU_VR_Yi  = 16,
 };
 
 // =============================
@@ -323,6 +324,14 @@ enum rpu_op_e {
     RPU_INITP       = 0b000101,
     RPU_CALCP       = 0b000110,
     RPU_WLS         = 0b000111,
+    RPU_MULY        = 0b001000,
+    RPU_MOVD        = 0b001001,
+    RPU_POSVAR      = 0b001010,
+    RPU_BIAS        = 0b001011,
+    RPU_CALCSS      = 0b001100,
+    RPU_SS          = 0b001101,
+    RPU_SSVAR       = 0b001110,
+    RPU_NEWSS       = 0b001111,
 };
 
 // System call codes.

@@ -14,8 +14,8 @@
 // ===========================
 // ===== RAIM PARAMETERS =====
 // ===========================
-#define RAIM_N_SV_MAX 10
-#define RAIM_N_SS_MAX 10
+#define RAIM_N_SV_MAX 16
+#define RAIM_N_SS_MAX 17 // 1 (AIV) + 16 (1 faulty satellite)
 
 // =================================
 // ===== RPU DESIGN PARAMETERS =====
@@ -32,13 +32,15 @@ typedef struct {
     uint8_t N_sv;
     uint8_t N_const;
     uint8_t N_ss;
+    uint8_t ss_k_aiv;
     float sig_tropo2;
     float sig_user2;
     float sig_ura2;
     float sig_ure2;
+    float sig_ura2_all[RAIM_N_SV_MAX];
     float b_nom[RAIM_N_SV_MAX];
     float w_sqrt[RAIM_N_SV_MAX];
-    float c_acc[RAIM_N_SV_MAX];
+    float w_acc_sqrt[RAIM_N_SV_MAX];
     float u[RAIM_N_SV_MAX][7];
     uint32_t idx_ss[RAIM_N_SS_MAX];
     float s[RAIM_N_SS_MAX][7][RAIM_N_SV_MAX];
@@ -46,6 +48,10 @@ typedef struct {
     float y[RAIM_N_SV_MAX];
     float k_fa[3];
     float k_fa_r;
+    float sig_q2[RAIM_N_SS_MAX][3];
+    float bias_q[RAIM_N_SS_MAX][3];
+    float ss_mag[RAIM_N_SS_MAX];
+    float sig_ssq2[RAIM_N_SS_MAX][3];
 } rpu_regs_t;
 
 /** Concrete RAIM coprocessor. */
@@ -79,7 +85,7 @@ class raim_cop : public sc_module, public coprocessor_if {
 
         /** Registers. */
         rpu_regs_t _regs;
-        uint8_t _condition_code;
+        uint8_t _rpu_cpsr;
         int32_t _next_pc_offset;
 
         void main();
