@@ -141,8 +141,8 @@ main:
   la $t2, data_sv9 # last SV cursor
 
   # loop
-  nop # LWC2 $LX, 0($t1)
 load_loop:
+  nop # LWC2 $LX, 0($t1)
   nop # LWC2 $LY, 4($t1)
   nop # LWC2 $LZ, 8($t1)
   nop # LWC2 $C, 12($t1)
@@ -172,8 +172,8 @@ load_loop:
   addi $t1, $zero, 0   # subset cursor
 
   # loop through subsets
-  nop # LWXC2 IDX, $t1($t0)
 subset_loop:
+  nop # LWXC2 $IDX, $t1($t0)
   nop # INITPC2
   nop # CALCPC2
   nop # WLSC2
@@ -181,8 +181,43 @@ subset_loop:
   nop # BIAS
   nop # CALCSS
   nop # SSVARC2
-  nop # NEWSSC2
+  nop # TSTGC2
+  bgezl $zero, sv_local_test # BFDC2 sv_local_test
+  la $a0, str_fault_ndet
+  ori $v0, $zero, 4
+  syscall
+  j subset_loop_increment
+
+  # run local test on satellites
+sv_local_test:
+  la $a0, str_fault_det
+  ori $v0, $zero, 4
+  syscall
+  ori $t3, $zero, 0 # initial counter
+
+  # loop through satellite vehicles
+sv_local_test_loop:
+  nop # MTC2 $t3, $TSTi
+  nop # TSTLC2
+  bgezl $zero, sv_local_test # BFLC2 faulty_sv_located
+  la $a0, str_fault_nloc
+  ori $v0, $zero, 4
+  syscall
+  j sv_local_test_loop_increment
+
+faulty_sv_located:
+  la $a0, str_fault_loc
+  ori $v0, $zero, 4
+  syscall
+
+sv_local_test_loop_increment:
+  slti $t4, $t3, 9 # t4 <- t3 < 9
+  addi $t3, $t3, 1  # move cursor to next subset
+  bnez $t4, sv_local_test_loop
+
+  # increment cursor
 subset_loop_increment:
+  nop # NEWSSC2
   slti $t2, $t1, 4 # t2 <- t1 < 4
   addi $t1, $t1, 4  # move cursor to next subset
   bnez $t2, subset_loop

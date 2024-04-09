@@ -72,10 +72,21 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
         _next_pc_offset = sign_extend_immd(ir, 2);
 
         // conditional PC-relative branch
-        _has_next_pc_offset = (_rpu_cpsr & 0b11111) == flags;
+        LOGF("[%s] cond branch (flag %02x), cpsr is %02x", this->name(), flags, _rpu_cpsr);
+        switch (flags) {
+        case RPU_OKAY: {
+            _has_next_pc_offset = (_rpu_cpsr & 0b11111) == flags;
+            break;
+        }
+        default: {
+            _has_next_pc_offset = ((_rpu_cpsr & 0b11111) & flags) > 0;
+            break;
+        }
+        };
+
         break;
     }
-    }
+    };
 
     return false;
 }
@@ -83,7 +94,6 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
 bool raim_cop::get_regs(uint32_t rt, int32_t &res) {
     // decode register address
     switch (rt) {
-    case RPU_VR_EXC: res = _prev_ex; break;
     case RPU_VR_IDX: res = _regs.idx_faulty_sv; break;
     default: return false;
     }
@@ -414,11 +424,11 @@ void raim_cop::main() {
                 break;
             }
             case RPU_TSTL: {
-                // local test for satellite d
+                // local test for satellite tst_i
                 // fails if y[i] > K_fa,r / W_sqrt[i]
-                if ((_regs.k_fa_r / _regs.w_sqrt[d] - _regs.y[d]) < 0.0f) {
+                if ((_regs.k_fa_r / _regs.w_sqrt[_regs.tst_i] - _regs.y[_regs.tst_i]) < 0.0f) {
                     _rpu_cpsr |= RPU_FL;
-                    _regs.idx_faulty_sv |= (1 << d);
+                    _regs.idx_faulty_sv |= (1 << _regs.tst_i);
                 }
                 break;
             }

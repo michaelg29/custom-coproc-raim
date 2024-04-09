@@ -403,7 +403,7 @@ void cpu::main() {
 
             // conditional PC-relative branch
             if (_regs.w[rs] == _regs.w[rt]) {
-                next_pc = _regs.s.pc + immd;
+                next_pc = _regs.s.pc + immd + 4;
             }
             break;
         }
@@ -416,7 +416,7 @@ void cpu::main() {
             case REGIMM_BGEZL: {
                 // conditional PC-relative branch
                 if (_regs.w[rs] >= 0) {
-                    next_pc = _regs.s.pc + immd;
+                    next_pc = _regs.s.pc + immd + 4;
                 }
                 break;
             }
@@ -424,7 +424,7 @@ void cpu::main() {
             case REGIMM_BGEZALL: {
                 // conditional PC-relative branch to procedure call
                 if (_regs.w[rs] >= 0) {
-                    next_pc = _regs.s.pc + immd;
+                    next_pc = _regs.s.pc + immd + 4;
                     _regs.w[31] = _regs.s.pc + 4; // should be +8 for a pipelined register
                 }
                 break;
@@ -433,7 +433,7 @@ void cpu::main() {
             case REGIMM_BLTZL: {
                 // conditional PC-relative branch
                 if (_regs.w[rs] < 0) {
-                    next_pc = _regs.s.pc + immd;
+                    next_pc = _regs.s.pc + immd + 4;
                 }
                 break;
             }
@@ -441,7 +441,7 @@ void cpu::main() {
             case REGIMM_BLTZALL: {
                 // conditional PC-relative branch to procedure call
                 if (_regs.w[rs] < 0) {
-                    next_pc = _regs.s.pc + immd;
+                    next_pc = _regs.s.pc + immd + 4;
                     _regs.w[31] = _regs.s.pc + 4; // should be +8 for a pipelined register
                 }
                 break;
@@ -522,7 +522,7 @@ void cpu::main() {
 
             // conditional PC-relative branch
             if (_regs.w[rs] > 0) {
-                next_pc = _regs.s.pc + immd;
+                next_pc = _regs.s.pc + immd + 4;
             }
             break;
         }
@@ -533,7 +533,7 @@ void cpu::main() {
 
             // conditional PC-relative branch
             if (_regs.w[rs] <= 0) {
-                next_pc = _regs.s.pc + immd;
+                next_pc = _regs.s.pc + immd + 4;
             }
             break;
         }
@@ -544,7 +544,7 @@ void cpu::main() {
 
             // conditional PC-relative branch
             if (_regs.w[rs] != _regs.w[rt]) {
-                next_pc = _regs.s.pc + immd;
+                next_pc = _regs.s.pc + immd + 4;
             }
             break;
         }
@@ -604,12 +604,12 @@ void cpu::main() {
         }
         case OPCODE_J: {
             immd = GET_INSTR_BITS(_regs.s.ir, 0, 0x03ffffff) << 2;
-            next_pc = _regs.s.pc + immd;
+            next_pc = immd;
             break;
         }
         case OPCODE_JAL: {
             immd = GET_INSTR_BITS(_regs.s.ir, 0, 0x03ffffff) << 2;
-            next_pc = _regs.s.pc + immd;
+            next_pc = immd;
             _regs.w[31] = _regs.s.pc + 4; // should be +8 for a pipelined register
             break;
         }
@@ -875,13 +875,13 @@ void cpu::main() {
         }
         _regs.s.pc = next_pc;
         if (cop1->get_next_pc_offset(res)) {
-            _regs.s.pc = _regs.s.pc + res;
+            _regs.s.pc = _regs.s.pc + res + 4;
         }
         if (cop2->get_next_pc_offset(res)) {
-            _regs.s.pc = _regs.s.pc + res;
+            _regs.s.pc = _regs.s.pc + res + 4;
         }
         if (cop3->get_next_pc_offset(res)) {
-            _regs.s.pc = _regs.s.pc + res;
+            _regs.s.pc = _regs.s.pc + res + 4;
         }
 
         instr_cnt++;

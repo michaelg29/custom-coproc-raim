@@ -35,6 +35,9 @@ int main(int argc, char **argv) {
     }
 
     /** Placeholder instruction replacements. */
+    uint32_t bgezl_tst = (OPCODE_REGIMM << 26) | (0b00000 << 21) | (REGIMM_BGEZL << 16);
+    uint32_t bgezl_mask = 0xffffffff << 16;
+    printf("%08x test %08x mask\n", bgezl_tst, bgezl_mask);
     uint32_t gen_instr_idx = 0;
     int gen_instr[] = {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_AL0, -12), // LWC2 $AL0, -12($t0)
@@ -66,6 +69,11 @@ int main(int argc, char **argv) {
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_BIAS),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCSS),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_SSVAR),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_TSTG),
+        gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FD, 0), // BFDC2 sv_local_test
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t3, RPU_VR_I, 0, 0),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_TSTL),
+        gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FL, 0), // BFLC2 faulty_sv_located
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSS),
     };
     uint32_t n_gen_instr = sizeof(gen_instr) / sizeof(uint32_t);
@@ -93,6 +101,7 @@ int main(int argc, char **argv) {
     // read characters
     uint32_t base_addr;
     uint32_t size;
+    uint32_t word;
     uint32_t words[MAX_WORDS_PER_LOG_LINE];
     char c = getfchar();
     bool newline = true;
@@ -126,7 +135,16 @@ int main(int argc, char **argv) {
 
                 // perform replacement
                 if (!words[size] && gen_instr_idx < n_gen_instr) {
+                    // total replacement of nop
                     words[size] = (uint32_t)gen_instr[gen_instr_idx];
+                    gen_instr_idx++;
+                }
+                else if (((words[size] & bgezl_mask) == bgezl_tst) && gen_instr_idx < n_gen_instr) {
+                    // preserve existing offset for branch
+                    word = (uint32_t)gen_instr[gen_instr_idx];
+                    word &= 0xffff0000;
+                    word |= words[size] & 0x0000ffff;
+                    words[size] = word;
                     gen_instr_idx++;
                 }
             }

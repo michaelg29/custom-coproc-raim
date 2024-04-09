@@ -26,6 +26,7 @@
 
 /** Concrete register collection. */
 typedef struct {
+    uint32_t tst_i;
     float alpha0;
     float G[RAIM_N_SV_MAX][3];
     uint8_t C[RAIM_N_SV_MAX];

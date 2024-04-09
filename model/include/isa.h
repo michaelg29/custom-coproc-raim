@@ -63,7 +63,7 @@ enum register_e {
 
 // RAIM co-processor register locations.
 enum rpu_regs_e {
-    RPU_VR_EXC = 0,
+    RPU_VR_I   = 0,
     RPU_VR_AL0 = 1,
     RPU_VR_LX  = 2,
     RPU_VR_LY  = 3,
