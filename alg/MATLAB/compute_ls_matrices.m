@@ -2,7 +2,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% calculate matrices for least-squares %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [S] = calc_ls_matrices( ...
+function [S] = compute_ls_matrices( ...
     N_sat, N_const, N_ss, ...
     W, G, ...
     ss_sat_mat, ss_const_mat)
@@ -15,7 +15,10 @@ function [S] = calc_ls_matrices( ...
 %   N_const:      Integer number of constellations.
 %   N_ss:         Integer number of subsets for which to compute matrices,
 %                 excluding the all-in-view set.
-%   W:            N_sat*N_sat weighting matrix for all the satellites.
+%   W:            N_sat*N_sat weighting matrix of the satellites used for
+%                 integrity.
+%   W_acc:        N_sat*N_sat weighting matrix of the satellites used for
+%                 accuracy and continuity.
 %   G:            N_sat*(3+N_const) geometry matrix for all the satellites.
 %   ss_sat_mat:   N_ss*N_sat matrix with each row as an activation string
 %                 for the satellite vehicles in the corresponding subset.
@@ -35,7 +38,7 @@ function [S] = calc_ls_matrices( ...
 S = zeros(3+N_const,N_sat,N_ss+1);
 
 % compute the all-in-view matrix
-S(:,:,N_ss+1) = iterative_weighted_pseudoinverse(10, G, W);
+S(:,:,1) = iterative_weighted_pseudoinverse(10, G, W);
 
 % compute for each subset
 for k = 1:N_ss
@@ -48,7 +51,7 @@ for k = 1:N_ss
     this_W = W(not_zero_sat,not_zero_sat);
 
     % compute pseudoinverse
-    S(not_zero_const,not_zero_sat,k) = ...
+    S(not_zero_const,not_zero_sat,k+1) = ...
         iterative_weighted_pseudoinverse(10, this_G, this_W);
 end
 

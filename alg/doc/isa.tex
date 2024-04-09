@@ -65,8 +65,28 @@ MOVD k – move the scratchpad matrix memory into the memory for LS matrix for s
 
 $S^{(k)} \leftarrow SPR$
 
-SSSSC2 k – calculate the solution separation matrix for subset k and store as the least-squares matrix
+POSVAR – calculate the position variance for subset k
 
-$S{(k)} \leftarrow S{(k)} – S^{(0)}$
+$\sigma_q^{(k)2} \leftarrow [(S^{(k)}W^{(k)(-1/2)})(W^{(k)(-1/2)}S^{(k)T})](q,q)$
+
+$\sigma_q^{(k)2} \leftarrow [U U^T](q,q); U = S^{(k)}W^{(k)(-1/2)}$
+
+BIAS
+
+$b_q^{(k)} \leftarrow \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom}[i]$
+
+CALCSSC2 k – calculate the solution separation matrix for subset k and store as the least-squares matrix
+
+$S{(k)}\leftarrow S{(k)} – S^{(0)}$
+
+SSC2 – calculate the solution separation magnitude for subset k
+
+$ |\Delta \hat{x}^{(k)}| = |(S^{(k)} - S^{(0)})\vec{y}| = |SPR_{*,d}|$
+
+SSVAR – calculate the solution separation variance for subset k
+
+$\sigma_{ss,q}^{(k)2} \leftarrow [(S^{(k)}W_{acc}^{(k)(-1/2)})(W_{acc}^{(k)(-1/2)}S^{(k)T})](q,q)$
+
+$\sigma_{ss,q}^{(k)2} \leftarrow [U U^T](q,q); U = S^{(k)}W_{acc}^{(k)(-1/2)}$
 
 \end{document}

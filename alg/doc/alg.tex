@@ -12,37 +12,72 @@
 
 \section{Background knowledge}
 
-$\Delta \vec{x} = (G^T G)^{-1} G^T \vec{y}$
+\begin{equation}
+    \label{eq:bg:raim}
+    \Delta \vec{x} = (G^T G)^{-1} G^T \vec{y}
+\end{equation}
 
-$\Delta \vec{x} = (G^T W G)^{-1} G^T W \vec{y}$
+\begin{equation}
+    \label{eq:bg:araim}
+    \Delta \vec{x} = (G^T W G)^{-1} G^T W \vec{y}
+\end{equation}
 
 \section{Literature survey}
 
-$U \in \mathbb{R}^{M \times N} \Rightarrow U^T \in \mathbb{R}^{N \times M}$
+\begin{equation}
+    \label{eq:app:pseudoinv:iteration}
+    U^{\dagger}_{k+1}=(2I_N - U^{\dagger}_k U) U^{\dagger}_k
+\end{equation}
+\begin{equation}
+    \label{eq:app:pseudoinv:initial}
+    U^{\dagger}_0 = \alpha_0 U^T, \alpha_0 \in [0,\frac{2}{\max(\text{eigenvals}(U^T U))}]
+\end{equation}
 
-$U^{\dagger} = (U^T U)^{-1} U^T \in \mathbb{R}^{N \times M}$
+\subsection{Weighting matrix integration}
 
-$U^{\dagger}_{k+1}=(2I_N - U^{\dagger}_k U) U^{\dagger}_k$
+The polynomial expansion iterative method applies to computing the pseudoinverse for a matrix, $U$. The matrix $U$, is $M \times N$ so its transpose, $U^T$, is $N \times M$. After~(\ref{eq:app:pseudoinv:op}), the pseudoinverse, $U^{\dagger}$, is $N \times M$.
 
-$U^{\dagger}_0 = \alpha U^T, \alpha \in [0,\frac{2}{\max(\text{eigenvals}(U^T U))}]$
+\begin{equation}
+    \label{eq:app:pseudoinv:op}
+    U^{\dagger} = (U^T U)^{-1} U^T \in \mathbb{R}^{N \times M}
+\end{equation}
 
-$S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
+However, the RAIM method uses weighted least-squares, meaning there is an extra matrix in the middle of the approach as~(\ref{eq:app:pseudoinv:wls}).
 
-$U = W^{1/2}G \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
+\begin{equation}
+    \label{eq:app:pseudoinv:wls}
+    S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)}
+\end{equation}
 
-$U^{\dagger} = (W^{1/2}G)^{\dagger} = ((W^{1/2}G)^T W^{1/2}G)^{-1} (W^{1/2}G)^T$
+To adapt the method, the design starts with the substitution, $U = W^{1/2}G$. The square root on the weighting matrix is simply an element-wise square root, so the RPU expects to have the elements with the square root already applied. The substitution yields~(\ref{eq:app:pseudoinv:sub1}).
 
-$(AB)^T = B^T A^T$
+\begin{equation}
+    \label{eq:app:pseudoinv:sub1}
+    U^{\dagger} = (W^{1/2}G)^{\dagger} = ((W^{1/2}G)^T W^{1/2}G)^{-1} (W^{1/2}G)^T
+\end{equation}
 
-$U^{\dagger} = (G^T (W^{1/2})^T W^{1/2}G)^{-1} G^T (W^{1/2})^T$
+Then, substituting an equivalent expression for the transpose (using $(AB)^T = B^T A^T$) gives~(\ref{eq:app:pseudoinv:sub2}).
 
-$W^{1/2} = (W^{1/2})^T$
+\begin{equation}
+    \label{eq:app:pseudoinv:sub2}
+    U^{\dagger} = (G^T (W^{1/2})^T W^{1/2}G)^{-1} G^T (W^{1/2})^T
+\end{equation}
 
-$U^{\dagger} = (G^T W G)^{-1} G^T W^{1/2}$
+Given that $W^{1/2}$ is square and diagonal, $W^{1/2} = (W^{1/2})^T$. Hence, the equation simplifies to~(\ref{eq:app:pseudoinv:sub3}).
 
-$S^{(k)} = U^{\dagger} W^{1/2} = (G^T W G)^{-1} G^T W$
+\begin{equation}
+    \label{eq:app:pseudoinv:sub3}
+    U^{\dagger} = (G^T W G)^{-1} G^T W^{1/2}
+\end{equation}
 
-$\alpha = 0.13$
+The above gives the output of the iterative approach. Finally, to achieve the target weighted least-squares matrix, the RPU right-multiplies the iterative output by the square root of the weighting matrix to get the final weighted least-squares matrix as shown in~(\ref{eq:app:pseudoinv:final}).
+
+\begin{equation}
+    \label{eq:app:pseudoinv:final}
+    S^{(k)} = U^{\dagger} W^{1/2} = (G^T W G)^{-1} G^T W
+\end{equation}
+
+$\alpha_0 = 0.13$
 
 $N = 10$
 
@@ -68,11 +103,85 @@ $N_{sat} \ge 3 + N_{const} + k; N_{const} \ge 1$
 
 \subsection{RAIM subset least-squares estimations}
 
+\begin{itemize}
+
+\item Calculate the diagonals of the two square covariance matrices, $C_{int}, C_{acc} \in \mathbb{R}^{N_{sat} \times N_{sat}}$ as~(\ref{eq:appr:cint}) and~(\ref{eq:appr:cacc}), respectively. The RPU takes as input the standard deviations of the errors for clock and delay, $\sigma_{URA,i}$, $\sigma_{URE,i}$, $\sigma_{tropo,i}$, and $\sigma_{user,i}$, for each satellite. The reciprocal of the diagonal of $C_{int}$ is the weight matrix, $W$, as per~(\ref{eq:appr:w}).
+
+\begin{equation}
+    \label{eq:appr:cint}
+    C_{int}(i,i) \equiv \sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:cacc}
+    C_{acc}(i,i) \equiv \sigma_{URE,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:w}
+    W \equiv C_{int}^{-1} \Rightarrow W(i,i)=\frac{1}{\sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2}
+\end{equation}
+
+\item For the all-in-view set along with each requested subset of the satellite vehicles, indexed by $(k)$, calculate the weighted pseudoinverse matrix, $S^{(k)}$ as~(\ref{eq:appr:sk}), given the weight matrix for that subset along with the provided geometry matrix. Following the work in~[XXX], this computation need not compute an inverse as there is an iterative method to calculate a pseudoinverse. However, this work must validate that the iterative method still applies when using the extra weighting matrix. Appendix~[XXX] demonstrates the required modifications for the proposed iterative algorithm resulting in~(\ref{eq:appr:sk_iterative}).
+
+\begin{equation}
+    \label{eq:appr:sk}
+    S^{(k)} \equiv (G^T W^{(k)} G)^{-1} G^T W^{(k)}
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:sk_iterative}
+    S^{(k)} = (W^{(k)1/2} G)^{\dagger} * W^{(k)1/2}
+\end{equation}
+
+\item Be able to update the weighted pseudoinverse by right-multiplying it with a matrix as shown in~(\ref{eq:appr:skL}). This allows for the integration of the work by Lee~[XXX].
+
+\begin{equation}
+    \label{eq:appr:skL}
+    S^{(k)} = S^{(k)} L
+\end{equation}
+
+\item Compute the matrix-vector multiplication of the weighted pseudoinverse matrix for a set of satellite vehicles with an input vector, such as the vector of pseudorange residuals, and return the result as~(\ref{eq:appr:sky}). This will allow the GPP to compute a converging solution quickly and efficiently for the linearized position. Additionally, this allows the GPP to request the calculation of the solution separation values for each subset.
+
+\begin{equation}
+    \label{eq:appr:sky}
+    \vec{x} = S^{(k)} \vec{y}
+\end{equation}
+
+Using the weighted pseudoinverse matrix for each subset (i.e., $\forall \ k \in [1,N_{ss}]$), compute the solution separation as~(\ref{eq:appr:ss}), where $S^{(0)}$ is the weighted least-squares matrix for the all-in-view set. Then, deriving values from $S^{(k)}$, compute the variances of the 3 components (i.e., $q=1,2,3$) of each of the resultant positions, the biases on the position solution, and the variance of the solution separations as per equations~(\ref{eq:appr:sigmaq}), (\ref{eq:appr:bias}), and~(\ref{eq:appr:sigmass}), respectively.
+
+\begin{equation}
+    \label{eq:appr:ss}
+    \Delta \hat{x}^{(k)} = \hat{x}^{(k)} - \hat{x}^{(0)} = (S^{(k)} - S^{(0)})\vec{y} \in \mathbb{R}^{(3+N_{const})}
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:sigmaq}
+    \sigma_q^{(k)2} = [S^{(k)}C_{int}S^{(k)T}](q,q)
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:bias}
+    b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom,i}
+\end{equation}
+
+\begin{equation}
+    \label{eq:appr:sigmass}
+    \sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)
+\end{equation}
+
+\end{itemize}
+
+This project limits the scope to the above steps for a few other reasons apart from their ease of translation to digital hardware. The matrix multiplication for each subset lends to the derivation of the biases and variance of the components and solution separations. The designed co-processor does not account for subset generation, nor the computation of protection levels. Subset generation requires complex control flow in considering specific fault modes, which is more suitable for standard software instructions. The protection levels require estimating the Q-function and solving complex equations, which are also best implemented with the general-purpose processor instruction set.
+
+To compute the above equations, Table~\ref{tab:rpu_eq_input} shows the values the RPU must take as input.
+
 \begin{table}[htbp] \centering
-  \caption{Definitions}
-  \begin{tabular}{|m{2cm}|m{2cm}|m{2cm}|m{7cm}|}
+  \caption{Input values for the RPU to compute solution separations and variances. The scope column shows whether the value applies to specific satellite vehicles ($SV_i$), specific subsets ($SS_k$), or everything (conf).}
+  \label{tab:rpu_eq_input}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{7cm}|}
     \hline
-    \textbf{Notation} & \textbf{Relation} & \textbf{Dimensions} & \textbf{Description}\\ \hline
+    \textbf{Notation} & \textbf{Scope} & \textbf{Dimensions} & \textbf{Description}\\ \hline
     $x_{SV_i}$ & $SV_i$ & $3 \times 1$ & Unit vector pointing from the linearized receiver position to the satellite position in ENU coordinates\\ \hline
     $c_{SV_i}$ & $SV_i$ & $1 \times 1$ & Constellation number.\\ \hline
     $\sigma_{tropo,i}^2$ & $SV_i$ & $1 \times 1$ & Variance for the tropospheric delay.\\ \hline
@@ -85,72 +194,14 @@ $N_{sat} \ge 3 + N_{const} + k; N_{const} \ge 1$
   \end{tabular}
 \end{table}
 
-Initial matrices the RPU must calculate:
-
-$C_{int}(i,i) \equiv \sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2$
-
-$C_{acc}(i,i) \equiv \sigma_{URE,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2$
-
-$W \equiv C_{int}^{-1} \Rightarrow W(i,i)=\frac{1}{\sigma_{URA,i}^2 + \sigma_{tropo,i}^2 + \sigma_{user,i}^2}$
-
-All-in-view iterative solution:
-
-$\Delta \hat{x}_j=(G^T W G)^{-1} G^T W \Delta PR_j$
-
-$\Delta PR_j(i)=PR_i-|\vec{x}_{SV_{i}}-\hat{x}_j|$
-
-$\hat{x}_{j+1} = \hat{x}_j + \Delta \hat{x}_j$
-
-$\vec{y} \equiv \Delta PR_J$
-
-Least-squares matrix for each subset:
-
-$S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
-
-$W^{(k)} \in \mathbb{R}^{N_{sat} \times N_{sat}}$
-
-$G \in \mathbb{R}^{N_{sat} \times (3+N_{const})} \Rightarrow G^T \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
-
-$\Rightarrow G^T W^{(k)} \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
-
-$\Rightarrow G^T W^{(k)} G, (G^T W^{(k)} G)^{-1} \in \mathbb{R}^{(3+N_{const}) \times (3+N_{const})}$
-
-$\Rightarrow S^{(k)} = (G^T W^{(k)} G)^{-1} G^T W^{(k)} = (W^{(k)1/2} G)^{\dagger} * W^{(k)1/2} \in \mathbb{R}^{(3+N_{const}) \times N_{sat}}$
-
-The following equations are applicable for all subsets ($\forall \ k \in [1,N_{ss}]$) and the three ENU components ($\forall \ q \in \{1,2,3\}$). Subset solution separations, along with variances and biases:
-
-$\Delta \hat{x}^{(k)} = \hat{x}^{(k)} - \hat{x}^{(0)} = (S^{(k)} - S^{(0)})\vec{y} \in \mathbb{R}^{(3+N_{const})}$
-
-$\sigma_q^{(k)2} = [(G^T W^{(k)} G)^{-1}](q,q)$
-
-$b_q^{(k)} = \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom,i}$
-
-$\sigma_{ss,q}^{(k)2} = [(S^{(k)}-S^{(0)})C_{acc}(S^{(k)}-S^{(0)})^T](q,q)$
-
 \subsection{Fault detection and exclusion}
 
-\begin{table}[htbp] \centering
-  \caption{Definitions}
-  \begin{tabular}{|m{2cm}|m{2cm}|m{2cm}|m{7cm}|}
-    \hline
-    \textbf{Notation} & \textbf{Relation} & \textbf{Dimensions} & \textbf{Description}\\ \hline
-    $K_{fa}$ & conf & $3 \times 1$ & Threshold factors derived from the continuity budgets allocated for the vertical and horizontal modes. See (19) and (20) in [X] for more details.\\ \hline
-    $K_{fa,r}$ & conf & $1 \times 1$ & Threshold factors dervied from the continuity budgets allocated for the local test. See (22) and (23) in [X] for more details.\\ \hline
-    $idx_{ss,k}$ & $SS_k$ & $1 \times 1$ & $N_{sat}$-bit activation string to indicate satellites included in a subset.\\ \hline
-  \end{tabular}
-\end{table}
+Since the RPU ends up performing much of the mathematics internally, it has access to many values used in the fault detection and exclusion (FDE) tests. As a result, it can process specific steps of the FDE procedure when software issues the proper instructions. To detect a fault when using solution separation ARAIM, the RPU uses the global test on each subset solution in~(\ref{eq:appr:glob_test}), where $K_{fa,q}$ is a provided threshold and $\sigma_{ss,q}^{(k)2}$ is the variance computed above.
 
-Requirements
-
-Solution: $N_{sat} \ge 3 + N_{const}; N_{const} \ge 1$
-
-Fault detection: $N_{sat} \ge 3 + N_{const} + 1; N_{const} \ge 1$
-
-Fault exclusion: $N_{sat} \ge 3 + N_{const} + 2; N_{const} \ge 1$
-
-Global test for each subset $k$:
-
-$|\Delta \hat{x}^{(k)}| = |\hat{x}^{(k)} - \hat{x}^{(0)}| \le \sigma_{ss,q}^{(k)2} * K_{fa,q}$
+\begin{equation}
+    \label{eq:appr:glob_test}
+    |\Delta \hat{x}^{(k)}| = |(S^{(k)} - S^{(0)})\vec{y}| \le \sigma_{ss,q}^{(k)2} * K_{fa,q}
+\end{equation}
 
 $K_{fa,1} = K_{fa,2} = Q^{-1}(\frac{P_{FA\_HOR}}{4N_{fault modes}})$
 
@@ -158,10 +209,27 @@ $K_{fa,3} = Q^{-1}(\frac{P_{FA\_VERT}}{2N_{fault modes}})$
 
 $Q^{-1}(p)$ is the $(1-p)$-quantile of a normal distribution.
 
-Local test for each satellite vehicle $i$:
+If this test fails, the RPU moves to locate and exclude that fault. Using criteria in [10], this project defines the local test for each satellite vehicle as~(\ref{eq:appr:local_test}), where $y_i$ is the $i$-th element of the converged pseudorange residual as previously calculated in~(\ref{eq:appr:sky}) and $C_{int}(i,i)$ is the $i$-th element of the diagonal of the covariance matrix used for integrity. Obviously, the RPU should start with the largest value, as that will most likely fail the test.
 
-$|y_i| \le \sqrt{C_{int}(i,i)} * K_{fa,r}$
+\begin{equation}
+    \label{eq:appr:local_test}
+    |y_i| \le \sqrt{C_{int}(i,i)} * K_{fa,r} = K_{fa,r} / W^{1/2}(i,i)
+\end{equation}
 
 $K_{fa,r} = Q^{-1}(\frac{P_{FA}}{2})$
+
+Table~\ref{tab:rpu_fde_input} shows the parameters the RPU must receive on top of the previous list to perform fault detection and exclusion.
+
+\begin{table}[htbp] \centering
+  \caption{Input values for the RPU to compute fault detection and exclusion. The scope column shows whether the value applies to specific satellite vehicles ($SV_i$), specific subsets ($SS_k$), or everything (conf).}
+  \label{tab:rpu_fde_input}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{7cm}|}
+    \hline
+    \textbf{Notation} & \textbf{Scope} & \textbf{Dimensions} & \textbf{Description}\\ \hline
+    $K_{fa}$ & conf & $3 \times 1$ & Threshold factors derived from the continuity budgets allocated for the vertical and horizontal modes. See (19) and (20) in [X] for more details.\\ \hline
+    $K_{fa,r}$ & conf & $1 \times 1$ & Threshold factors dervied from the continuity budgets allocated for the local test. See (22) and (23) in [X] for more details.\\ \hline
+    $idx_{ss,k}$ & $SS_k$ & $1 \times 1$ & $N_{sat}$-bit activation string to indicate satellites included in a subset.\\ \hline
+  \end{tabular}
+\end{table}
 
 \end{document}

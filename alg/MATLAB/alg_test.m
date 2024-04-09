@@ -2,10 +2,9 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% Script to test the algorithm. %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [] = alg_test(test, log_asm)
+function [] = alg_test(log_asm)
 
 arguments
-    test = ""
     log_asm = false
 end
 
@@ -22,12 +21,13 @@ sig_URE_i2 = 0.50 * 0.50; % meters^2
 bias_nom_i = 0.50; % meters
 
 % placeholder variables
-init_G = ones(N_sat, 3);
-consts = zeros(N_sat, 1);
-sig_URA2 = zeros(N_sat, 1);
-sig_URE2 = zeros(N_sat, 1);
+init_G     = ones(N_sat, 3);
+consts     = zeros(N_sat, 1);
+sig_URA2   = zeros(N_sat, 1);
+sig_URE2   = zeros(N_sat, 1);
 sig_tropo2 = zeros(N_sat, 1);
-sig_user2 = zeros(N_sat, 1);
+sig_user2  = zeros(N_sat, 1);
+b_nom      = zeros(N_sat, 1);
 
 % test data from Blanch et al. Appendix H
 init_G(1:N_sat,1:3) = [ 0.0225  0.9951 -0.0966;
@@ -54,16 +54,17 @@ C_int_exp = diag([ 3.8865 1.4377 0.8604 1.6383 1.3229 0.8434 0.8963 0.8669 0.857
 C_acc_exp = diag([ 3.5740 1.1252 0.5479 1.3258 1.0104 0.5309 0.5838 0.5544 0.5448 1.0491 ]);
 sig_fault_const1_vert_exp = 2.5760;
 sig_fault_const1_sep_vert_exp = 1.5307;
-bias_fault_const1_vert_exp = 3.8935;
+bias_fault_const1_vert_exp = 2.8935;
 sig_fault_const2_vert_exp = 2.5577;
 sig_fault_const2_sep_vert_exp = 1.5292;
 bias_fault_const2_vert_exp = 2.0875;
 
 % calculate per-satellite variances and initial observation matrix
 for i = 1:N_sat
-    % copy sigma_URA2 and sigma_URE2
+    % copy constant values
     sig_URA2(i) = sig_URA_i2;
     sig_URE2(i) = sig_URE_i2;
+    b_nom(i) = bias_nom_i;
 
     % determine angle of elevation = atan2(z, sqrt(x^2 + y^2))
     ang = rad2deg(abs(atan2(init_G(i,3), sqrt(power(init_G(i,1),2)+power(init_G(i,2),2)))));
@@ -99,40 +100,38 @@ if log_asm
     end
 end
 
-if test == "init_matrices"
-    % unit test - matrix initialization
-    fprintf("Running unit test on init_matrices\n");
-    [C_int, C_acc, W, ~] = init_matrices( ...
-        N_sat, N_const, ...
-        sig_URA2, sig_URE2, sig_tropo2, sig_user2, ...
-        init_G, consts);
+% matrix initialization
+[C_int, C_acc, W, W_acc, G] = init_matrices( ...
+    N_sat, N_const, ...
+    sig_URA2, sig_URE2, sig_tropo2, sig_user2, ...
+    init_G, consts);
 
-    assert(C_int == C_int_exp);
-    assert(C_acc == C_acc_exp);
-    assert(W == inv(C_int_exp));
-elseif test == "calc_ls_matrices"
-    [C_int, C_acc, W, G] = init_matrices( ...
-        N_sat, N_const, ...
-        sig_URA2, sig_URE2, sig_tropo2, sig_user2, ...
-        init_G, consts);
+assert(max(max(abs(C_int - C_int_exp))) < 1e-4);
+assert(max(max(abs(C_acc - C_acc_exp))) < 1e-4);
+assert(max(max(abs(W - inv(C_int_exp)))) < 1e-4);
+assert(max(max(abs(W_acc - inv(C_acc_exp)))) < 1e-3);
 
-    [S] = calc_ls_matrices( ...
-        N_sat, N_const, N_ss, ...
-        W, G, ...
-        ss_sat_mat, ss_const_mat)
+% weighted least squares (nothing to check)
+[S] = compute_ls_matrices( ...
+    N_sat, N_const, N_ss, ...
+    W, G, ...
+    ss_sat_mat, ss_const_mat);
 
-    % first subset assumes fault in constellation 2
-    %assert(abs(sqrt(inv_GTWG(3,3,1)) - sig_fault_const2_vert_exp) < 1e-4);
-    % second subset assumes fault in constellation 1
-    %assert(abs(sqrt(inv_GTWG(3,3,2)) - sig_fault_const1_vert_exp) < 1e-4);
-elseif test ~= "none"
-    % integration test - call the whole algorithm
-    fprintf("Running integration test on alg\n");
-    [pos_vars, nominal_bias_impact, sol_sep_vars] = alg( ...
-         N_sat, N_const, N_ss, ...
-         sig_URA2, sig_URE2, sig_tropo2, sig_user2, ...
-         init_G, consts, x_SVs, prs, xhat)
-end
+% compute variances and biases
+[var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
+    N_sat, N_const, N_ss, ...
+    W, W_acc, S, ...
+    b_nom);
+
+% first subset assumes fault in constellation 2
+assert(abs(sqrt(var_pos(1,3)) - sig_fault_const2_vert_exp) < 1e-4);
+assert(abs(bias_pos(1,3) - bias_fault_const2_vert_exp) < 1e-4);
+assert(abs(sqrt(var_ss_pos(1,3)) - sig_fault_const2_sep_vert_exp) < 1e-3);
+
+% second subset assumes fault in constellation 1
+assert(abs(sqrt(var_pos(2,3)) - sig_fault_const1_vert_exp) < 1e-4);
+assert(abs(bias_pos(2,3) - bias_fault_const1_vert_exp) < 1e-4);
+assert(abs(sqrt(var_ss_pos(2,3)) - sig_fault_const1_sep_vert_exp) < 1e-3);
 
 fprintf("Done with test\n");
 

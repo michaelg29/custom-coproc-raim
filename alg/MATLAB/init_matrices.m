@@ -2,7 +2,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% calculate initial matrices %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [C_int, C_acc, W, G] = init_matrices( ...
+function [C_int, C_acc, W, W_acc, G] = init_matrices( ...
     N_sat, N_const, ...
     sig_URA2, sig_URE2, sig_tropo2, sig_user2, ...
     init_G, consts)
@@ -30,7 +30,10 @@ function [C_int, C_acc, W, G] = init_matrices( ...
 % Return values:
 %   C_int: N_sat*N_sat covariance matrix for integrity.
 %   C_acc: N_sat*N_sat covariance matrix for accuracy and continuity.
-%   W:     N_sat*N_sat weighting matrix for all satellites.
+%   W:     N_sat*N_sat weighting matrix of the satellites used for
+%          integrity.
+%   W_acc: N_sat*N_sat weighting matrix of the satellites used for
+%          accuracy and continuity.
 %   G:     N_sat*(3+N_const) matrix extending the geometry matrix to
 %          include the activation string for the satellite constellations.
 
@@ -45,6 +48,8 @@ C_int = diag(C_int_diag);
 C_acc = diag(C_acc_diag);
 % W = C_int^-1 => W(i,i) = 1 / C_int(i,i)
 W     = diag(1.0 ./ C_int_diag);
+% W_acc = C_acc^-1 => W_acc(i,i) = 1 / C_acc(i,i)
+W_acc = diag(1.0 ./ C_acc_diag);
 
 % construct extended geometry matrix
 G = zeros(N_sat,3+N_const);

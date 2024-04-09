@@ -90,7 +90,6 @@ data_sv9:
   .word 0x3f1dfb07 # sig_user2 = 0.617112
 
 data_subsets:
-  .word 1023 # all-in-view
   .word 992  # 5 last satellites
   .word 31   # 5 first satellites
 
@@ -108,23 +107,23 @@ main:
   ##### load in SV data #####
   ###########################
   la $t0, data_bias_nom
-  nop # LWC2 ALi, -12($t0)
-  nop # LWC2 SA, -8($t0)
-  nop # LWC2 SE, -4($t0)
+  nop # LWC2 $ALi, -12($t0)
+  nop # LWC2 $SA, -8($t0)
+  nop # LWC2 $SE, -4($t0)
 
   # cursors
   la $t1, data_sv0 # initial cursor
   la $t2, data_sv9 # last SV cursor
 
   # loop
-  nop # LWC2 LX, 0($t1)
+  nop # LWC2 $LX, 0($t1)
 load_loop:
-  nop # LWC2 LY, 4($t1)
-  nop # LWC2 LZ, 8($t1)
-  nop # LWC2 C, 12($t1)
-  nop # LWC2 ST, 16($t1)
-  nop # LWC2 SR, 20($t1)
-  nop # LWC2 BN, 0($t0)
+  nop # LWC2 $LY, 4($t1)
+  nop # LWC2 $LZ, 8($t1)
+  nop # LWC2 $C, 12($t1)
+  nop # LWC2 $ST, 16($t1)
+  nop # LWC2 $SR, 20($t1)
+  nop # LWC2 $BN, 0($t0)
   nop # NEWSVC2
   slt $t3, $t1, $t2 # t3 <- t1 < t2
   addi $t1, $t1, 24 # move cursor to next SV
@@ -135,17 +134,31 @@ load_loop:
   #################################
   nop # CALCUC2
 
+  # all-in-view
+  ori $t0, $zero, 1023
+  nop # MTC2 $t0, $IDX
+  nop # INITPC2
+  nop # CALCPC2
+  nop # WLSC2
+  nop # NEWSSC2
+
   # cursors
   la $t0, data_subsets # initial subset
   addi $t1, $zero, 0   # subset cursor
 
-  # loop
+  # loop through subsets
   nop # LWXC2 IDX, $t1($t0)
 subset_loop:
   nop # INITPC2
   nop # CALCPC2
   nop # WLSC2
-  slti $t2, $t1, 8 # t2 <- t1 < 8
+  nop # POSVARC2
+  nop # BIAS
+  nop # CALCSS
+  nop # SSVARC2
+  nop # NEWSSC2
+subset_loop_increment:
+  slti $t2, $t1, 4 # t2 <- t1 < 4
   addi $t1, $t1, 4  # move cursor to next subset
   bnez $t2, subset_loop
 

@@ -15,39 +15,43 @@
 \begin{table}[htbp] \begin{center}
   \caption{Virtual registers in the RPU. General purpose instructions such as \emph{LWC2} and \emph{MFC2} access these registers. They are virtual as they map to internal registers. Some have hardwired locations. Others have mapped locations that change based on the current satellite vehicle or subset, indicated by a * in the mapped register column.}
   \label{tab:rpu_virtual_registers}
-  \begin{tabular}{|m{1.5cm}|m{2cm}|m{6cm}|m{1.5cm}|}
+  \begin{tabular}{|m{1.25cm}|m{1.5cm}|m{1.75cm}|m{5.25cm}|m{1.5cm}|}
     \hline
-    \textbf{Name} & \textbf{Type} & \textbf{Notation/Description} & \textbf{Mapped register}\\ \hline
+    \textbf{ID} & \textbf{Name} & \textbf{Type} & \textbf{Notation/Description} & \textbf{Mapped register}\\ \hline
 
-    \emph{EXC} & \emph{uint32} & Previous trapped exception. & \emph{EXC}\\ \hline
+    \emph{CPSR} & \emph{CPSR} & \emph{bit[7:0]} & Current program status register. Table~\ref{tab:rpu_cpsr_codes} shows the possible values. & \emph{CPSR}\\ \hline
 
-    \emph{AL0} & \emph{float} & The factor for the initial guess in the pseudorange calculation. & $\alpha_0$\\ \hline
+    \emph{RR0} & \emph{EXC} & \emph{uint32} & Previous trapped exception. Table~\ref{tab:rpu_exception_codes} shows the possible values. & \emph{EXC}\\ \hline
 
-    \emph{LX} & \emph{float} & The x value of the current SV's LOS vector. & $G[*][0]$\\ \hline
-    \emph{LY} & \emph{float} & The y value of the current SV's LOS vector. & $G[*][1]$\\ \hline
-    \emph{LZ} & \emph{float} & The z value of the current SV's LOS vector. & $G[*][2]$\\ \hline
+    \emph{RR1} & \emph{AL0} & \emph{float} & The factor for the initial guess in the pseudorange calculation. & $\alpha_0$\\ \hline
 
-    \emph{C} & \emph{bit[1:0]} & Constellation index for the current SV. The values start from $0$ and increment by $1$ for each additional constellation. & $C[*]$\\ \hline
+    \emph{RR2} & \emph{LX} & \emph{float} & The x value of the current SV's LOS vector. & $G[*][0]$\\ \hline
+    \emph{RR3} & \emph{LY} & \emph{float} & The y value of the current SV's LOS vector. & $G[*][1]$\\ \hline
+    \emph{RR4} & \emph{LZ} & \emph{float} & The z value of the current SV's LOS vector. & $G[*][2]$\\ \hline
 
-    \emph{ST2} & \emph{float} & Variance for the tropospheric delay for the current SV. & $\sigma_{tropo}^2$\\ \hline
+    \emph{RR5} & \emph{C} & \emph{bit[1:0]} & Constellation index for the current SV. The values start from $0$ and increment by $1$ for each additional constellation. & $C[*]$\\ \hline
 
-    \emph{SR2} & \emph{float} & Variance for the user delay for the current SV. & $\sigma_{user}^2$\\ \hline
+    \emph{RR6} & \emph{ST2} & \emph{float} & Variance for the tropospheric delay for the current SV. & $\sigma_{tropo}^2$\\ \hline
 
-    \emph{SA2} & \emph{float} & Variance for the clock and ephemeris error used for integrity for the current SV. & $\sigma_{URA}^2$\\ \hline
+    \emph{RR7} & \emph{SR2} & \emph{float} & Variance for the user delay for the current SV. & $\sigma_{user}^2$\\ \hline
 
-    \emph{SE2} & \emph{float} & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV. & $\sigma_{URE}^2$\\ \hline
+    \emph{RR8} & \emph{SA2} & \emph{float} & Variance for the clock and ephemeris error used for integrity for the current SV. & $\sigma_{URA}^2$\\ \hline
 
-    \emph{BN} & \emph{float} & Maximum nominal bias for integrity for the current SV. & $b_{nom}[*]$\\ \hline
+    \emph{RR9} & \emph{SE2} & \emph{float} & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV. & $\sigma_{URE}^2$\\ \hline
 
-    \emph{IDX} & \emph{bit}[$N_{sv,max}-1:0$] & Activation string to indicate the SVs that the current subset includes. & $idx_{ss}[*]$\\ \hline
+    \emph{RR10} & \emph{BN} & \emph{float} & Maximum nominal bias for integrity for the current SV. & $b_{nom}[*]$\\ \hline
 
-    \emph{KX} & \emph{float} & The threshold factor for the global test of the x-coordinate. & $K_{fa}[0]$\\ \hline
+    \emph{RR11} & \emph{IDX} & \emph{bit}[$N_{sv,max}\newline-1:0$] & Activation string to indicate the SVs that the current subset includes. & $idx_{ss}[*]$\\ \hline
 
-    \emph{KY} & \emph{float} & The threshold factor for the global test of the y-coordinate. & $K_{fa}[1]$\\ \hline
+    \emph{RR12} & \emph{KX} & \emph{float} & The threshold factor for the global test of the x-coordinate. & $K_{fa}[0]$\\ \hline
 
-    \emph{KZ} & \emph{float} & The threshold factor for the global test of the z-coordinate. & $K_{fa}[2]$\\ \hline
+    \emph{RR13} & \emph{KY} & \emph{float} & The threshold factor for the global test of the y-coordinate. & $K_{fa}[1]$\\ \hline
 
-    \emph{KR} & \emph{float} & The threshold factor for the local exclusion test. & $K_{fa,r}$\\ \hline
+    \emph{RR14} & \emph{KZ} & \emph{float} & The threshold factor for the global test of the z-coordinate. & $K_{fa}[2]$\\ \hline
+
+    \emph{RR15} & \emph{KR} & \emph{float} & The threshold factor for the local exclusion test. & $K_{fa,r}$\\ \hline
+
+    \emph{RR16} - \emph{RR31} & \emph{Y0} - \emph{Y15} & \emph{float} & The $i$-th element of the test vector. & $y[*]$\\ \hline
   \end{tabular}
 \end{center}
 \end{table}
@@ -60,7 +64,9 @@
 
     \textbf{Name} & \textbf{Size (bits)} & \textbf{Notation/Description}\\ \hline
 
-    \emph{EXC} & $\lceil{\text{log}_2(N_{ex})}\rceil$ & Previous trapped exception.\\ \hline
+    \emph{CPSR} & $8$ & Previous trapped exception. Table~\ref{tab:rpu_cpsr_codes} shows the possible values.\\ \hline
+
+    \emph{EXC} & $\lceil{\text{log}_2(N_{ex})}\rceil$ & Previous trapped exception. Table~\ref{tab:rpu_exception_codes} shows the possible values.\\ \hline
 
     $\alpha_0$ & $32$ & The factor for the initial guess in the pseudorange calculation.\\ \hline
 
@@ -72,7 +78,7 @@
 
     $N_{const}$ & $2$ & The current number of constellations with visible SVs. Taken as the maximum value of $C[i]$.\\ \hline
 
-    $N_{ss}$ & $\lceil{\text{log}_2(N_{sv,max})}\rceil$ & The current number of formed subsets. Increments with each new calculated least-squares matrix.\\ \hline
+    $N_{ss}$ & $\lceil{\text{log}_2(N_{ss,max})}\rceil$ & The current number of formed subsets. Increments with each new calculated least-squares matrix.\\ \hline
 
     $\sigma_{tropo}^2$ & $32$ & Variance for the tropospheric delay for the current SV.\\ \hline
 
@@ -81,6 +87,8 @@
     $\sigma_{URA}^2$ & $32$ & Variance for the clock and ephemeris error used for integrity for the current SV.\\ \hline
 
     $\sigma_{URE}^2$ & $32$ & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV.\\ \hline
+
+    $\sigma_{URA}^2[i]$ & $(N_{sv,max}) \times 32$ & Variance for the clock and ephemeris error used for integrity for the $i$-th SV.\\ \hline
 
     $b_{nom}[i]$ & $(N_{sv,max}) \times 32$ & Maximum nominal bias for integrity for the $i$-th SV.\\ \hline
 
@@ -98,6 +106,14 @@
 
     $y[i]$ & $(N_{sv,max}) \times 32$ & The $i$-th element of the vector to multiply with the least-squares matrix.\\ \hline
 
+    $|\Delta\hat{x}^{(k)}|$ & $(N_{ss,max}) \times 32$ & The magnitude of the solution separation for the $k$-th subset from the all-in-view set.\\ \hline
+
+    $\sigma_q^{(k)2}$ & $(N_{ss,max}) \times 3) \times 32$ & The variance of the $q$-th coordinate for the $k$-th subset solution.\\ \hline
+
+    $b_q^{(k)}$ & $(N_{ss,max}) \times 3) \times 32$ & The bias of the $q$-th coordinate for the $k$-th subset.\\ \hline
+
+    $\sigma_{ss,q}^{(k)2}$ & $(N_{ss,max}) \times 3) \times 32$ & The variance of the $q$-th coordinate for the $k$-th subset solution separation.\\ \hline
+
     $K_{fa}[j]$ & $(3) \times 32$ & The threshold factor for the global test of the $j$-th element of the coordinate vector (ENU).\\ \hline
 
     $K_{fa,r}$ & $32$ & The threshold factor for the local exclusion test.\\ \hline
@@ -105,10 +121,25 @@
 \end{center}
 \end{table}
 
+\section{RPU Program Status}
+
+\begin{table}[htbp] \begin{center}
+  \caption{RPU current program status register (CPSR) values.}
+  \label{tab:rpu_cpsr_codes}
+  \begin{tabular}{|m{1.5cm}|m{3.5cm}|m{7cm}|}
+    \hline
+    \textbf{Code} & \textbf{Exception Name} & \textbf{Exception Description}\\ \hline
+
+    $0$ & None & No specific status, OKAY functionality.\\ \hline
+  \end{tabular}
+\end{center}
+\end{table}
+
 \section{RPU Exceptions}
 
 \begin{table}[htbp] \begin{center}
-  \caption{RPU exception codes. The RPU stores current raised exceptions in the register EXC.}\label{tab:rpu_exception_codes}
+  \caption{RPU exception codes. The RPU stores current raised exceptions in the register EXC.}
+  \label{tab:rpu_exception_codes}
   \begin{tabular}{|m{1.5cm}|m{3.5cm}|m{7cm}|}
     \hline
     \textbf{Code} & \textbf{Exception Name} & \textbf{Exception Description}\\ \hline
@@ -127,4 +158,3 @@
 \end{table}
 
 \end{document}
-
