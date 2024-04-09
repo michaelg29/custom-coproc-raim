@@ -35,26 +35,38 @@ raim_cop::~raim_cop() {
 bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     bool write_back = false;
     uint32_t rrs = GET_INSTR_REG(ir, 11);
+    uint32_t fmt = GET_INSTR_REG(ir, 21);
+    uint32_t flags = GET_INSTR_REG(ir, 16);
 
-    switch (GET_INSTR_COP_OP(ir)) {
-    case RPU_RST: {
+    // decode instruction format
+    switch (fmt) {
+    case RPU_FMT_NONE: {
+        // enqueue instruction
+        _instr_q_overflow = !_instr_q.enqueue(ir);
+        break;
+    }
+    case RPU_FMT_RST: {
         // reset registers
+        _rpu_cpsr = RPU_OKAY;
         memset(&_regs, 0, sizeof(rpu_regs_t));
         break;
     }
-    case RPU_MF: {
+    case RPU_FMT_MF: {
         // move RPU register rrs to res
         write_back = get_regs(rrs, res);
         break;
     }
-    case RPU_MT: {
+    case RPU_FMT_MT: {
         // move rt to RPU register rrs
         set_regs(rrs, rt);
         break;
     }
-    default: {
-        // enqueue instruction
-        _instr_q_overflow = !_instr_q.enqueue(ir);
+    case RPU_FMT_BC: {
+        // get immediate and left shift
+        _next_pc_offset = sign_extend_immd(ir, 2);
+
+        // conditional PC-relative branch
+        _has_next_pc_offset = (_rpu_cpsr & 0b11111) == flags;
         break;
     }
     }
@@ -169,7 +181,6 @@ void raim_cop::main() {
                 // calculate weight
                 _regs.w_sqrt[i] = 1.0f / sqrt(_regs.sig_tropo2 + _regs.sig_user2 + _regs.sig_ura2);
                 _regs.w_acc_sqrt[i] = 1.0f / sqrt(_regs.sig_tropo2 + _regs.sig_user2 + _regs.sig_ure2);
-                _regs.sig_ura2_all[i] = _regs.sig_ura2;
 
                 LOGF("[%s] Completed SV %d", this->name(), i);
                 LOGF("LOS %f %f %f, constellation %d", _regs.G[i][0], _regs.G[i][1], _regs.G[i][2], _regs.C[i]);

@@ -37,7 +37,6 @@ typedef struct {
     float sig_user2;
     float sig_ura2;
     float sig_ure2;
-    float sig_ura2_all[RAIM_N_SV_MAX];
     float b_nom[RAIM_N_SV_MAX];
     float w_sqrt[RAIM_N_SV_MAX];
     float w_acc_sqrt[RAIM_N_SV_MAX];

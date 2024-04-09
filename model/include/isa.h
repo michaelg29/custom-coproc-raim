@@ -316,9 +316,6 @@ enum fpu_fmt_e {
 
 // Operations of the RPU opcode (opcode COP2).
 enum rpu_op_e {
-    RPU_RST         = 0b000000,
-    RPU_MF          = 0b000001,
-    RPU_MT          = 0b000010,
     RPU_NEWSV       = 0b000011,
     RPU_CALCU       = 0b000100,
     RPU_INITP       = 0b000101,
@@ -332,6 +329,20 @@ enum rpu_op_e {
     RPU_SS          = 0b001101,
     RPU_SSVAR       = 0b001110,
     RPU_NEWSS       = 0b001111,
+};
+
+// RAIM conditions to test for.
+enum rpu_cond_e {
+    RPU_OKAY        = 0b00000,
+};
+
+// Possible formats for RAIM instructions.
+enum rpu_fmt_e {
+    RPU_FMT_NONE    = 0b00000,
+    RPU_FMT_RST     = 0b00001,
+    RPU_FMT_MF      = 0b00010,
+    RPU_FMT_MT      = 0b00100,
+    RPU_FMT_BC      = 0b01000,
 };
 
 // System call codes.
