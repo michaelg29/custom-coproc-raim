@@ -33,6 +33,7 @@ data_sv0:
   .word 0x00000000 # constellation
   .word 0x3fa2faeb # sig_tropo2 = 1.273282
   .word 0x40033f88 # sig_user2 = 2.050753
+  .word 0xc1d03d71 # y = -26.030000
 
 data_sv1:
   .word 0x3f2ccccd # LOS_x = 0.675000
@@ -41,6 +42,7 @@ data_sv1:
   .word 0x00000000 # constellation
   .word 0x3e5261d9 # sig_tropo2 = 0.205451
   .word 0x3f2b77e9 # sig_user2 = 0.669798
+  .word 0x41b70a3d # y = 22.880000
 
 data_sv2:
   .word 0x3d941206 # LOS_x = 0.072300
@@ -49,6 +51,7 @@ data_sv2:
   .word 0x00000000 # constellation
   .word 0x3cd2adba # sig_tropo2 = 0.025718
   .word 0x3e8b58bb # sig_user2 = 0.272161
+  .word 0xc12dc28f # y = -10.860000
 
 data_sv3:
   .word 0xbf7096bc # LOS_x = -0.939800
@@ -57,6 +60,7 @@ data_sv3:
   .word 0x00000000 # constellation
   .word 0x3e8a1c12 # sig_tropo2 = 0.269745
   .word 0x3f4e5b71 # sig_user2 = 0.806083
+  .word 0xc0b051ec # y = -5.510000
 
 data_sv4:
   .word 0xbf17381d # LOS_x = -0.590700
@@ -65,6 +69,7 @@ data_sv4:
   .word 0x00000000 # constellation
   .word 0x3e2e4d6b # sig_tropo2 = 0.170217
   .word 0x3f17152d # sig_user2 = 0.590167
+  .word 0xc01ccccd # y = -2.450000
 
 data_sv5:
   .word 0xbea5aee6 # LOS_x = -0.323600
@@ -73,6 +78,7 @@ data_sv5:
   .word 0x00000001 # constellation
   .word 0x3c83eabf # sig_tropo2 = 0.016103
   .word 0x3e878d6a # sig_user2 = 0.264751
+  .word 0xc150f5c3 # y = -13.060000
 
 data_sv6:
   .word 0xbf2cbfb1 # LOS_x = -0.674800
@@ -81,6 +87,7 @@ data_sv6:
   .word 0x00000001 # constellation
   .word 0x3d259b2c # sig_tropo2 = 0.040431
   .word 0x3e963948 # sig_user2 = 0.293406
+  .word 0x421028f6 # y = 36.040000
 
 data_sv7:
   .word 0x3dc01a37 # LOS_x = 0.093800
@@ -89,6 +96,7 @@ data_sv7:
   .word 0x00000001 # constellation
   .word 0x3ceb2dc7 # sig_tropo2 = 0.028708
   .word 0x3e8d2598 # sig_user2 = 0.275677
+  .word 0xc14dc28f # y = -12.860000
 
 data_sv8:
   .word 0x3f0e9e1b # LOS_x = 0.557100
@@ -97,6 +105,7 @@ data_sv8:
   .word 0x00000001 # constellation
   .word 0x3cc63a90 # sig_tropo2 = 0.024198
   .word 0x3e8a885d # sig_user2 = 0.270572
+  .word 0x41533333 # y = 13.200000
 
 data_sv9:
   .word 0x3f2985f0 # LOS_x = 0.662200
@@ -105,6 +114,7 @@ data_sv9:
   .word 0x00000001 # constellation
   .word 0x3e3a577c # sig_tropo2 = 0.181974
   .word 0x3f1dfb07 # sig_user2 = 0.617112
+  .word 0x41a4b852 # y = 20.590000
 
 data_subsets:
   .word 992  # 5 last satellites
@@ -148,10 +158,11 @@ load_loop:
   nop # LWC2 $C, 12($t1)
   nop # LWC2 $ST, 16($t1)
   nop # LWC2 $SR, 20($t1)
+  nop # LWC2 $Y15, 24($t1)
   nop # LWC2 $BN, 0($t0)
   nop # NEWSVC2
   slt $t3, $t1, $t2 # t3 <- t1 < t2
-  addi $t1, $t1, 24 # move cursor to next SV
+  addi $t1, $t1, 28 # move cursor to next SV
   bnez $t3, load_loop
 
   #################################

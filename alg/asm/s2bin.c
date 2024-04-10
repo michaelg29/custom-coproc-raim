@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_C,  12),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_ST2, 16),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_SR2, 20),
+        gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_Yi+15, 24),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_BN, 0),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSV),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCU),

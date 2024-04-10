@@ -1,6 +1,6 @@
-*.bin
+#*.bin
 *.o
 *.exe
-*.log
+#*.log
 system
 s2bin

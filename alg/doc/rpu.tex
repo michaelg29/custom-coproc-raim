@@ -21,7 +21,9 @@
 
     \emph{CPSR} & \emph{CPSR} & \emph{bit[7:0]} & Current program status register. Table~\ref{tab:rpu_cpsr_codes} shows the possible values. & \emph{CPSR}\\ \hline
 
-    \emph{RR0} & \emph{EXC} & \emph{uint32} & Previous trapped exception. Table~\ref{tab:rpu_exception_codes} shows the possible values. & \emph{EXC}\\ \hline
+    \emph{EXC} & \emph{EXC} & \emph{uint32} & Previous trapped exception. Table~\ref{tab:rpu_exception_codes} shows the possible values. & \emph{EXC}\\ \hline
+
+    \emph{RR0} & \emph{I} & \emph{uint32} & Index of the subset or satellite vehicle to test. & $tst_i$\\ \hline
 
     \emph{RR1} & \emph{AL0} & \emph{float} & The factor for the initial guess in the pseudorange calculation. & $\alpha_0$\\ \hline
 
@@ -41,7 +43,7 @@
 
     \emph{RR10} & \emph{BN} & \emph{float} & Maximum nominal bias for integrity for the current SV. & $b_{nom}[*]$\\ \hline
 
-    \emph{RR11} & \emph{IDX} & \emph{bit}[$N_{sv,max}\newline-1:0$] & Activation string to indicate the SVs that the current subset includes. & $idx_{ss}[*]$\\ \hline
+    \emph{RR11} & \emph{IDX} & \emph{bit}[$N_{sv,max}\newline-1:0$] & Activation string to indicate the SVs that the current subset includes. & Writes: $idx_{ss}[*]$ \newline Reads: $idx_{faulty,sv}$\\ \hline
 
     \emph{RR12} & \emph{KX} & \emph{float} & The threshold factor for the global test of the x-coordinate. & $K_{fa}[0]$\\ \hline
 
@@ -68,6 +70,8 @@
 
     \emph{EXC} & $\lceil{\text{log}_2(N_{ex})}\rceil$ & Previous trapped exception. Table~\ref{tab:rpu_exception_codes} shows the possible values.\\ \hline
 
+    $tst_i$ & $\lceil{\text{log}_2(N_{sv,max})}\rceil$ & The index of the satellite vehicle or subset to test.\\ \hline
+
     $\alpha_0$ & $32$ & The factor for the initial guess in the pseudorange calculation.\\ \hline
 
     $G[i][j]$ & $(N_{sv,max} \times 3) \times 32$ & The $j$-th 32-bit floating-point element of the $i$-th SV's LOS vector.\\ \hline
@@ -88,8 +92,6 @@
 
     $\sigma_{URE}^2$ & $32$ & Variance for the clock and ephemeris error used for accuracy and continuity for the current SV.\\ \hline
 
-    $\sigma_{URA}^2[i]$ & $(N_{sv,max}) \times 32$ & Variance for the clock and ephemeris error used for integrity for the $i$-th SV.\\ \hline
-
     $b_{nom}[i]$ & $(N_{sv,max}) \times 32$ & Maximum nominal bias for integrity for the $i$-th SV.\\ \hline
 
     $W^{1/2}[i][i]$ & $(N_{sv,max}) \times 32$ & Square root of the $i$-th element of the diagonal of the weight matrix.\\ \hline
@@ -100,7 +102,9 @@
 
     $idx_{ss}[k]$ & $(N_{ss,max}) \times N_{sv,max}$ & Activation string for the $k$-th subset.\\ \hline
 
-    $S[k][j][i]$ & $(N_{ss,max} \times 7) \times N_{sv,max} \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset.\\ \hline
+    $idx_{faulty,sv}$ & $N_{sv,max}$ & Activation string indicating which satellite vehicles are faulty.\\ \hline
+
+    $S[k][j][i]$ & $(N_{ss,max} \times 7 \times N_{sv,max}) \times 32$ & The $(j,i)$ element of the least-squares matrix for the $k$-th subset.\\ \hline
 
     $spr[j][i]$ & $(7 \times N_{sv,max}) \times 32$ & The $(j,i)$-th element of the scratchpad matrix.\\ \hline
 

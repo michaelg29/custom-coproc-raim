@@ -47,6 +47,20 @@ ss_sat_mat = [ 1 1 1 1 1 0 0 0 0 0;
 ss_const_mat = [ 1 0;
                  0 1 ];
 
+% random pseudorange residuals
+y = [
+    -26.03 ;
+     22.88 ;
+    -10.86 ;
+    -5.51  ;
+    -2.45  ;
+    -13.06 ;
+     36.04 ;
+    -12.86 ;
+     13.20 ;
+     20.59
+];
+
 % expected results from Blanch et al. Appendix H
 % sig_tropo2 = 1.2733 0.2055 0.0257 0.2697 0.1702 0.0161 0.0404 0.0287 0.0242 0.1820
 % sig_user2 = 2.0508 0.6698 0.2722 0.8061 0.5902 0.2648 0.2934 0.2757 0.2706 0.6171
@@ -97,6 +111,7 @@ if log_asm
         fprintf("  .word 0x%08x # constellation\n", consts(i,1));
         fprintf("  .word 0x%s # sig_tropo2 = %f\n", fh(sig_tropo2(i)), sig_tropo2(i));
         fprintf("  .word 0x%s # sig_user2 = %f\n", fh(sig_user2(i)), sig_user2(i));
+        fprintf("  .word 0x%s # y = %f\n", fh(y(i)), y(i));
     end
 end
 

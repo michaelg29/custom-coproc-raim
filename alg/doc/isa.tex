@@ -3,6 +3,7 @@
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{array}
+\usepackage{float}
 
 \title{RAIM Co-processor ISA}
 \author{Michael Grieco}
@@ -10,83 +11,695 @@
 
 \begin{document}
 
-LWC2 rrt, offset(base) – load word to RPU
+\section{Approach}
 
-\emph{rrt} $\leftarrow$ memory[\emph{base}+\emph{offset}]
+\subsection{RPU Model}
 
-LWXC2 rrd, index(base) – load word indexed to RPU
+\begin{table}[H] \centering
+  \caption{Key instructions in the RPU instruction set architecture (ISA).}
+  \label{tab:rpu_isa_highlight}
+  \begin{tabular}{|m{2.5cm}|m{4cm}|m{10cm}|}
+    \hline
+    \textbf{Instruction} & \textbf{Brief function} & \textbf{Important aspect}\\ \hline
+    
+    \texttt{LWC2} \newline \texttt{SWC2} \newline \texttt{MTC2} \newline \texttt{MFC2} & Read from and write to the RPU register file & These instructions give the main datapath direct access to the RPU register file without having to execute further memory transactions to external peripherals.\\ \hline
 
-\emph{rrt} $\leftarrow$ memory[\emph{base}+\emph{index}]
+    \texttt{CALCUC2} & Compute the intermediate matrix $U = W^{1/2}G$.  & This instruction need only execute once per group of in-view satellites as the subsets can simply select the columns with their corresponding satellite vehicles.\\ \hline
 
-SWC2 rrt, offset(base) – store word from RPU
+    \texttt{CALCPC2} & Compute the pseudoinverse $S^{(k)} = U^{\dagger}$. & This instruction operates on each subset independently to compute its specific weighted least-squares matrix.\\ \hline
 
-memory[\emph{base}+\emph{offset}] $\leftarrow$ \emph{rrt}
+    \texttt{MULYC2 d} & Matrix-vector multiplication & This instruction allows for any operation of the form $\vec{x} = S^{(k)} \vec{y}$. This is key for iterative position updates $\Delta \hat{x} = S^{(k)} \vec{y}$. Additionally, this allows for updates to the least squares matrix by multiplying $S^{(k)}$ by each column of the additional weighting matrix (like $L$ in~\cite{XXX}) separately.\\ \hline
 
-SWXC2 rrs, index(base) – store word indexed from RPU
+    \texttt{POSVARC2 k} \newline \texttt{SSVARC2 k} & Compute position and solution separation variances. & These two instructions compute test statistics for each coordinate for each subset. These two instructions execute identical datapaths in the RPU as they have the operation $\sigma^{(k)2} = [A A^T](q, q)$, but use different input and output locations.\\ \hline
 
-memory[\emph{base}+\emph{index}] $\leftarrow$ \emph{rrs}
+    \texttt{TSTGC2} \newline \texttt{TSTLC2} & Execute global and local tests & These compare the computed test statistics to thresholds written to the RPU. They assert and de-assert bits in the \emph{CPSR} based on whether the tests pass.\\ \hline
 
-MFC2 rt, rrs – move RPU register to GPR
+    \texttt{BOKC2} \newline \texttt{BFUC2} \newline \texttt{BFDC2} \newline \texttt{BFLC2} & Conditional PC-relative branches & These instructions allow the main datapath to execute control flow based on the condition flag of the RPU. The specific condition codes correspond to various events that would lead to different process paths. For example, \texttt{BFUC2} will branch if the instruction queue is full. This allows the processor to determine whether it can issue additional RAIM instructions without having to explicitly read a status register in the RPU into its own register file.\\ \hline
+  \end{tabular}
+\end{table}
 
-\emph{rt} $\leftarrow$ \emph{rrs}
+\section{RAIM Processing Unit Instruction Set}
 
-MTC2 rt, rrs – move GPR to RPU register
+\subsection{Individual RPU instruction descriptions}
 
-\emph{rrs} $\leftarrow$ \emph{rt}
+\text{}
+\subsubsection{LWC2 - Load word to RPU}
+\text{}
 
-RSTC2 – reset RPU registers
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
 
-NEWSVC2 – move the satellite vehicle cursor down in the RPU
+    [31:26] & 6 & \emph{LWC2} & \texttt{110010}\\ \hline
 
-$N_{sv} \leftarrow N_{sv} + 1$
+    [25:21] & 5 & \emph{base} & Base register\\ \hline
 
-CALCU – calculate the intermediate matrix and the initial guess before calculating a pseudoinverse
+    [20:16] & 5 & \emph{rrt} & Destination register\\ \hline
 
-$U \leftarrow W^{1/2} G$
+    [15:0] & 16 & offset & 16-bit signed offset from base\\ \hline
+  \end{tabular}
+\end{table}
 
-INITP – initialize the pseudoinverse guess
+\textbf{Format}: \texttt{LWXC2 rrd, index(base)}
 
-$S^{(k)} \leftarrow \alpha_0 U^{T}$
+\textbf{Purpose}: To load a word from memory to an RR (GPR+constant addressing).
 
-CALCP – calculate the pseudoinverse of the intermediate matrix for the current
+\textbf{Description}: \emph{rrt} $\leftarrow$ memory[\emph{base}+offset]
 
-$S^{(k)} \leftarrow U^{\dagger} \stackrel{\Delta_n}{=} (2I_{3+N_{const}} - U^{\dagger}_n U) U^{\dagger}_n
-$
+\text{}
+\subsubsection{LWXC2 - Load word indexed to RPU}
+\text{}
 
-WLSC2 – calculate the subset weighted least-squares matrix with the activation string (rrt)
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
 
-$S^{(k)} \leftarrow SPR W^{1/2}$
+    [31:26] & 6 & \emph{COP2X} & \texttt{010101}\\ \hline
 
-MULY d, k – multiply the k-th LS matrix with the vector in y and store in scratchpad column d
+    [25:21] & 5 & \emph{base} & Base register\\ \hline
 
-$SPR_{*,d} \leftarrow S^{(k)} \vec{y}$
+    [20:16] & 5 & \emph{index} & Index register\\ \hline
 
-MOVD k – move the scratchpad matrix memory into the memory for LS matrix for subset k
+    [15:11] & 5 & & \texttt{00000}\\ \hline
 
-$S^{(k)} \leftarrow SPR$
+    [10:6] & 5 & \emph{rrd} & Destination register\\ \hline
 
-POSVAR – calculate the position variance for subset k
+    [5:0] & 6 & \emph{LWXC2} & \texttt{000000}\\ \hline
+  \end{tabular}
+\end{table}
 
-$\sigma_q^{(k)2} \leftarrow [(S^{(k)}W^{(k)(-1/2)})(W^{(k)(-1/2)}S^{(k)T})](q,q)$
+\textbf{Format}: \texttt{LWXC2 rrd, index(base)}
 
-$\sigma_q^{(k)2} \leftarrow [U U^T](q,q); U = S^{(k)}W^{(k)(-1/2)}$
+\textbf{Purpose}: To load a word from memory to an RR (GPR+GPR addressing).
 
-BIAS
+\textbf{Description}: \emph{rrd} $\leftarrow$ memory[\emph{base}+\emph{index}]
 
-$b_q^{(k)} \leftarrow \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom}[i]$
+\text{}
+\subsubsection{SWC2 - Store word from RPU}
+\text{}
 
-CALCSSC2 k – calculate the solution separation matrix for subset k and store as the least-squares matrix
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
 
-$S{(k)}\leftarrow S{(k)} – S^{(0)}$
+    [31:26] & 6 & \emph{SWC2} & \texttt{111010}\\ \hline
 
-SSC2 – calculate the solution separation magnitude for subset k
+    [25:21] & 5 & \emph{base} & Base register\\ \hline
 
-$ |\Delta \hat{x}^{(k)}| = |(S^{(k)} - S^{(0)})\vec{y}| = |SPR_{*,d}|$
+    [20:16] & 5 & \emph{rrt} & Source register\\ \hline
 
-SSVAR – calculate the solution separation variance for subset k
+    [15:0] & 16 & offset & 16-bit signed offset from base\\ \hline
+  \end{tabular}
+\end{table}
 
-$\sigma_{ss,q}^{(k)2} \leftarrow [(S^{(k)}W_{acc}^{(k)(-1/2)})(W_{acc}^{(k)(-1/2)}S^{(k)T})](q,q)$
+\textbf{Format}: \texttt{SWC2 rrt, offset(base)}
 
-$\sigma_{ss,q}^{(k)2} \leftarrow [U U^T](q,q); U = S^{(k)}W_{acc}^{(k)(-1/2)}$
+\textbf{Purpose}: To store a word from an RR to memory (GPR+constant addressing).
+
+\textbf{Description}: memory[\emph{base}+offset] $\leftarrow$ \emph{rrt}
+
+\text{}
+\subsubsection{SWXC2 - Store word indexed from RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2X} & \texttt{010101}\\ \hline
+
+    [25:21] & 5 & \emph{base} & Base register\\ \hline
+
+    [20:16] & 5 & \emph{index} & Index register\\ \hline
+
+    [15:11] & 5 & \emph{rrs} & Source register\\ \hline
+
+    [10:6] & 5 & & \texttt{00000}\\ \hline
+
+    [5:0] & 6 & \emph{SWXC2} & \texttt{001000}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{SWXC2 rrs, index(base)}
+
+\textbf{Purpose}: To load a word from memory to an RR (GPR+GPR addressing).
+
+\textbf{Description}: memory[\emph{base}+\emph{index}] $\leftarrow$ \emph{rrs}
+
+\text{}
+\subsubsection{MFC2 - Move word from RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{MF} & \texttt{00010}\\ \hline
+
+    [20:16] & 5 & \emph{rt} & Destination register\\ \hline
+
+    [15:11] & 5 & \emph{rrs} & Source register\\ \hline
+
+    [10:0] & 11 & & \texttt{000...}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{MFC2 rt, rrs}
+
+\textbf{Purpose}: To copy a word from an RPU (COP2) register to a GPR.
+
+\textbf{Description}: \emph{rt} $\leftarrow$ \emph{rrs}
+
+\text{}
+\subsubsection{MTC2 - Move word to RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{MT} & \texttt{00100}\\ \hline
+
+    [20:16] & 5 & \emph{rt} & Source register\\ \hline
+
+    [15:11] & 5 & \emph{rrs} & Destination register\\ \hline
+    
+    [10:6] & 5 & immd & Intermediate value\\ \hline
+
+    [5:0] & 6 & OPCODE & Any of the below [5:0] opcodes with \emph{COP2} as the main opcode.\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{MTC2 rt, rrs}
+
+\textbf{Purpose}: To copy a word from a GPR to an RPU (COP2) register. Optionally (if \emph{OPCODE} $\neq$ \texttt{000000}) execute an instruction as a follow-up using the newly stored value.
+
+\textbf{Description}: \emph{rrs} $\leftarrow$ \emph{rt}; exec[\emph{OPCODE}]
+
+\text{}
+\subsubsection{RSTC2 - Reset RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{RST} & \texttt{00001}\\ \hline
+
+    [20:0] & 21 & & \texttt{000...}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{RSTC2}
+
+\textbf{Purpose}: To reset the RPU internal registers.
+
+\textbf{Description}: * $\leftarrow$ 0
+
+\text{}
+\subsubsection{CLRCC2 - Clear RPU flags}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{CLRC} & \texttt{10000}\\ \hline
+
+    [20:0] & 21 & & \texttt{000...}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{CLRCC2}
+
+\textbf{Purpose}: To clear the RPU current program status register (CPSR).
+
+\textbf{Description}: \emph{CPSR}, $idx_{faulty,sv}$ $\leftarrow$ 0
+
+\text{}
+\subsubsection{NEWSVC2 - New SV data in the RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{NEWSVC2} & \texttt{000011}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{NEWSVC2}
+
+\textbf{Purpose}: To indicate to the RPU that subsequent SV register writes correspond to a new SV.
+
+\textbf{Description}: $N_{sv} \leftarrow N_{sv} + 1$
+
+\text{}
+\subsubsection{CALCUC2 - Calculate the intermediate matrix}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{CALCUC2} & \texttt{000100}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{CALCUC2}
+
+\textbf{Purpose}: Compute the intermediate matrix for which to compute a pseudoinverse.
+
+\textbf{Description}: $U \leftarrow W^{1/2} G$
+
+\text{}
+\subsubsection{INITPC2 - Initialize the pseudoinverse guess}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{INITPC2} & \texttt{000101}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{INITPC2}
+
+\textbf{Purpose}: Initialize the pseudoinverse guess as the transpose of the intermediate matrix.
+
+\textbf{Description}: $S^{(k)} \leftarrow \alpha_0 U^{T}$
+
+\text{}
+\subsubsection{CALCPC2 - Compute a pseudoinverse}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{CALCPC2} & \texttt{000110}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{CALCPC2}
+
+\textbf{Purpose}: Iteratively compute the pseudoinverse of the matrix for the current subset.
+
+\textbf{Description}: $S^{(k)} \leftarrow U^{\dagger} \stackrel{\Delta_n}{=} (2I_{3+N_{const}} - U^{\dagger}_n U) U^{\dagger}_n$
+
+\text{}
+\subsubsection{WLSC2 - Compute a pseudoinverse}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{WLSC2} & \texttt{000111}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{WLSC2}
+
+\textbf{Purpose}: Calculate the subset weighted least-squares matrix for the current subset.
+
+\textbf{Description}: $S^{(k)} \leftarrow S^{(k)} W^{1/2}$
+
+\text{}
+\subsubsection{MULYC2 - Compute a matrix-vector multiplication}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:11] & 15 & & \texttt{000...}\\ \hline
+    
+    [10:6] & 5 & $d$ & Output column to which to write.\\ \hline
+
+    [5:0] & 6 & \emph{MULYC2} & \texttt{001000}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{MULYC2 d}
+
+\textbf{Purpose}: Multiply the current subset LS matrix with the vector register and store in scratchpad column $d$.
+
+\textbf{Description}: $SPR(:,d) \leftarrow S^{(k)} \vec{y}$
+
+\text{}
+\subsubsection{MOVDC2 - Copy the scratchpad}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{MOVDC2} & \texttt{001001}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{MOVDC2}
+
+\textbf{Purpose}: Move the scratchpad matrix memory into the memory for LS matrix for the current subset.
+
+\textbf{Description}: $S^{(k)} \leftarrow SPR$
+
+\text{}
+\subsubsection{POSVARC2 - Compute position variance}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{POSVARC2} & \texttt{001010}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{POSVARC2}
+
+\textbf{Purpose}: Calculate the position variance for the current subset.
+
+\textbf{Description}: $\sigma_q^{(k)2} \leftarrow [(S^{(k)}W^{(k)(-1/2)})(W^{(k)(-1/2)}S^{(k)T})](q,q)$
+
+\text{}
+\subsubsection{BIASC2 - Compute nominal bias}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{BIASC2} & \texttt{001011}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BIASC2}
+
+\textbf{Purpose}: Calculate the nominal bias for the current subset.
+
+\textbf{Description}: $b_q^{(k)} \leftarrow \sum_{i=1}^{N_{sat}}|S^{(k)}(q,i)|*b_{nom}[i]$
+
+\text{}
+\subsubsection{CALCSSC2 - Compute the solution separation matrix}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{CALCSSC2} & \texttt{001100}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{CALCSSC2}
+
+\textbf{Purpose}: Calculate the solution separation matrix for the current subset and store it as its least-squares matrix.
+
+\textbf{Description}: $S^{(k)} \leftarrow S^{(k)} - S^{(0)}$
+
+\text{}
+\subsubsection{SSVARC2 - Compute the solution separation variance}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{SSVARC2} & \texttt{001110}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{SSVARC2}
+
+\textbf{Purpose}: Calculate the solution separation variance for the current subset.
+
+\textbf{Description}: $\sigma_{ss,q}^{(k)2} \leftarrow [(S^{(k)}W_{acc}^{(k)(-1/2)})(W_{acc}^{(k)(-1/2)}S^{(k)T})](q,q)$
+
+\text{}
+\subsubsection{NEWSSC2 - New SS data in the RPU}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{NEWSSC2} & \texttt{001111}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{NEWSSC2}
+
+\textbf{Purpose}: To indicate to the RPU that subsequent subset commands correspond to a new subset.
+
+\textbf{Description}: $N_{ss} \leftarrow N_{ss} + 1$
+
+\text{}
+\subsubsection{TSTGC2 - Global test}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{TSTGC2} & \texttt{010000}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{TSTGC2}
+
+\textbf{Purpose}: Run the global test on the current subset using the vector in \emph{SPR} column $d$.
+
+\textbf{Description}: \emph{CPSR}[1] $\leftarrow$ ($|SPR(q,d)| \le \sigma_{ss}^{(k)2}(q) \cdot K_{fa}(q)\ \forall q = 0,1,2$) ? 0 : 1
+
+\text{}
+\subsubsection{TSTLC2 - Local test}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:6] & 20 & & \texttt{000...}\\ \hline
+
+    [5:0] & 6 & \emph{TSTLC2} & \texttt{010001}\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{TSTLC2}
+
+\textbf{Purpose}: Run the local test on a satellite vehicle using the vector $\vec{y}$.
+
+\textbf{Description}: \emph{CPSR}[2] $\leftarrow$ ($\vert\vec{y}[tst_i]\vert \le K_{fa,r}/W^{1/2}[tst_i,tst_i]$) ? 0 : 1
+
+\text{}
+\subsubsection{BOKC2 - Branch on RPU okay}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{BC} & \texttt{01000}\\ \hline
+
+    [20:16] & 5 & \emph{OK} & \texttt{00000}\\ \hline
+
+    [15:0] & 6 & offset & PC-relative offset in number of 32-bit instructions\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BOKC2 offset}
+
+\textbf{Purpose}: To test if the RPU is OKAY and do a PC-relative conditional branch.
+
+\textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} == \texttt{00000}) ? (offset $<<$ 2) : 4]
+
+\text{}
+\subsubsection{BFUC2 - Branch on RPU queue full}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{BC} & \texttt{01000}\\ \hline
+
+    [20:16] & 5 & \emph{FULL} & \texttt{00001}\\ \hline
+
+    [15:0] & 6 & offset & PC-relative offset in number of 32-bit instructions\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BFUC2 offset}
+
+\textbf{Purpose}: To test if the RPU instruction queue is full and do a PC-relative conditional branch.
+
+\textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} \& \texttt{00001} $>$ 0) ? (offset $<<$ 2) : 4]
+
+\text{}
+\subsubsection{BFDC2 - Branch on RPU fault detected}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{BC} & \texttt{01000}\\ \hline
+
+    [20:16] & 5 & \emph{FD} & \texttt{00010}\\ \hline
+
+    [15:0] & 6 & offset & PC-relative offset in number of 32-bit instructions\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BFDC2 offset}
+
+\textbf{Purpose}: To test if the RPU detected a fault and do a PC-relative conditional branch.
+
+\textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} \& \texttt{00010} $>$ 0) ? (offset $<<$ 2) : 4]
+
+\text{}
+\subsubsection{BFLC2 - Branch on RPU fault located}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{BC} & \texttt{01000}\\ \hline
+
+    [20:16] & 5 & \emph{FL} & \texttt{00100}\\ \hline
+
+    [15:0] & 6 & offset & PC-relative offset in number of 32-bit instructions\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BFDC2 offset}
+
+\textbf{Purpose}: To test if the RPU detected a fault and do a PC-relative conditional branch.
+
+\textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} \& \texttt{00100} $>$ 0) ? (offset $<<$ 2) : 4]
 
 \end{document}
