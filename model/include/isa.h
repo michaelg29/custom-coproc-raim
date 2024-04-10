@@ -326,7 +326,6 @@ enum rpu_op_e {
     RPU_POSVAR      = 0b001010,
     RPU_BIAS        = 0b001011,
     RPU_CALCSS      = 0b001100,
-    RPU_SS          = 0b001101,
     RPU_SSVAR       = 0b001110,
     RPU_NEWSS       = 0b001111,
     RPU_TSTG        = 0b010000,
@@ -336,8 +335,9 @@ enum rpu_op_e {
 // RAIM conditions to test for.
 enum rpu_cond_e {
     RPU_OKAY        = 0b00000,
-    RPU_FD          = 0b00001,
-    RPU_FL          = 0b00010,
+    RPU_FULL        = 0b00001,
+    RPU_FD          = 0b00010,
+    RPU_FL          = 0b00100,
 };
 
 // Possible formats for RAIM instructions.

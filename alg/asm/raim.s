@@ -161,10 +161,10 @@ load_loop:
 
   # all-in-view
   ori $t0, $zero, 1023
-  nop # MTC2 $t0, $IDX
-  nop # INITPC2
+  nop # INITPC2 $t0, $IDX
   nop # CALCPC2
   nop # WLSC2
+
   nop # NEWSSC2
 
   # cursors
@@ -173,10 +173,14 @@ load_loop:
 
   # loop through subsets
 subset_loop:
+
+  # compute least-squares matrix
   nop # LWXC2 $IDX, $t1($t0)
   nop # INITPC2
   nop # CALCPC2
   nop # WLSC2
+
+  # compute statistics
   nop # POSVARC2
   nop # BIAS
   nop # CALCSS
@@ -197,8 +201,7 @@ sv_local_test:
 
   # loop through satellite vehicles
 sv_local_test_loop:
-  nop # MTC2 $t3, $TSTi
-  nop # TSTLC2
+  nop # TSTLC2 $t3, $TSTi
   bgezl $zero, sv_local_test # BFLC2 faulty_sv_located
   la $a0, str_fault_nloc
   ori $v0, $zero, 4

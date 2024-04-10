@@ -202,7 +202,7 @@ bool fp_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
         signal_ex(EX_INVALID);
         break;
     }
-    }
+    };
 
     return false;
 }

@@ -65,6 +65,11 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     case RPU_FMT_MT: {
         // move rt to RPU register rrs
         set_regs(rrs, rt);
+
+        // optionally enqueue a follow-up instruction
+        if (GET_INSTR_COP_OP(ir) != 0) {
+            _instr_q_overflow = !_instr_q.enqueue(ir);
+        }
         break;
     }
     case RPU_FMT_BC: {
@@ -96,7 +101,7 @@ bool raim_cop::get_regs(uint32_t rt, int32_t &res) {
     switch (rt) {
     case RPU_VR_IDX: res = _regs.idx_faulty_sv; break;
     default: return false;
-    }
+    };
 
     return true;
 }
@@ -185,6 +190,14 @@ void raim_cop::main() {
         // ==============================
         // ===== INSTRUCTION DECODE =====
         // ==============================
+
+        // assert or de-assert full flag
+        if (_instr_q.is_full()) {
+            _rpu_cpsr |= RPU_FULL;
+        }
+        else {
+            _rpu_cpsr &= ~RPU_FULL;
+        }
 
         // take new operation from the instruction queue
         if (_instr_q.dequeue(ir)) {
@@ -437,7 +450,7 @@ void raim_cop::main() {
                 signal_ex(EX_INVALID);
                 break;
             }
-            }
+            };
         }
 
         POSEDGE_CPU();

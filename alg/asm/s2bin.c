@@ -35,9 +35,6 @@ int main(int argc, char **argv) {
     }
 
     /** Placeholder instruction replacements. */
-    uint32_t bgezl_tst = (OPCODE_REGIMM << 26) | (0b00000 << 21) | (REGIMM_BGEZL << 16);
-    uint32_t bgezl_mask = 0xffffffff << 16;
-    printf("%08x test %08x mask\n", bgezl_tst, bgezl_mask);
     uint32_t gen_instr_idx = 0;
     int gen_instr[] = {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_AL0, -12), // LWC2 $AL0, -12($t0)
@@ -56,8 +53,7 @@ int main(int argc, char **argv) {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_BN, 0),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSV),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCU),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t0, RPU_VR_IDX, 0, 0),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_INITP),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t0, RPU_VR_IDX, 0, RPU_INITP),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCP),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_WLS),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSS),
@@ -71,11 +67,12 @@ int main(int argc, char **argv) {
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_SSVAR),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_TSTG),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FD, 0), // BFDC2 sv_local_test
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t3, RPU_VR_I, 0, 0),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_TSTL),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t3, RPU_VR_I, 0, RPU_TSTL),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FL, 0), // BFLC2 faulty_sv_located
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSS),
     };
+
+    // determine number of instructions to replace
     uint32_t n_gen_instr = sizeof(gen_instr) / sizeof(uint32_t);
     printf("Replacing %d instructions.\n", n_gen_instr);
 
@@ -85,6 +82,7 @@ int main(int argc, char **argv) {
         printf("Could not open file %s for reading\n", argv[1]);
         return 1;
     }
+
     // get file size
     fseek(fp, 0L, SEEK_END);
     fsize = ftell(fp);
@@ -106,6 +104,11 @@ int main(int argc, char **argv) {
     char c = getfchar();
     bool newline = true;
     bool dataline = false;
+
+    // instruction replacement values
+    uint32_t bgezl_tst = (OPCODE_REGIMM << 26) | (0b00000 << 21) | (REGIMM_BGEZL << 16);
+    uint32_t bgezl_mask = 0xffffffff << 16;
+    printf("%08x test %08x mask\n", bgezl_tst, bgezl_mask);
 
     // process a line in each iteration of the loop
     uint32_t line = 0;

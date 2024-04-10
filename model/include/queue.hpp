@@ -55,6 +55,19 @@ class queue {
             return true;
         }
 
+        /** Determine if full. */
+        bool is_full() {
+            int i = _tail - _head;
+            i -= _size;
+            return i >= 0;
+        }
+
+        /** Determine if empty. */
+        bool is_empty() {
+            int i = _tail - _head;
+            return i <= 0;
+        }
+
     private:
 
         /** Cursors. */

@@ -372,7 +372,7 @@ void cpu::main() {
                 signal_ex(EX_INVALID);
                 break;
             }
-            }
+            };
             break;
         }
         case OPCODE_ADDI:
@@ -512,7 +512,7 @@ void cpu::main() {
                 signal_ex(EX_INVALID);
                 break;
             }
-            }
+            };
             break;
         }
         case OPCODE_BGTZ: {
@@ -589,17 +589,11 @@ void cpu::main() {
                 }
                 break;
             }
-            /*case : {
-                LOGF("Unimplemented FPU opcode: %02x", GET_INSTR_COP_OP(_regs.s.ir));
-                dst_reg_idx = -1;
-                signal_ex(EX_NOIMP);
-                break;
-            }*/
             default: {
                 dst_reg_idx = cop1->execute(_regs.s.ir, _regs.w[rt], res) ? rt : -1;
                 break;
             }
-            }
+            };
             break;
         }
         case OPCODE_J: {
@@ -845,7 +839,7 @@ void cpu::main() {
             signal_ex(EX_INVALID);
             break;
         }
-        }
+        };
 
         // ================
         // == WRITE-BACK ==
