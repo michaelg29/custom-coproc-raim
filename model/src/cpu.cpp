@@ -57,6 +57,8 @@ bool stubbed_cop::get_regs(uint32_t rt, int32_t &res) {
 
 void stubbed_cop::set_regs(uint32_t rt, int32_t res) {}
 
+void stubbed_cop::print_statistics() {}
+
 cpu::cpu(sc_module_name name, uint32_t start_addr, uint32_t exit_addr, uint32_t max_instr_cnt) : sc_module(name), _start_addr(start_addr), _exit_addr(exit_addr), _max_instr_cnt(max_instr_cnt) {
     SC_THREAD(main);
 

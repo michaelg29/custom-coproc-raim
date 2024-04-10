@@ -107,6 +107,9 @@ class coprocessor_if : virtual public sc_interface {
         /** Get the offset for the next program counter if the coprocessor has updated it. */
         bool get_next_pc_offset(int32_t &next_pc_offset);
 
+        /** Print locally-collected statistics. */
+        virtual void print_statistics() = 0;
+
     protected:
 
         /** Protected variables. */
@@ -130,6 +133,7 @@ class stubbed_cop : public coprocessor_if {
         bool execute(uint32_t ir, int32_t rt, int32_t &res);
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
+        void print_statistics();
 
 };
 

@@ -62,6 +62,10 @@ int sc_main(int argc, char* argv[]) {
 
     std::cout << "Simulated for " << duration << std::endl;
 
+    empty_cop->print_statistics();
+    cop1->print_statistics();
+    cop2->print_statistics();
+
     sc_tracer::close();
 
     return 0;

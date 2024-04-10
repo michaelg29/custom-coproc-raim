@@ -26,6 +26,7 @@
 
 // wait for next CC
 #define POSEDGE_CPU() wait(1, SC_NS)
+#define DELAY_CC(n) wait(n, SC_NS)
 #define YIELD() wait(0, SC_NS)
 // wait for next CC, then yield priority with another wait statement
 #define POSEDGE() wait(1, SC_NS); wait(0, SC_NS)

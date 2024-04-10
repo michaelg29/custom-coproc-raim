@@ -225,3 +225,5 @@ bool fp_cop::get_next_pc_offset(int32_t &next_pc_offset) {
     next_pc_offset = _next_pc_offset;
     return _has_next_pc_offset;
 }
+
+void fp_cop::print_statistics() {}

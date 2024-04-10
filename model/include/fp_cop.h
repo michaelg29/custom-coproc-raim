@@ -40,6 +40,7 @@ class fp_cop : public sc_module, public coprocessor_if {
         void set_regs(uint32_t rt, int32_t res);
         bool get_condition_code(uint8_t &cc);
         bool get_next_pc_offset(int32_t &next_pc_offset);
+        void print_statistics();
 
     private:
 
