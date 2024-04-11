@@ -77,6 +77,7 @@ int main(int argc, char **argv) {
         gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_CALCSS),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_SSVAR),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_MC, 0), // BMCC2 ss_wait_var
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_MULY),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_TSTG),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FD, 0), // BFDC2 sv_local_test
         gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t3, RPU_VR_I, 0, RPU_TSTL),

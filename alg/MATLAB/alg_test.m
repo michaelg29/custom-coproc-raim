@@ -19,6 +19,10 @@ N_const_max = 1;
 sig_URA_i2 = 0.75 * 0.75; % meters^2
 sig_URE_i2 = 0.50 * 0.50; % meters^2
 bias_nom_i = 0.50; % meters
+k_fa = [ 6.0361 ;  % invq((P_FA,H = 9e-8)/2/(N_fault_modes=57))
+         6.0361 ;  % invq((P_FA,H = 9e-8)/2/(N_fault_modes=57))
+         5.3953 ]; % invq((P_FA,V = 3.9e-6)/2/(N_fault_modes=57))
+k_fa_r = 4.6114;   % invq((P_FA = 4e-6)/2)
 
 % placeholder variables
 init_G     = ones(N_sat, 3);
@@ -49,16 +53,16 @@ ss_const_mat = [ 1 0;
 
 % random pseudorange residuals
 y = [
-    -26.03 ;
-     22.88 ;
-    -10.86 ;
-    -5.51  ;
-    -2.45  ;
-    -13.06 ;
-     36.04 ;
-    -12.86 ;
-     13.20 ;
-     20.59
+    -9.53  ;
+     0.88  ;
+    -0.01  ;
+    -0.51  ;
+    -0.45  ;
+    -1.06  ;
+     2.04  ;
+    -0.86  ;
+     3.20  ;
+     3.60
 ];
 
 % expected results from Blanch et al. Appendix H
@@ -133,7 +137,7 @@ assert(max(max(abs(W_acc - inv(C_acc_exp)))) < 1e-3);
     ss_sat_mat, ss_const_mat);
 
 % compute variances and biases
-[var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
+[var_pos, bias_pos, var_ss_pos, SS] = compute_var_bias( ...
     N_sat, N_const, N_ss, ...
     W, W_acc, S, ...
     b_nom);
@@ -147,6 +151,13 @@ assert(abs(sqrt(var_ss_pos(1,3)) - sig_fault_const2_sep_vert_exp) < 1e-3);
 assert(abs(sqrt(var_pos(2,3)) - sig_fault_const1_vert_exp) < 1e-4);
 assert(abs(bias_pos(2,3) - bias_fault_const1_vert_exp) < 1e-4);
 assert(abs(sqrt(var_ss_pos(2,3)) - sig_fault_const1_sep_vert_exp) < 1e-3);
+
+% global test
+[fd, faulty_sv] = compute_tests( ...
+    N_sat, N_const, N_ss, ...
+    var_pos, bias_pos, var_ss_pos, ...
+    C_int, SS, y, ...
+    k_fa, k_fa_r);
 
 fprintf("Done with test\n");
 

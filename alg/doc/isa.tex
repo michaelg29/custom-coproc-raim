@@ -702,4 +702,31 @@
 
 \textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} \& \texttt{00100} $>$ 0) ? (offset $<<$ 2) : 4]
 
+
+\text{}
+\subsubsection{BMCC2 - Branch on RPU matrix computing}
+\text{}
+
+\begin{table}[H] \centering
+  \def\arraystretch{1.4}
+  \begin{tabular}{|m{2cm}|m{1.5cm}|m{2.5cm}|m{4.5cm}|}
+    \hline
+    \textbf{Bits} & \textbf{Width} & \textbf{Name} & \textbf{Description}\\ \hline
+
+    [31:26] & 6 & \emph{COP2} & \texttt{010010}\\ \hline
+
+    [25:21] & 5 & \emph{BC} & \texttt{01000}\\ \hline
+
+    [20:16] & 5 & \emph{MC} & \texttt{01000}\\ \hline
+
+    [15:0] & 6 & offset & PC-relative offset in number of 32-bit instructions\\ \hline
+  \end{tabular}
+\end{table}
+
+\textbf{Format}: \texttt{BMCC2 offset}
+
+\textbf{Purpose}: To test if the RPU is computing a WLS matrix and do a PC-relative conditional branch.
+
+\textbf{Description}: \emph{PC} $\leftarrow$ \emph{PC} + [(\emph{CPSR} \& \texttt{01000} $>$ 0) ? (offset $<<$ 2) : 4]
+
 \end{document}

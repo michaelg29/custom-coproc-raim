@@ -2,7 +2,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%% calculate variances and biases for subsets %%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
+function [var_pos, bias_pos, var_ss_pos, SS] = compute_var_bias( ...
     N_sat, N_const, N_ss, ...
     W, W_acc, S, ...
     b_nom)
@@ -17,7 +17,7 @@ function [var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
 %   W_acc:    N_sat*N_sat weighting matrix of the satellites used for
 %             accuracy and continuity.
 %   S:        N_ss+1 (3+N_const)*N_sat matrices computed as the weighted
-%             least-squares matrices. S(0,:,:) is the all-in-view LS matrix.
+%             least-squares matrices. S(:,:,0) is the all-in-view LS matrix.
 %   b_nom:    N_sat*1 matrix with the nominal biases for each SV.
 
 % Return values:
@@ -30,10 +30,13 @@ function [var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
 %   var_ss_pos: N_ss*3 matrix with the variances of the subset solution
 %               separations. var_ss_pos(k,q) is the variance of the q-th
 %               coordinate for the k-th subset solution separation.
+%   SS:         N_ss (3+N_const)*N_sat matrices computed as the weighted
+%               least-squares matrices.
 
     var_pos = zeros(N_ss,3);
     bias_pos = zeros(N_ss,3);
     var_ss_pos = zeros(N_ss,3);
+    SS = zeros(3+N_const,N_sat,N_ss);
 
     for k = 1:N_ss
         for q = 1:3
@@ -44,8 +47,9 @@ function [var_pos, bias_pos, var_ss_pos] = compute_var_bias( ...
             end
         end
 
+        SS(:,:,k) = S(:,:,k+1) - S(:,:,1);
         var_pos(k,:) = compute_pos_variance(S(:,:,k+1), diag(W), N_sat);
-        var_ss_pos(k,:) = compute_pos_variance((S(:,:,k+1) - S(:,:,1)), diag(W_acc), N_sat);
+        var_ss_pos(k,:) = compute_pos_variance(SS(:,:,k), diag(W_acc), N_sat);
     end
 end
 
