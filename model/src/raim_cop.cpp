@@ -242,12 +242,7 @@ void raim_cop_fu::main() {
                     dotp = 0.0f;
                     mask = init_mask;
                     for (c = _regs->N_sv - 1; c >= 0; c--, mask >>= 1) {
-                        if (!(_regs->idx_ss[k] & mask)) {
-                            continue;
-                        }
-
                         dotp += _regs->s[k][r][c] * _regs->y[c];
-                        DELAY_CC(1);
                     }
                     _regs->spr[r][d] = dotp;
                 }
@@ -374,6 +369,7 @@ void raim_cop_fu::main() {
                 for (q = 2; q >= 0; q--) {
                     if ((_regs->sig_ssq2[k][q] * _regs->k_fa[q] - fabs(_regs->spr[q][d])) < 0.0f) {
                         _cpsr |= RPU_FD;
+                        LOGF("[%s] Detected fault in subset %d", this->name(), k);
                     }
                 }
                 DELAY_CC(1);
@@ -387,9 +383,12 @@ void raim_cop_fu::main() {
             case RPU_TSTL: {
                 // local test for satellite tst_i
                 // fails if y[i] > K_fa,r / W_sqrt[i]
-                if ((_regs->k_fa_r / _regs->w_sqrt[_regs->tst_i] - _regs->y[_regs->tst_i]) < 0.0f) {
+                if ((_regs->k_fa_r / _regs->w_sqrt[_regs->tst_i] - fabs(_regs->y[_regs->tst_i])) < 0.0f) {
                     _cpsr |= RPU_FL;
                     _regs->idx_faulty_sv |= (1 << _regs->tst_i);
+                }
+                else {
+                    _cpsr &= ~RPU_FL;
                 }
                 DELAY_CC(1);
 
@@ -538,6 +537,8 @@ void raim_cop::set_regs(uint32_t rt, int32_t res) {
 
     // decode register address
     switch (rt) {
+    case RPU_VR_I: _regs.tst_i = res; break;
+
     case RPU_VR_AL0: _regs.alpha0 = fres; break;
 
     case RPU_VR_LX: _regs.G[i][0] = fres; break;
@@ -795,6 +796,9 @@ void raim_cop::main() {
             }
             case RPU_NEWSS: {
                 ir_issued = true;
+                for (rrs = 0; rrs < RPU_N_FUs; rrs++) {
+                    _fus[rrs]->clear_cpsr();
+                }
                 break;
             }
             case RPU_TSTG: {

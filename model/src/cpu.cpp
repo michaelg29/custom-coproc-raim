@@ -105,7 +105,7 @@ void cpu::main() {
         // == INSTRUCTION FETCH ==
         // =======================
         mem->read(_regs.s.pc, _regs.s.ir);
-        LOGF("[%s]: Read instr %08x from addr %08x", this->name(), _regs.s.ir, _regs.s.pc);
+        //LOGF("[%s]: Read instr %08x from addr %08x", this->name(), _regs.s.ir, _regs.s.pc);
 
         // ========================
         // == INSTRUCTION DECODE ==
@@ -253,7 +253,6 @@ void cpu::main() {
                 break;
             }
             case SPECIAL_SYSCALL: {
-                LOGF("[%s] Syscall code %d", this->name(), _regs.s.v0);
                 dst_reg_idx = -1;
                 switch (_regs.s.v0) {
                 case SYSCALL_PINT: {
@@ -285,6 +284,7 @@ void cpu::main() {
                 }
                 case SYSCALL_EXIT: {
                     // exit program
+                    LOGF("[%s] Exit requested", this->name());
                     _max_instr_cnt = 1;
                     break;
                 }
@@ -848,7 +848,7 @@ void cpu::main() {
         // ================
         if (dst_reg_idx >= 0) {
             _regs.w[dst_reg_idx] = res;
-            LOGF("Writing result %08x to register %d (rd = %d, rs = %d, rt = %d)", res, dst_reg_idx, rd, rs, rt);
+            //LOGF("Writing result %08x to register %d (rd = %d, rs = %d, rt = %d)", res, dst_reg_idx, rd, rs, rt);
         }
 
         // capture exceptions
