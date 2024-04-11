@@ -37,6 +37,7 @@ int main(int argc, char **argv) {
     /** Placeholder instruction replacements. */
     uint32_t gen_instr_idx = 0;
     int gen_instr[] = {
+        // configuration data
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_AL0, -12), // LWC2 $AL0, -12($t0)
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SA2, -8),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_SE2, -4),
@@ -44,6 +45,8 @@ int main(int argc, char **argv) {
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KY, 8),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KZ, 12),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_KR, 16),
+
+        // individual SV data
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LX, 0),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LY, 4),
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_LZ, 8),
@@ -53,20 +56,28 @@ int main(int argc, char **argv) {
         gen_immd_instr(OPCODE_LWC2, REGS_t1, RPU_VR_Yi+15, 24),
         gen_immd_instr(OPCODE_LWC2, REGS_t0, RPU_VR_BN, 0),
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSV),
+
+        // all-in-view subset
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCU),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t0, RPU_VR_IDX, 0, RPU_INITP),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCP),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_WLS),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t0, RPU_VR_IDX, 0, 0),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_r0, 0, 0, RPU_INITP),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_r0, 0, 0, RPU_CALCP),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_r0, 0, 0, RPU_WLS),
+        gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_MC, 0), // BMCC2 aiv_wait_wls
         gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_NEWSS),
+
+        // individual subsets
         gen_reg_instr (OPCODE_COP2X, REGS_t0, REGS_t1, 0, RPU_VR_IDX, OPCODE_LWXCZ), // LWXC2 $IDX $t1($t0)
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_INITP),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCP),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_WLS),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_POSVAR),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_BIAS),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_CALCSS),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_SSVAR),
-        gen_reg_instr (OPCODE_COP2, RPU_FMT_NONE, 0, 0, 0, RPU_TSTG),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_INITP),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_CALCP),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_WLS),
+        gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_MC, 0), // BMCC2 ss_wait_wls
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_POSVAR),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_BIAS),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_CALCSS),
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_SSVAR),
+        gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_MC, 0), // BMCC2 ss_wait_var
+        gen_reg_instr (OPCODE_COP2, RPU_FMT_CP, REGS_t1, 0, 0, RPU_TSTG),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FD, 0), // BFDC2 sv_local_test
         gen_reg_instr (OPCODE_COP2, RPU_FMT_MT, REGS_t3, RPU_VR_I, 0, RPU_TSTL),
         gen_immd_instr(OPCODE_COP2, RPU_FMT_BC, RPU_FL, 0), // BFLC2 faulty_sv_located

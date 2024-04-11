@@ -55,84 +55,88 @@ Console
 
 Text Segment
 =========================
-[0x00400000]        0x3c041001  lui $4, 4097 [str_greeting]     ; 133: la $a0, str_greeting
-[0x00400004]        0x34020004  ori $2, $0, 4                   ; 134: ori $v0, $zero, 4
-[0x00400008]        0x0000000c  syscall                         ; 135: syscall
-[0x0040000c]        0x3c011001  lui $1, 4097 [data_bias_nom]    ; 140: la $t0, data_bias_nom
+[0x00400000]        0x3c041001  lui $4, 4097 [str_greeting]     ; 134: la $a0, str_greeting
+[0x00400004]        0x34020004  ori $2, $0, 4                   ; 135: ori $v0, $zero, 4
+[0x00400008]        0x0000000c  syscall                         ; 136: syscall
+[0x0040000c]        0x3c011001  lui $1, 4097 [data_bias_nom]    ; 141: la $t0, data_bias_nom
 [0x00400010]        0x3428006c  ori $8, $1, 108 [data_bias_nom]
-[0x00400014]        0x00000000  nop                             ; 141: nop # LWC2 $AL0, -12($t0)
-[0x00400018]        0x00000000  nop                             ; 142: nop # LWC2 $SA2, -8($t0)
-[0x0040001c]        0x00000000  nop                             ; 143: nop # LWC2 $SE2, -4($t0)
-[0x00400020]        0x00000000  nop                             ; 144: nop # LWC2 $KX, 4($t0)
-[0x00400024]        0x00000000  nop                             ; 145: nop # LWC2 $KY, 8($t0)
-[0x00400028]        0x00000000  nop                             ; 146: nop # LWC2 $KZ, 12($t0)
-[0x0040002c]        0x00000000  nop                             ; 147: nop # LWC2 $KR, 16($t0)
-[0x00400030]        0x3c011001  lui $1, 4097 [data_sv0]         ; 150: la $t1, data_sv0 # initial cursor
+[0x00400014]        0x00000000  nop                             ; 142: nop # LWC2 $AL0, -12($t0)
+[0x00400018]        0x00000000  nop                             ; 143: nop # LWC2 $SA2, -8($t0)
+[0x0040001c]        0x00000000  nop                             ; 144: nop # LWC2 $SE2, -4($t0)
+[0x00400020]        0x00000000  nop                             ; 145: nop # LWC2 $KX, 4($t0)
+[0x00400024]        0x00000000  nop                             ; 146: nop # LWC2 $KY, 8($t0)
+[0x00400028]        0x00000000  nop                             ; 147: nop # LWC2 $KZ, 12($t0)
+[0x0040002c]        0x00000000  nop                             ; 148: nop # LWC2 $KR, 16($t0)
+[0x00400030]        0x3c011001  lui $1, 4097 [data_sv0]         ; 151: la $t1, data_sv0 # initial cursor
 [0x00400034]        0x34290080  ori $9, $1, 128 [data_sv0]
-[0x00400038]        0x3c011001  lui $1, 4097 [data_sv9]         ; 151: la $t2, data_sv9 # last SV cursor
+[0x00400038]        0x3c011001  lui $1, 4097 [data_sv9]         ; 152: la $t2, data_sv9 # last SV cursor
 [0x0040003c]        0x342a017c  ori $10, $1, 380 [data_sv9]
-[0x00400040]        0x00000000  nop                             ; 155: nop # LWC2 $LX, 0($t1)
-[0x00400044]        0x00000000  nop                             ; 156: nop # LWC2 $LY, 4($t1)
-[0x00400048]        0x00000000  nop                             ; 157: nop # LWC2 $LZ, 8($t1)
-[0x0040004c]        0x00000000  nop                             ; 158: nop # LWC2 $C, 12($t1)
-[0x00400050]        0x00000000  nop                             ; 159: nop # LWC2 $ST, 16($t1)
-[0x00400054]        0x00000000  nop                             ; 160: nop # LWC2 $SR, 20($t1)
-[0x00400058]        0x00000000  nop                             ; 161: nop # LWC2 $Y15, 24($t1)
-[0x0040005c]        0x00000000  nop                             ; 162: nop # LWC2 $BN, 0($t0)
-[0x00400060]        0x00000000  nop                             ; 163: nop # NEWSVC2
-[0x00400064]        0x012a582a  slt $11, $9, $10                ; 164: slt $t3, $t1, $t2 # t3 <- t1 < t2
-[0x00400068]        0x2129001c  addi $9, $9, 28                 ; 165: addi $t1, $t1, 28 # move cursor to next SV
-[0x0040006c]        0x1560fff4  bne $11, $0, -48 [load_loop-0x0040006c]; 166: bnez $t3, load_loop
-[0x00400070]        0x00000000  nop                             ; 171: nop # CALCUC2
-[0x00400074]        0x340803ff  ori $8, $0, 1023                ; 174: ori $t0, $zero, 1023
-[0x00400078]        0x00000000  nop                             ; 175: nop # INITPC2 $t0, $IDX
-[0x0040007c]        0x00000000  nop                             ; 176: nop # CALCPC2
-[0x00400080]        0x00000000  nop                             ; 177: nop # WLSC2
-[0x00400084]        0x00000000  nop                             ; 179: nop # NEWSSC2
-[0x00400088]        0x3c011001  lui $1, 4097 [data_subsets]     ; 182: la $t0, data_subsets # initial subset
-[0x0040008c]        0x34280198  ori $8, $1, 408 [data_subsets]
-[0x00400090]        0x20090000  addi $9, $0, 0                  ; 183: addi $t1, $zero, 0   # subset cursor
-[0x00400094]        0x00000000  nop                             ; 189: nop # LWXC2 $IDX, $t1($t0)
-[0x00400098]        0x00000000  nop                             ; 190: nop # INITPC2
-[0x0040009c]        0x00000000  nop                             ; 191: nop # CALCPC2
-[0x004000a0]        0x00000000  nop                             ; 192: nop # WLSC2
-[0x004000a4]        0x00000000  nop                             ; 195: nop # POSVARC2
-[0x004000a8]        0x00000000  nop                             ; 196: nop # BIAS
-[0x004000ac]        0x00000000  nop                             ; 197: nop # CALCSS
-[0x004000b0]        0x00000000  nop                             ; 198: nop # SSVARC2
-[0x004000b4]        0x00000000  nop                             ; 199: nop # TSTGC2
-[0x004000b8]        0x04030005  bgezl $0 20 [sv_local_test-0x004000b8]; 200: bgezl $zero, sv_local_test # BFDC2 sv_local_test
-[0x004000bc]        0x3c011001  lui $1, 4097 [str_fault_ndet]   ; 201: la $a0, str_fault_ndet
-[0x004000c0]        0x34240010  ori $4, $1, 16 [str_fault_ndet]
-[0x004000c4]        0x34020004  ori $2, $0, 4                   ; 202: ori $v0, $zero, 4
-[0x004000c8]        0x0000000c  syscall                         ; 203: syscall
-[0x004000cc]        0x08100047  j 0x0040011c [subset_loop_increment]; 204: j subset_loop_increment
-[0x004000d0]        0x3c011001  lui $1, 4097 [str_fault_det]    ; 208: la $a0, str_fault_det
-[0x004000d4]        0x34240028  ori $4, $1, 40 [str_fault_det]
-[0x004000d8]        0x34020004  ori $2, $0, 4                   ; 209: ori $v0, $zero, 4
-[0x004000dc]        0x0000000c  syscall                         ; 210: syscall
-[0x004000e0]        0x340b0000  ori $11, $0, 0                  ; 211: ori $t3, $zero, 0 # initial counter
-[0x004000e4]        0x00000000  nop                             ; 215: nop # TSTLC2 $t3, $TSTi
-[0x004000e8]        0x0403fff9  bgezl $0 -28 [sv_local_test-0x004000e8]; 216: bgezl $zero, sv_local_test # BFLC2 faulty_sv_located
-[0x004000ec]        0x3c011001  lui $1, 4097 [str_fault_nloc]   ; 217: la $a0, str_fault_nloc
-[0x004000f0]        0x3424003c  ori $4, $1, 60 [str_fault_nloc]
-[0x004000f4]        0x34020004  ori $2, $0, 4                   ; 218: ori $v0, $zero, 4
-[0x004000f8]        0x0000000c  syscall                         ; 219: syscall
-[0x004000fc]        0x08100044  j 0x00400110 [sv_local_test_loop_increment]; 220: j sv_local_test_loop_increment
-[0x00400100]        0x3c011001  lui $1, 4097 [str_fault_loc]    ; 223: la $a0, str_fault_loc
-[0x00400104]        0x34240050  ori $4, $1, 80 [str_fault_loc]
-[0x00400108]        0x34020004  ori $2, $0, 4                   ; 224: ori $v0, $zero, 4
-[0x0040010c]        0x0000000c  syscall                         ; 225: syscall
-[0x00400110]        0x296c0009  slti $12, $11, 9                ; 228: slti $t4, $t3, 9 # t4 <- t3 < 9
-[0x00400114]        0x216b0001  addi $11, $11, 1                ; 229: addi $t3, $t3, 1  # move cursor to next subset
-[0x00400118]        0x1580fff2  bne $12, $0, -56 [sv_local_test_loop-0x00400118]; 230: bnez $t4, sv_local_test_loop
-[0x0040011c]        0x00000000  nop                             ; 234: nop # NEWSSC2
-[0x00400120]        0x292a0004  slti $10, $9, 4                 ; 235: slti $t2, $t1, 4 # t2 <- t1 < 4
-[0x00400124]        0x21290004  addi $9, $9, 4                  ; 236: addi $t1, $t1, 4  # move cursor to next subset
-[0x00400128]        0x1540ffda  bne $10, $0, -152 [subset_loop-0x00400128]; 237: bnez $t2, subset_loop
-[0x0040012c]        0x2002000a  addi $2, $0, 10                 ; 240: addi $v0, $zero, 10
-[0x00400130]        0x0000000c  syscall                         ; 241: syscall
-[0x00400134]        0x0810004b  j 0x0040012c [end]              ; 242: j end
+[0x00400040]        0x00000000  nop                             ; 156: nop # LWC2 $LX, 0($t1)
+[0x00400044]        0x00000000  nop                             ; 157: nop # LWC2 $LY, 4($t1)
+[0x00400048]        0x00000000  nop                             ; 158: nop # LWC2 $LZ, 8($t1)
+[0x0040004c]        0x00000000  nop                             ; 159: nop # LWC2 $C, 12($t1)
+[0x00400050]        0x00000000  nop                             ; 160: nop # LWC2 $ST, 16($t1)
+[0x00400054]        0x00000000  nop                             ; 161: nop # LWC2 $SR, 20($t1)
+[0x00400058]        0x00000000  nop                             ; 162: nop # LWC2 $Y15, 24($t1)
+[0x0040005c]        0x00000000  nop                             ; 163: nop # LWC2 $BN, 0($t0)
+[0x00400060]        0x00000000  nop                             ; 164: nop # NEWSVC2
+[0x00400064]        0x012a582a  slt $11, $9, $10                ; 165: slt $t3, $t1, $t2 # t3 <- t1 < t2
+[0x00400068]        0x2129001c  addi $9, $9, 28                 ; 166: addi $t1, $t1, 28 # move cursor to next SV
+[0x0040006c]        0x1560fff4  bne $11, $0, -48 [load_loop-0x0040006c]; 167: bnez $t3, load_loop
+[0x00400070]        0x00000000  nop                             ; 174: nop # CALCUC2
+[0x00400074]        0x340803ff  ori $8, $0, 1023                ; 175: ori $t0, $zero, 1023
+[0x00400078]        0x00000000  nop                             ; 176: nop # MTC2 $t0, $IDX
+[0x0040007c]        0x00000000  nop                             ; 177: nop # INITPC2 $zero
+[0x00400080]        0x00000000  nop                             ; 178: nop # CALCPC2 $zero
+[0x00400084]        0x00000000  nop                             ; 179: nop # WLSC2 $zero
+[0x00400088]        0x0403ffff  bgezl $0 -4 [aiv_wait_wls-0x00400088]; 181: bgezl $zero, aiv_wait_wls # BMMC2 aiv_wait_wls
+[0x0040008c]        0x00000000  nop                             ; 182: nop # NEWSSC2
+[0x00400090]        0x3c011001  lui $1, 4097 [data_subsets]     ; 186: la $t0, data_subsets # initial subset
+[0x00400094]        0x34280198  ori $8, $1, 408 [data_subsets]
+[0x00400098]        0x20090004  addi $9, $0, 4                  ; 187: addi $t1, $zero, 4   # subset cursor
+[0x0040009c]        0x00000000  nop                             ; 192: nop # LWXC2 $IDX, $t1($t0)
+[0x004000a0]        0x00000000  nop                             ; 193: nop # INITPC2 $t1
+[0x004000a4]        0x00000000  nop                             ; 194: nop # CALCPC2 $t1
+[0x004000a8]        0x00000000  nop                             ; 195: nop # WLSC2 $t1
+[0x004000ac]        0x0403ffff  bgezl $0 -4 [ss_wait_wls-0x004000ac]; 197: bgezl $zero, ss_wait_wls # BMMC2 ss_wait_wls
+[0x004000b0]        0x00000000  nop                             ; 200: nop # POSVARC2 $t1
+[0x004000b4]        0x00000000  nop                             ; 201: nop # BIAS $t1
+[0x004000b8]        0x00000000  nop                             ; 202: nop # CALCSS $t1
+[0x004000bc]        0x00000000  nop                             ; 203: nop # SSVARC2 $t1
+[0x004000c0]        0x0403ffff  bgezl $0 -4 [ss_wait_var-0x004000c0]; 205: bgezl $zero, ss_wait_var # BMMC2 ss_wait_var
+[0x004000c4]        0x00000000  nop                             ; 206: nop # TSTGC2 $t1
+[0x004000c8]        0x04030005  bgezl $0 20 [sv_local_test-0x004000c8]; 207: bgezl $zero, sv_local_test # BFDC2 sv_local_test
+[0x004000cc]        0x3c011001  lui $1, 4097 [str_fault_ndet]   ; 208: la $a0, str_fault_ndet
+[0x004000d0]        0x34240010  ori $4, $1, 16 [str_fault_ndet]
+[0x004000d4]        0x34020004  ori $2, $0, 4                   ; 209: ori $v0, $zero, 4
+[0x004000d8]        0x0000000c  syscall                         ; 210: syscall
+[0x004000dc]        0x0810004b  j 0x0040012c [subset_loop_increment]; 211: j subset_loop_increment
+[0x004000e0]        0x3c011001  lui $1, 4097 [str_fault_det]    ; 215: la $a0, str_fault_det
+[0x004000e4]        0x34240028  ori $4, $1, 40 [str_fault_det]
+[0x004000e8]        0x34020004  ori $2, $0, 4                   ; 216: ori $v0, $zero, 4
+[0x004000ec]        0x0000000c  syscall                         ; 217: syscall
+[0x004000f0]        0x340b0000  ori $11, $0, 0                  ; 218: ori $t3, $zero, 0 # initial counter
+[0x004000f4]        0x00000000  nop                             ; 222: nop # TSTLC2 $t3, $TSTi
+[0x004000f8]        0x0403fff9  bgezl $0 -28 [sv_local_test-0x004000f8]; 223: bgezl $zero, sv_local_test # BFLC2 faulty_sv_located
+[0x004000fc]        0x3c011001  lui $1, 4097 [str_fault_nloc]   ; 224: la $a0, str_fault_nloc
+[0x00400100]        0x3424003c  ori $4, $1, 60 [str_fault_nloc]
+[0x00400104]        0x34020004  ori $2, $0, 4                   ; 225: ori $v0, $zero, 4
+[0x00400108]        0x0000000c  syscall                         ; 226: syscall
+[0x0040010c]        0x08100048  j 0x00400120 [sv_local_test_loop_increment]; 227: j sv_local_test_loop_increment
+[0x00400110]        0x3c011001  lui $1, 4097 [str_fault_loc]    ; 230: la $a0, str_fault_loc
+[0x00400114]        0x34240050  ori $4, $1, 80 [str_fault_loc]
+[0x00400118]        0x34020004  ori $2, $0, 4                   ; 231: ori $v0, $zero, 4
+[0x0040011c]        0x0000000c  syscall                         ; 232: syscall
+[0x00400120]        0x296c0009  slti $12, $11, 9                ; 235: slti $t4, $t3, 9 # t4 <- t3 < 9
+[0x00400124]        0x216b0001  addi $11, $11, 1                ; 236: addi $t3, $t3, 1 # move cursor to next subset
+[0x00400128]        0x1580fff2  bne $12, $0, -56 [sv_local_test_loop-0x00400128]; 237: bnez $t4, sv_local_test_loop
+[0x0040012c]        0x00000000  nop                             ; 241: nop # NEWSSC2
+[0x00400130]        0x292a0008  slti $10, $9, 8                 ; 242: slti $t2, $t1, 8 # t2 <- t1 < 8
+[0x00400134]        0x21290004  addi $9, $9, 4                  ; 243: addi $t1, $t1, 4  # move cursor to next subset
+[0x00400138]        0x1540ffd8  bne $10, $0, -160 [subset_loop-0x00400138]; 244: bnez $t2, subset_loop
+[0x0040013c]        0x2002000a  addi $2, $0, 10                 ; 247: addi $v0, $zero, 10
+[0x00400140]        0x0000000c  syscall                         ; 248: syscall
+[0x00400144]        0x0810004f  j 0x0040013c [end]              ; 249: j end
 
         KERNEL
 
@@ -166,8 +170,9 @@ Data Segment
 [0x10010160]                        0x3f0e9e1b  0x3e9e1b09  0xbf4559b4  0x00000001
 [0x10010170]                        0x3cc63a90  0x3e8a885d  0x41533333  0x3f2985f0
 [0x10010180]                        0x3f321ff3  0xbe8e5604  0x00000001  0x3e3a577c
-[0x10010190]                        0x3f1dfb07  0x41a4b852  0x000003e0  0x0000001f
-[0x100101a0]...[0x10040000]        0x00000000
+[0x10010190]                        0x3f1dfb07  0x41a4b852  0x000003ff  0x000003e0
+[0x100101a0]                        0x0000001f  0x00000000  0x00000000  0x00000000
+[0x100101b0]...[0x10040000]        0x00000000
 
         STACK
 [0x7ffff1a8]                        0x00000000  0x00000000

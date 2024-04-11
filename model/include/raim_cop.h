@@ -94,16 +94,20 @@ class raim_cop_fu : public sc_module {
         SC_HAS_PROCESS(raim_cop_fu);
         raim_cop_fu(sc_module_name name, rpu_regs_status_t *regs_status, rpu_regs_t *regs);
 
-        /** Issue an instruction to the functional unit. */
-        bool issue_instr(uint32_t ir);
+        /** Issue an instruction to the functional unit with a buffered immediate value. */
+        bool issue_instr(uint32_t ir, int32_t rt);
 
         /** Read the CPSR resulting from the executed instruction. */
         uint8_t get_cpsr();
+
+        /** Clear the CPSR. */
+        void clear_cpsr();
 
     private:
 
         /** Status. */
         uint32_t _ir;
+        int32_t _rt;
         uint8_t _cpsr;
 
         /** Pointers. */
@@ -141,7 +145,6 @@ class raim_cop : public sc_module, public coprocessor_if {
         bool _has_next_pc_offset;
 
         /** Instruction queue. */
-        bool _instr_q_overflow;
         uint32_t _instrs[RPU_INSTR_Q_SIZE];
         queue<uint32_t> _instr_q;
         int32_t _rt_vals[RPU_INSTR_Q_SIZE];

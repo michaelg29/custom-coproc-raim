@@ -117,6 +117,7 @@ data_sv9:
   .word 0x41a4b852 # y = 20.590000
 
 data_subsets:
+  .word 1023 # all-in-view
   .word 992  # 5 last satellites
   .word 31   # 5 first satellites
 
@@ -168,35 +169,41 @@ load_loop:
   #################################
   ##### calculate LS matrices #####
   #################################
-  nop # CALCUC2
 
   # all-in-view
+  nop # CALCUC2
   ori $t0, $zero, 1023
-  nop # INITPC2 $t0, $IDX
-  nop # CALCPC2
-  nop # WLSC2
-
+  nop # MTC2 $t0, $IDX
+  nop # INITPC2 $zero
+  nop # CALCPC2 $zero
+  nop # WLSC2 $zero
+aiv_wait_wls:
+  bgezl $zero, aiv_wait_wls # BMMC2 aiv_wait_wls
   nop # NEWSSC2
 
+subset_loop_init:
   # cursors
   la $t0, data_subsets # initial subset
-  addi $t1, $zero, 0   # subset cursor
+  addi $t1, $zero, 4   # subset cursor
 
   # loop through subsets
 subset_loop:
-
   # compute least-squares matrix
   nop # LWXC2 $IDX, $t1($t0)
-  nop # INITPC2
-  nop # CALCPC2
-  nop # WLSC2
+  nop # INITPC2 $t1
+  nop # CALCPC2 $t1
+  nop # WLSC2 $t1
+ss_wait_wls:
+  bgezl $zero, ss_wait_wls # BMMC2 ss_wait_wls
 
   # compute statistics
-  nop # POSVARC2
-  nop # BIAS
-  nop # CALCSS
-  nop # SSVARC2
-  nop # TSTGC2
+  nop # POSVARC2 $t1
+  nop # BIAS $t1
+  nop # CALCSS $t1
+  nop # SSVARC2 $t1
+ss_wait_var:
+  bgezl $zero, ss_wait_var # BMMC2 ss_wait_var
+  nop # TSTGC2 $t1
   bgezl $zero, sv_local_test # BFDC2 sv_local_test
   la $a0, str_fault_ndet
   ori $v0, $zero, 4
@@ -226,13 +233,13 @@ faulty_sv_located:
 
 sv_local_test_loop_increment:
   slti $t4, $t3, 9 # t4 <- t3 < 9
-  addi $t3, $t3, 1  # move cursor to next subset
+  addi $t3, $t3, 1 # move cursor to next subset
   bnez $t4, sv_local_test_loop
 
   # increment cursor
 subset_loop_increment:
   nop # NEWSSC2
-  slti $t2, $t1, 4 # t2 <- t1 < 4
+  slti $t2, $t1, 8 # t2 <- t1 < 8
   addi $t1, $t1, 4  # move cursor to next subset
   bnez $t2, subset_loop
 

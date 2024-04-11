@@ -28,18 +28,10 @@ void coprocessor_if::signal_ex(exception_e ex) {
     _prev_ex = ex;
 }
 
-bool coprocessor_if::get_condition_code(uint8_t &cc) {
-    return false;
-}
-
 exception_e coprocessor_if::get_exception() {
     exception_e ret = _prev_ex;
     _prev_ex = EX_NONE;
     return ret;
-}
-
-bool coprocessor_if::get_next_pc_offset(int32_t &next_pc_offset) {
-    return false;
 }
 
 stubbed_cop::stubbed_cop()
@@ -52,6 +44,14 @@ bool stubbed_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
 
 bool stubbed_cop::get_regs(uint32_t rt, int32_t &res) {
     _prev_ex = EX_COP_UNUSABLE;
+    return false;
+}
+
+bool stubbed_cop::get_condition_code(uint8_t &cc) {
+    return false;
+}
+
+bool stubbed_cop::get_next_pc_offset(int32_t &next_pc_offset) {
     return false;
 }
 
@@ -869,15 +869,20 @@ void cpu::main() {
         if (_regs.s.pc == _exit_addr) {
             break;
         }
-        _regs.s.pc = next_pc;
         if (cop1->get_next_pc_offset(res)) {
+            LOGF("[%s] Updating PC (COP1) from %08x to %08x", this->name(), next_pc-4, _regs.s.pc);
             _regs.s.pc = _regs.s.pc + res + 4;
         }
-        if (cop2->get_next_pc_offset(res)) {
+        else if (cop2->get_next_pc_offset(res)) {
+            _regs.s.pc = _regs.s.pc + res + 4;
+            LOGF("[%s] Updating PC (COP2) from %08x to %08x", this->name(), next_pc-4, _regs.s.pc);
+        }
+        else if (cop3->get_next_pc_offset(res)) {
+            LOGF("[%s] Updating PC (COP3) from %08x to %08x", this->name(), next_pc-4, _regs.s.pc);
             _regs.s.pc = _regs.s.pc + res + 4;
         }
-        if (cop3->get_next_pc_offset(res)) {
-            _regs.s.pc = _regs.s.pc + res + 4;
+        else {
+            _regs.s.pc = next_pc;
         }
 
         instr_cnt++;

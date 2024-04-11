@@ -44,11 +44,12 @@ raim_cop_fu::raim_cop_fu(sc_module_name name, rpu_regs_status_t *regs_status, rp
     SC_THREAD(main);
 }
 
-bool raim_cop_fu::issue_instr(uint32_t ir) {
+bool raim_cop_fu::issue_instr(uint32_t ir, int32_t rt) {
     // reject if busy
     if (_ir) return false;
 
     _ir = ir;
+    _rt = rt;
     return true;
 }
 
@@ -63,7 +64,7 @@ void raim_cop_fu::main() {
 
     while (true) {
         i = _regs->N_sv;
-        k = _regs->N_ss;
+        k = _rt / 4;
         N = 3 + _regs->N_const;
         init_mask = 1 << (_regs->N_sv - 1);
 
@@ -80,20 +81,20 @@ void raim_cop_fu::main() {
             opcode = GET_INSTR_COP_OP(_ir);
             switch (opcode) {
             case RPU_NEWSV: {
+                // increment cursor
+                if (_regs->N_sv < RAIM_N_SV_MAX) {
+                    _regs->N_sv++;
+                }
+
                 // calculate weight
                 _regs->w_sqrt[i] = 1.0f / sqrt(_regs->sig_tropo2 + _regs->sig_user2 + _regs->sig_ura2);
                 _regs->w_acc_sqrt[i] = 1.0f / sqrt(_regs->sig_tropo2 + _regs->sig_user2 + _regs->sig_ure2);
                 DELAY_CC(3); // 3 operations
 
                 LOGF("[%s] Completed SV %d", this->name(), i);
-                LOGF("LOS %f %f %f, constellation %d", _regs->G[i][0], _regs->G[i][1], _regs->G[i][2], _regs->C[i]);
+                LOGF("LOS %f %f %f, constellation %d, y %f", _regs->G[i][0], _regs->G[i][1], _regs->G[i][2], _regs->C[i], _regs->y[i]);
                 LOGF("st2 %f, sr2 %f, sa2 %f, se2 %f, bn %f", _regs->sig_tropo2, _regs->sig_user2, _regs->sig_ura2, _regs->sig_ure2, _regs->b_nom[i]);
                 LOGF("=> W_sqrt %f, W_acc_sqrt %f", _regs->w_sqrt[i], _regs->w_acc_sqrt[i]);
-
-                // increment cursor
-                if (_regs->N_sv < RAIM_N_SV_MAX) {
-                    _regs->N_sv++;
-                }
 
                 // free registers
                 _regs_status->sig_tropo2    = true;
@@ -109,6 +110,7 @@ void raim_cop_fu::main() {
                 // U <- w_sqrt * G
                 // w_sqrt is diagonal => single multiplication for each element
                 // result is size of G
+                _cpsr |= RPU_MC;
                 for (r = _regs->N_sv - 1; r >= 0; r--) {
                     // first 3 columns
                     for (c = 3 - 1; c >= 0; c--) {
@@ -118,6 +120,8 @@ void raim_cop_fu::main() {
                     // constellation columns
                     c = 3 + _regs->C[r];
                     _regs->u[r][c] = _regs->w_sqrt[r];
+
+                    DELAY_CC(4); // 4 total operations
                 }
 
                 // free registers
@@ -128,6 +132,7 @@ void raim_cop_fu::main() {
             }
             case RPU_INITP: {
                 mask = init_mask;
+                _cpsr |= RPU_MC;
                 for (r = _regs->N_sv - 1; r >= 0; r--, mask >>= 1) {
                     if (!(_regs->idx_ss[k] & mask)) {
                         for (c = 3 + 4; c >= 0; c--) {
@@ -144,6 +149,8 @@ void raim_cop_fu::main() {
                     // constellation columns
                     c = 3 + _regs->C[r];
                     _regs->s[k][c][r] = _regs->alpha0 * _regs->w_sqrt[r];
+
+                    DELAY_CC(4); // 4 total operations
                 }
 
                 // free registers
@@ -154,7 +161,8 @@ void raim_cop_fu::main() {
             }
             case RPU_CALCP: {
                 // S[k] <- pseudoinv(U)
-                LOGF("[%s] Subset %d has indices %03x, mask %03x", this->name(), k, _regs->idx_ss[k], 1 << (_regs->N_sv - 1));
+                LOGF("[%s] Subset %d has indices %03x, mask %03x", this->name(), k, _regs->idx_ss[k], init_mask);
+                _cpsr |= RPU_MC;
                 for (n = 0; n < RPU_PSEUDO_MAX_IT; n++) {
                     // SPR <- 2I_N - Ut_n U
                     // [7][RAIM_N_SV_MAX] x [RAIM_N_SV_MAX][7]
@@ -172,6 +180,7 @@ void raim_cop_fu::main() {
                             _regs->spr[r][c] = dotp;
                         }
                     }
+                    DELAY_CC(1);
 
                     // S[k] <- SPR Ut_n
                     mask = init_mask;
@@ -204,10 +213,12 @@ void raim_cop_fu::main() {
                 // S[k] <- S[k] w_sqrt
                 // w_sqrt is diagonal => single multiplication for each element
                 mask = init_mask;
+                _cpsr |= RPU_MC;
                 for (c = _regs->N_sv - 1; c >= 0; c--, mask >>= 1) {
                     if (_regs->idx_ss[k] & mask) {
                         for (r = N - 1; r >= 0; r--) {
                             _regs->s[k][r][c] = _regs->s[k][r][c] * _regs->w_sqrt[c];
+                            DELAY_CC(1);
                         }
                     }
                     else {
@@ -218,6 +229,7 @@ void raim_cop_fu::main() {
                 }
 
                 print_mat((char*)"WLS matrix", k, (float*)_regs->s[k], N, _regs->N_sv, RAIM_N_SV_MAX - _regs->N_sv);
+                _cpsr ^= RPU_MC;
 
                 // free registers
                 _regs_status->s[k] = true;
@@ -235,6 +247,7 @@ void raim_cop_fu::main() {
                         }
 
                         dotp += _regs->s[k][r][c] * _regs->y[c];
+                        DELAY_CC(1);
                     }
                     _regs->spr[r][d] = dotp;
                 }
@@ -286,6 +299,7 @@ void raim_cop_fu::main() {
                     for (r = N - 1; r >= 0; r--) {
                         _regs->spr[r][c] = _regs->s[k][r][c] / w_sqrt_src[c];
                     }
+                    //DELAY_CC(1);
                 }
 
                 // dst[q] <- (SPR SPR^T)[q][q], q = 1,2,3
@@ -297,6 +311,7 @@ void raim_cop_fu::main() {
                         dotp += _regs->spr[q][c] * _regs->spr[q][c];
                     }
                     dst[q] = dotp;
+                    //DELAY_CC(1);
                 }
 
                 LOGF("[%s] stddev for subset %d is [%f %f %f]", this->name(), k, sqrt(dst[0]), sqrt(dst[1]), sqrt(dst[2]));
@@ -323,6 +338,7 @@ void raim_cop_fu::main() {
                         dotp += fabs(_regs->s[k][q][i]) * _regs->b_nom[i];
                     }
                     _regs->bias_q[k][q] = dotp;
+                    //DELAY_CC(1);
                 }
                 LOGF("[%s] bias for subset %d is [%f %f %f]", this->name(), k, _regs->bias_q[k][0], _regs->bias_q[k][1], _regs->bias_q[k][2]);
 
@@ -339,6 +355,7 @@ void raim_cop_fu::main() {
                         _regs->s[k][r][c] = _regs->s[k][r][c] - _regs->s[_regs->ss_k_aiv][r][c];
                     }
                 }
+                //DELAY_CC(1);
 
                 // free registers
                 _regs_status->s[k]               = true;
@@ -359,6 +376,7 @@ void raim_cop_fu::main() {
                         _cpsr |= RPU_FD;
                     }
                 }
+                DELAY_CC(1);
 
                 // free registers
                 _regs_status->spr[d]      = true;
@@ -373,6 +391,7 @@ void raim_cop_fu::main() {
                     _cpsr |= RPU_FL;
                     _regs->idx_faulty_sv |= (1 << _regs->tst_i);
                 }
+                DELAY_CC(1);
 
                 // free registers
                 _regs_status->y      = true;
@@ -390,13 +409,15 @@ void raim_cop_fu::main() {
 }
 
 uint8_t raim_cop_fu::get_cpsr() {
-    uint8_t ret = _cpsr;
+    return _cpsr;
+}
+
+void raim_cop_fu::clear_cpsr() {
     _cpsr = RPU_OKAY;
-    return ret;
 }
 
 raim_cop::raim_cop(sc_module_name name, uint32_t cop_opcode)
-    : sc_module(name), coprocessor_if(cop_opcode), _instr_q_overflow(false), _instr_q(_instrs, RPU_INSTR_Q_SIZE, RPU_INSTR_Q_MASK), _rt_val_q(_rt_vals, RPU_INSTR_Q_SIZE, RPU_INSTR_Q_MASK), _cc_spinning(0) {
+    : sc_module(name), coprocessor_if(cop_opcode), _instr_q(_instrs, RPU_INSTR_Q_SIZE, RPU_INSTR_Q_MASK), _rt_val_q(_rt_vals, RPU_INSTR_Q_SIZE, RPU_INSTR_Q_MASK), _cc_spinning(0) {
     SC_THREAD(main);
 
     // initial register values
@@ -427,6 +448,9 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
     case RPU_FMT_RST: {
         // reset registers
         _rpu_cpsr = RPU_OKAY;
+        for (rrs = 0; rrs < RPU_N_FUs; rrs++) {
+            _fus[rrs]->clear_cpsr();
+        }
         memset(&_regs, 0, sizeof(rpu_regs_t));
         break;
     }
@@ -434,6 +458,9 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
         // clear CPSR
         _rpu_cpsr = RPU_OKAY;
         _regs.idx_faulty_sv = 0;
+        for (rrs = 0; rrs < RPU_N_FUs; rrs++) {
+            _fus[rrs]->clear_cpsr();
+        }
         break;
     }
     case RPU_FMT_MF: {
@@ -446,35 +473,42 @@ bool raim_cop::execute(uint32_t ir, int32_t rt, int32_t &res) {
         _next_pc_offset = sign_extend_immd(ir, 2);
 
         // conditional PC-relative branch
-        LOGF("[%s] cond branch (flag %02x), cpsr is %02x", this->name(), flags, _rpu_cpsr);
         switch (flags) {
         case RPU_OKAY: {
             _has_next_pc_offset = (_rpu_cpsr & 0b11111) == flags;
             break;
+        }
+        case RPU_MC: {
+            if ((_rpu_cpsr & RPU_MC) > 0) {
+                _cc_spinning++;
+            }
         }
         default: {
             _has_next_pc_offset = ((_rpu_cpsr & 0b11111) & flags) > 0;
             break;
         }
         };
+        LOGF("[%s] cond branch (flag %02x), cpsr is %02x -> %d", this->name(), flags, _rpu_cpsr, _has_next_pc_offset);
 
         break;
     }
-    case RPU_FMT_MT: {
+    case RPU_FMT_MT:
+    case RPU_FMT_CP: {
         // spin while not able to enqueue
-        while (_instr_q_overflow = !_instr_q.enqueue(ir)) {
+        while (!_instr_q.enqueue(ir)) {
             _cc_spinning++;
             POSEDGE_CPU();
         }
 
         // enqueue register value
+        LOGF("[%s] enqueuing %08x with instr %08x", this->name(), rt, ir);
         _rt_val_q.enqueue(rt);
         break;
     }
     default: {
         // all other formats must enqueue
         // spin while not able to enqueue
-        while (_instr_q_overflow = !_instr_q.enqueue(ir)) {
+        while (!_instr_q.enqueue(ir)) {
             _cc_spinning++;
             POSEDGE_CPU();
         }
@@ -550,8 +584,10 @@ bool raim_cop::get_condition_code(uint8_t &cc) {
 }
 
 bool raim_cop::get_next_pc_offset(int32_t &next_pc_offset) {
+    bool ret = _has_next_pc_offset;
     next_pc_offset = _next_pc_offset;
-    return _has_next_pc_offset;
+    _has_next_pc_offset = false;
+    return ret;
 }
 
 void raim_cop::main() {
@@ -565,14 +601,12 @@ void raim_cop::main() {
 
     while (true) {
         // default values
-        if (_instr_q_overflow) {
+        if (_instr_q.is_full()) {
             _prev_ex = EX_COP_UNUSABLE;
-            _instr_q_overflow = false;
         }
         else {
             _prev_ex = EX_NONE;
         }
-        _has_next_pc_offset = false;
         ir_valid = true;
         ir_issued = false;
 
@@ -585,6 +619,7 @@ void raim_cop::main() {
         // ==============================
 
         // assert or de-assert full flag
+        _rpu_cpsr = RPU_OKAY;
         if (_instr_q.is_full()) {
             _rpu_cpsr |= RPU_FULL;
         }
@@ -596,7 +631,7 @@ void raim_cop::main() {
         d = GET_INSTR_REG(ir, 6);
 
         // take new operation from the instruction queue
-        if (ir || _instr_q.dequeue(ir)) {
+        if (!ir && _instr_q.dequeue(ir)) {
             // decode instruction format
             switch (GET_INSTR_REG(ir, 21)) {
             case RPU_FMT_NONE: {
@@ -609,6 +644,11 @@ void raim_cop::main() {
                 set_regs(rrs, rt);
                 break;
             }
+            case RPU_FMT_CP: {
+                // dequeue intermediate value
+                _rt_val_q.dequeue(rt);
+                break;
+            }
             default: {
                 LOGF("Invalid RPU format: %02x", GET_INSTR_REG(ir, 21));
                 signal_ex(EX_INVALID);
@@ -616,10 +656,16 @@ void raim_cop::main() {
                 break;
             }
             };
+        }
 
+        if (ir && ir_valid) {
             // decode operation, ensure no data dependency violations
             opcode = GET_INSTR_COP_OP(ir);
             switch (opcode) {
+            case RPU_NOP: {
+                ir = 0;
+                break;
+            }
             case RPU_NEWSV: {
                 if (_regs_status.sig_user2     &&
                     _regs_status.sig_tropo2    &&
@@ -788,10 +834,17 @@ void raim_cop::main() {
             if (ir_valid && ir_issued) {
                 // look for open FU
                 for (i = 0; i < RPU_N_FUs; i++) {
-                    if (_fus[i]->issue_instr(ir)) {
+                    if (_fus[i]->issue_instr(ir, rt)) {
                         ir = 0;
+                        rt = 0;
                         break;
                     }
+                    else {
+                        LOGF("[%s] FU %d busy", this->name(), i);
+                    }
+                }
+                if (i == RPU_N_FUs) {
+                    ir_issued = false;
                 }
             }
         }
@@ -808,4 +861,5 @@ void raim_cop::main() {
 void raim_cop::print_statistics() {
     LOGF("\n=====\nStatistics for %s\n=====", this->name());
     printf("Number of cycles stalled: %d\n", _cc_spinning);
+
 }

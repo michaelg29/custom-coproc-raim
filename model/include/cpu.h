@@ -99,13 +99,13 @@ class coprocessor_if : virtual public sc_interface {
         virtual void set_regs(uint32_t rt, int32_t res) = 0;
 
         /** Get the condition code. */
-        bool get_condition_code(uint8_t &cc);
+        virtual bool get_condition_code(uint8_t &cc) = 0;
 
         /** Determine if the coprocessor signaled an exception in the previous instruction. */
         exception_e get_exception();
 
         /** Get the offset for the next program counter if the coprocessor has updated it. */
-        bool get_next_pc_offset(int32_t &next_pc_offset);
+        virtual bool get_next_pc_offset(int32_t &next_pc_offset) = 0;
 
         /** Print locally-collected statistics. */
         virtual void print_statistics() = 0;
@@ -133,6 +133,8 @@ class stubbed_cop : public coprocessor_if {
         bool execute(uint32_t ir, int32_t rt, int32_t &res);
         bool get_regs(uint32_t rt, int32_t &res);
         void set_regs(uint32_t rt, int32_t res);
+        bool get_condition_code(uint8_t &cc);
+        bool get_next_pc_offset(int32_t &next_pc_offset);
         void print_statistics();
 
 };
