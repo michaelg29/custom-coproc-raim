@@ -1,0 +1,708 @@
+./system ../../alg/asm/raim.bin  -s10 n
+Initial state:
+0 s - [mem]: 3 cursors and 208 words
+Starting simulation...
+0 s - [cpu] Updating PC (COP2) from 00400000 to 00400004
+Hello, world!
+28 ns - [raim_cop.rpu_fu_0] Completed SV 0
+28 ns - LOS 0.022500 0.995100 -0.096600, constellation 0, y -9.530000
+28 ns - st2 1.273282, sr2 2.050753, sa2 0.562500, se2 0.250000, bn 0.500000
+28 ns - => W_sqrt 0.507246, W_acc_sqrt 0.528957
+40 ns - [raim_cop.rpu_fu_0] Completed SV 1
+40 ns - LOS 0.675000 -0.690000 -0.261200, constellation 0, y 0.880000
+40 ns - st2 0.205451, sr2 0.669798, sa2 0.562500, se2 0.250000, bn 0.500000
+40 ns - => W_sqrt 0.833985, W_acc_sqrt 0.942704
+52 ns - [raim_cop.rpu_fu_0] Completed SV 2
+52 ns - LOS 0.072300 -0.660100 -0.747700, constellation 0, y -0.010000
+52 ns - st2 0.025718, sr2 0.272161, sa2 0.562500, se2 0.250000, bn 0.500000
+52 ns - => W_sqrt 1.078090, W_acc_sqrt 1.351007
+64 ns - [raim_cop.rpu_fu_0] Completed SV 3
+64 ns - LOS -0.939800 0.255300 -0.226900, constellation 0, y -0.510000
+64 ns - st2 0.269745, sr2 0.806083, sa2 0.562500, se2 0.250000, bn 0.500000
+64 ns - => W_sqrt 0.781267, W_acc_sqrt 0.868473
+76 ns - [raim_cop.rpu_fu_0] Completed SV 4
+76 ns - LOS -0.590700 -0.753900 -0.287700, constellation 0, y -0.450000
+76 ns - st2 0.170217, sr2 0.590167, sa2 0.562500, se2 0.250000, bn 0.500000
+76 ns - => W_sqrt 0.869439, W_acc_sqrt 0.994848
+88 ns - [raim_cop.rpu_fu_0] Completed SV 5
+88 ns - LOS -0.323600 -0.035400 -0.945500, constellation 1, y -1.060000
+88 ns - st2 0.016103, sr2 0.264751, sa2 0.562500, se2 0.250000, bn 0.500000
+88 ns - => W_sqrt 1.088918, W_acc_sqrt 1.372500
+100 ns - [raim_cop.rpu_fu_0] Completed SV 6
+100 ns - LOS -0.674800 0.435600 -0.595700, constellation 1, y 2.040000
+100 ns - st2 0.040431, sr2 0.293406, sa2 0.562500, se2 0.250000, bn 0.500000
+100 ns - => W_sqrt 1.056244, W_acc_sqrt 1.308743
+112 ns - [raim_cop.rpu_fu_0] Completed SV 7
+112 ns - LOS 0.093800 -0.700400 -0.707500, constellation 1, y -0.860000
+112 ns - st2 0.028708, sr2 0.275677, sa2 0.562500, se2 0.250000, bn 0.500000
+112 ns - => W_sqrt 1.074037, W_acc_sqrt 1.343055
+124 ns - [raim_cop.rpu_fu_0] Completed SV 8
+124 ns - LOS 0.557100 0.308800 -0.770900, constellation 1, y 3.200000
+124 ns - st2 0.024198, sr2 0.270572, sa2 0.562500, se2 0.250000, bn 0.500000
+124 ns - => W_sqrt 1.080044, W_acc_sqrt 1.354858
+136 ns - [raim_cop.rpu_fu_0] Completed SV 9
+136 ns - LOS 0.662200 0.695800 -0.278000, constellation 1, y 3.600000
+136 ns - st2 0.181974, sr2 0.617112, sa2 0.562500, se2 0.250000, bn 0.500000
+136 ns - => W_sqrt 0.856993, W_acc_sqrt 0.976325
+138 ns - [raim_cop] enqueuing 000003ff with instr 48885800
+139 ns - [raim_cop] enqueuing 00000000 with instr 48c00005
+140 ns - [raim_cop] enqueuing 00000000 with instr 48c00006
+141 ns - [raim_cop] enqueuing 00000000 with instr 48c00007
+142 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+142 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+143 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+143 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+144 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+144 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+145 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+145 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+146 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+146 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+147 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+147 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+148 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+148 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+149 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+149 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+150 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+150 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+151 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+151 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+152 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+152 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+153 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+153 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+154 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+154 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+155 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+155 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+156 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+156 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+157 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+157 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+158 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+158 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+159 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+159 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+160 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+160 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+161 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+161 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+162 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+162 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+163 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+163 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+164 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+164 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+165 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+165 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+166 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+166 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+167 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+167 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+168 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+168 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+169 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+169 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+170 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+170 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+171 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+171 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+172 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+172 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+173 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+173 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+174 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+174 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+175 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+175 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+176 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+176 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+177 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+177 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+178 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+178 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+179 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+179 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+180 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+180 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+181 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+181 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+182 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+182 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+183 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+183 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+184 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+184 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+185 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+185 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+186 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+186 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+187 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+187 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+188 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+188 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+189 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+189 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+190 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+190 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+191 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+191 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+192 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+192 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+193 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+193 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+194 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+194 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+195 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+195 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+196 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+196 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+197 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+197 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+198 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+198 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+199 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+199 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+200 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+200 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+201 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+201 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+202 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+202 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+203 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+203 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+204 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+204 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+205 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+205 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+206 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+206 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+207 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+207 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+208 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+208 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+209 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+209 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+210 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+210 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+211 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+211 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+212 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+212 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+213 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+213 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+214 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+214 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+215 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+215 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+216 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+216 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+217 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+217 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+218 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+218 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+219 ns - [raim_cop.rpu_fu_0] Subset 0 has indices 3ff, mask 200
+219 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+219 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+220 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+220 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+221 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+221 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+222 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+222 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+223 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+223 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+224 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+224 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+225 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+225 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+226 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+226 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+227 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+227 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+228 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+228 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+229 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+229 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+230 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+230 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+231 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+231 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+232 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+232 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+233 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+233 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+234 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+234 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+235 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+235 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+236 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+236 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+237 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+237 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+238 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+238 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+239 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+239 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+240 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+240 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+241 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+241 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+242 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+242 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+243 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+243 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+244 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+244 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+245 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+245 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+246 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+246 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+247 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+247 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+248 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+248 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+249 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+249 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+250 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+250 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+251 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+251 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+252 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+252 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+253 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+253 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+254 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+254 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+255 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+255 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+256 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+256 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+257 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+257 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+258 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+258 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+259 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+259 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+260 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+260 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+261 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+261 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+262 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+262 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+263 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+263 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+264 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+264 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+265 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+265 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+266 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+266 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+267 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+267 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+268 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+268 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+269 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+269 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+270 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+270 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+271 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+271 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+272 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+272 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+273 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+273 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+274 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+274 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+275 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+275 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+276 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+276 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+277 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+277 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+278 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+278 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+279 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+279 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+280 ns - WLS matrix (id 0): [
+0.033014 0.210983 0.135170 -0.196925 -0.182242 -0.143825 -0.319103 -0.030914 0.301092 0.192749 
+0.168337 -0.153828 0.109795 0.131591 -0.255894 0.085730 0.100229 -0.547534 0.267166 0.094409 
+-0.003276 0.390640 -1.061797 0.142734 0.531698 -0.785277 0.181814 0.577518 -0.557523 0.583468 
+0.144873 0.326255 -0.040544 0.261061 0.308355 -0.307339 0.072974 0.012386 -0.081560 0.303539 
+-0.018876 0.280572 -0.747688 0.090247 0.395744 -0.327099 0.331019 0.667399 -0.199274 0.527956 
+]
+280 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+280 ns - [cpu] Updating PC (COP2) from 00400088 to 00400088
+281 ns - [raim_cop] cond branch (flag 08), cpsr is 00 -> 0
+287 ns - [raim_cop] enqueuing 00000004 with instr 48c90005
+288 ns - [raim_cop] enqueuing 00000004 with instr 48c90006
+289 ns - [raim_cop] enqueuing 00000004 with instr 48c90007
+290 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+290 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+291 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+291 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+292 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+292 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+293 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+293 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+294 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+294 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+295 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+295 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+296 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+296 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+297 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+297 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+298 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+298 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+299 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+299 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+300 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+300 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+301 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+301 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+302 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+302 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+303 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+303 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+304 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+304 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+305 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+305 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+306 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+306 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+307 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+307 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+308 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+308 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+309 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+309 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+310 ns - [raim_cop.rpu_fu_0] Subset 1 has indices 01f, mask 200
+310 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+310 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+311 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+311 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+312 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+312 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+313 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+313 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+314 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+314 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+315 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+315 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+316 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+316 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+317 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+317 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+318 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+318 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+319 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+319 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+320 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+320 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+321 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+321 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+322 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+322 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+323 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+323 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+324 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+324 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+325 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+325 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+326 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+326 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+327 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+327 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+328 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+328 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+329 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+329 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+330 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+330 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+331 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+331 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+332 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+332 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+333 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+333 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+334 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+334 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+335 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+335 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+336 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+336 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+337 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+337 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+338 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+338 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+339 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+339 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+340 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+340 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+341 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+341 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+342 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+342 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+343 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+343 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+344 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+344 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+345 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+345 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+346 ns - WLS matrix (id 1): [
+0.188402 0.564730 0.062156 -0.368045 -0.447242 0.000000 0.000000 0.000000 0.000000 0.000000 
+0.423324 -0.237553 0.195762 0.254086 -0.635619 0.000000 0.000000 0.000000 0.000000 0.000000 
+0.037505 1.091833 -2.087516 0.059893 0.898284 0.000000 0.000000 0.000000 0.000000 0.000000 
+0.285129 0.627616 -0.437282 0.253787 0.270750 0.000000 0.000000 0.000000 0.000000 0.000000 
+0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 
+]
+346 ns - [raim_cop] cond branch (flag 08), cpsr is 00 -> 0
+347 ns - [raim_cop] enqueuing 00000004 with instr 48c9000a
+348 ns - [raim_cop.rpu_fu_0] stddev for subset 1 is [1.042275 1.204498 2.557740]
+348 ns - [raim_cop] enqueuing 00000004 with instr 48c9000b
+349 ns - [raim_cop] enqueuing 00000004 with instr 48c9000c
+350 ns - [raim_cop.rpu_fu_0] bias for subset 1 is [0.815287 0.873172 2.087516]
+350 ns - [raim_cop] enqueuing 00000004 with instr 48c9000e
+351 ns - [raim_cop.rpu_fu_0] AIV is 0
+351 ns - [raim_cop] cond branch (flag 08), cpsr is 00 -> 0
+352 ns - [raim_cop.rpu_fu_0] stddev for subset 1 is [0.706490 0.796304 1.529228]
+352 ns - [raim_cop] enqueuing 00000004 with instr 48c90008
+353 ns - [raim_cop] enqueuing 00000004 with instr 48c90010
+355 ns - [raim_cop.rpu_fu_0] Detected fault in subset 1
+Pausing
+358 ns - [raim_cop] cond branch (flag 02), cpsr is 02 -> 1
+358 ns - [cpu] Updating PC (COP2) from 004000dc to 004000f4
+Fault detected!
+364 ns - [raim_cop] enqueuing 00000000 with instr 488b0011
+Pausing
+369 ns - [raim_cop] cond branch (flag 04), cpsr is 06 -> 1
+369 ns - [cpu] Updating PC (COP2) from 0040011c to 00400134
+0: index of faulty SV!
+380 ns - [raim_cop] enqueuing 00000001 with instr 488b0011
+Pausing
+385 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+394 ns - [raim_cop] enqueuing 00000002 with instr 488b0011
+Pausing
+399 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+408 ns - [raim_cop] enqueuing 00000003 with instr 488b0011
+Pausing
+413 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+422 ns - [raim_cop] enqueuing 00000004 with instr 488b0011
+Pausing
+427 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+436 ns - [raim_cop] enqueuing 00000005 with instr 488b0011
+Pausing
+441 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+450 ns - [raim_cop] enqueuing 00000006 with instr 488b0011
+Pausing
+455 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+464 ns - [raim_cop] enqueuing 00000007 with instr 488b0011
+Pausing
+469 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+478 ns - [raim_cop] enqueuing 00000008 with instr 488b0011
+Pausing
+483 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+492 ns - [raim_cop] enqueuing 00000009 with instr 488b0011
+Pausing
+497 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+511 ns - [raim_cop] enqueuing 00000008 with instr 48c90005
+512 ns - [raim_cop] enqueuing 00000008 with instr 48c90006
+513 ns - [raim_cop] enqueuing 00000008 with instr 48c90007
+514 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+514 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+515 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+515 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+516 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+516 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+517 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+517 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+518 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+518 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+519 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+519 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+520 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+520 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+521 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+521 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+522 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+522 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+523 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+523 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+524 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+524 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+525 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+525 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+526 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+526 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+527 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+527 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+528 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+528 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+529 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+529 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+530 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+530 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+531 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+531 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+532 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+532 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+533 ns - [raim_cop.rpu_fu_0] Subset 2 has indices 3e0, mask 200
+533 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+533 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+534 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+534 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+535 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+535 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+536 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+536 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+537 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+537 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+538 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+538 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+539 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+539 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+540 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+540 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+541 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+541 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+542 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+542 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+543 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+543 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+544 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+544 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+545 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+545 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+546 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+546 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+547 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+547 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+548 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+548 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+549 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+549 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+550 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+550 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+551 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+551 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+552 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+552 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+553 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+553 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+554 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+554 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+555 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+555 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+556 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+556 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+557 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+557 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+558 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+558 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+559 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+559 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+560 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+560 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+561 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+561 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+562 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+562 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+563 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+563 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+564 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+564 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+565 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+565 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+566 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+566 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+567 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+567 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+568 ns - [raim_cop] cond branch (flag 08), cpsr is 08 -> 1
+568 ns - [cpu] Updating PC (COP2) from 004000ac to 004000ac
+569 ns - WLS matrix (id 2): [
+0.000000 0.000000 0.000000 0.000000 0.000000 -0.133472 -0.711687 0.033334 0.610426 0.201400 
+0.000000 0.000000 0.000000 0.000000 0.000000 0.202525 0.235940 -0.986313 0.433106 0.114742 
+0.000000 0.000000 0.000000 0.000000 0.000000 -1.495416 0.776319 1.026005 -1.398084 1.091176 
+0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 0.000000 
+0.000000 0.000000 0.000000 0.000000 0.000000 -0.829655 0.737357 1.017935 -0.802733 0.877095 
+]
+569 ns - [raim_cop] cond branch (flag 08), cpsr is 00 -> 0
+570 ns - [raim_cop] enqueuing 00000008 with instr 48c9000a
+571 ns - [raim_cop.rpu_fu_0] stddev for subset 2 is [0.919046 1.051922 2.575959]
+571 ns - [raim_cop] enqueuing 00000008 with instr 48c9000b
+572 ns - [raim_cop] enqueuing 00000008 with instr 48c9000c
+573 ns - [raim_cop.rpu_fu_0] bias for subset 2 is [0.845160 0.986313 2.893500]
+573 ns - [raim_cop] enqueuing 00000008 with instr 48c9000e
+574 ns - [raim_cop.rpu_fu_0] AIV is 0
+574 ns - [raim_cop] cond branch (flag 08), cpsr is 00 -> 0
+575 ns - [raim_cop.rpu_fu_0] stddev for subset 2 is [0.541757 0.603153 1.530678]
+575 ns - [raim_cop] enqueuing 00000008 with instr 48c90008
+576 ns - [raim_cop] enqueuing 00000008 with instr 48c90010
+578 ns - [raim_cop.rpu_fu_0] Detected fault in subset 2
+Pausing
+581 ns - [raim_cop] cond branch (flag 02), cpsr is 02 -> 1
+581 ns - [cpu] Updating PC (COP2) from 004000dc to 004000f4
+Fault detected!
+587 ns - [raim_cop] enqueuing 00000000 with instr 488b0011
+Pausing
+592 ns - [raim_cop] cond branch (flag 04), cpsr is 06 -> 1
+592 ns - [cpu] Updating PC (COP2) from 0040011c to 00400134
+0: index of faulty SV!
+603 ns - [raim_cop] enqueuing 00000001 with instr 488b0011
+Pausing
+608 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+617 ns - [raim_cop] enqueuing 00000002 with instr 488b0011
+Pausing
+622 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+631 ns - [raim_cop] enqueuing 00000003 with instr 488b0011
+Pausing
+636 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+645 ns - [raim_cop] enqueuing 00000004 with instr 488b0011
+Pausing
+650 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+659 ns - [raim_cop] enqueuing 00000005 with instr 488b0011
+Pausing
+664 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+673 ns - [raim_cop] enqueuing 00000006 with instr 488b0011
+Pausing
+678 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+687 ns - [raim_cop] enqueuing 00000007 with instr 488b0011
+Pausing
+692 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+701 ns - [raim_cop] enqueuing 00000008 with instr 488b0011
+Pausing
+706 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+715 ns - [raim_cop] enqueuing 00000009 with instr 488b0011
+Pausing
+720 ns - [raim_cop] cond branch (flag 04), cpsr is 02 -> 0
+Fault not located!
+734 ns - [cpu] Exit requested
+
+Info: /OSCI/SystemC: Simulation stopped by user.
+Total of 0 faults over 0 bytes.
+Final state:
+Simulated for 735 ns
+735 ns - 
+=====
+Statistics for raim_cop
+=====
+Number of cycles stalled: 250
